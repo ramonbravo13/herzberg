@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Send, Loader2, Bot } from 'lucide-react';
+import { Send, Loader2, Bot, LogOut } from 'lucide-react';
 import { startInterviewChat, sendMessageToBot } from '../gemini';
 
-export default function Chat({ onComplete }) {
+export default function Chat({ onComplete, onExit }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -13,6 +13,12 @@ export default function Chat({ onComplete }) {
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleExit = () => {
+    if (window.confirm("¿Estás seguro de que deseas salir? Como no se ha completado la totalidad de las preguntas, no se guardarán tus respuestas.")) {
+      if (onExit) onExit();
+    }
   };
 
   useEffect(() => {
@@ -89,6 +95,14 @@ export default function Chat({ onComplete }) {
             <p className="text-sm text-primary-100 opacity-90">Evaluación de Experiencia del Empleado</p>
           </div>
         </div>
+        <button
+          onClick={handleExit}
+          className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm font-medium"
+          title="Salir"
+        >
+          <LogOut size={18} />
+          <span className="hidden sm:inline">Salir</span>
+        </button>
       </div>
 
       {error && (

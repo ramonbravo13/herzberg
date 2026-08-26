@@ -81,7 +81,7 @@ function App() {
   if (started) {
     return (
       <div className="max-w-3xl mx-auto py-8 px-4 h-screen">
-        <Chat onComplete={handleComplete} />
+        <Chat onComplete={handleComplete} onExit={() => setStarted(false)} />
       </div>
     );
   }
