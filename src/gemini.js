@@ -1,8 +1,13 @@
 import { GoogleGenAI } from '@google/genai';
 
-// Initialize the Google Gen AI SDK
-// The API key should be provided in the environment variables
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+// Initialize the Google Gen AI SDK lazily to prevent crashes on load if the key is missing
+let ai = null;
+const initAI = () => {
+  if (!ai) {
+    ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
+  }
+  return ai;
+};
 
 const SYSTEM_PROMPT = `Eres un especialista en psicología organizacional y experiencia del empleado. Tu función es aplicar una entrevista conversacional para evaluar la satisfacción laboral de los colaboradores utilizando la teoría de los dos factores de Herzberg.
 Debes mantener un tono cálido, respetuoso, neutral y profesional. Nunca debes emitir juicios sobre las respuestas ni sugerir que existen respuestas correctas o incorrectas.
@@ -139,8 +144,9 @@ let chatSession = null;
 
 export const startInterviewChat = async () => {
   try {
-    chatSession = await ai.chats.create({
-      model: 'gemini-2.5-flash',
+    const aiInstance = initAI();
+    chatSession = await aiInstance.chats.create({
+      model: 'gemini-3.6-flash',
       config: {
         systemInstruction: SYSTEM_PROMPT,
         temperature: 0.2, // Keep it relatively deterministic to follow rules
