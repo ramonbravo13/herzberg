@@ -12,14 +12,14 @@ export default function OrganizationsManager() {
   const [editingOrg, setEditingOrg] = useState(null);
   const [editOrgName, setEditOrgName] = useState('');
 
-  useEffect(() => {
-    loadOrganizations();
-  }, []);
-
   const loadOrganizations = async () => {
     const orgs = await dbService.getOrganizations();
     setOrganizations(orgs);
   };
+
+  useEffect(() => {
+    loadOrganizations();
+  }, []);
 
   const handleSeedCeti = async () => {
     try {

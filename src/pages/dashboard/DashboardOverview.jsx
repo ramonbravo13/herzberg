@@ -12,14 +12,6 @@ export default function DashboardOverview() {
   const [selectedOrgId, setSelectedOrgId] = useState(location.state?.orgId || '');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadData();
-  }, [user]);
-
-  useEffect(() => {
-    loadEvaluations();
-  }, [selectedOrgId]);
-
   const loadData = async () => {
     setLoading(true);
     if (user.role === 'corporativo' || user.role === 'admin') {
@@ -49,6 +41,16 @@ export default function DashboardOverview() {
       setEvaluations(orgEvals);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, [user, selectedOrgId]); // Keep loadData stable or disable exhaustive deps warning, but actually we don't need loadData to be a dep if it's declared here. Wait, better to just put it above.
+
+  useEffect(() => {
+    loadEvaluations();
+  }, [selectedOrgId]);
+
+
 
   if (loading) {
     return <div className="text-center py-12">Cargando datos...</div>;

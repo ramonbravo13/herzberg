@@ -13,16 +13,16 @@ export default function UsersManager() {
   const [organizationId, setOrganizationId] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     const fetchedUsers = await dbService.getUsers();
     const fetchedOrgs = await dbService.getOrganizations();
     setUsers(fetchedUsers);
     setOrganizations(fetchedOrgs);
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const handleCreate = async (e) => {
     e.preventDefault();
