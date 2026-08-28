@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 
 // Portals
+import LandingPage from './pages/public/LandingPage';
 import EvaluationPortal from './pages/public/EvaluationPortal';
 import Login from './pages/auth/Login';
 
@@ -21,7 +22,7 @@ function App() {
       <Router>
         <Routes>
           {/* Rutas Públicas */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<LandingPage />} />
           <Route path="/evaluate/:token" element={<EvaluationPortal />} />
           <Route path="/login" element={<Login />} />
 
