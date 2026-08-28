@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, BarChart3, User } from 'lucide-react';
 
@@ -9,6 +9,10 @@ export default function DashboardLayout() {
 
   if (!user || (user.role !== 'empresarial' && user.role !== 'corporativo' && user.role !== 'admin')) {
     return <div className="p-8 text-center text-red-500 font-bold">Acceso Denegado.</div>;
+  }
+
+  if (user.requiresPasswordChange) {
+    return <Navigate to="/change-password" replace />;
   }
 
   const handleLogout = () => {

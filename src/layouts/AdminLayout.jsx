@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Users, Building2, LogOut, LayoutDashboard } from 'lucide-react';
 
@@ -10,6 +10,10 @@ export default function AdminLayout() {
 
   if (!user || user.role !== 'admin') {
     return <div className="p-8 text-center text-red-500 font-bold">Acceso Denegado. Solo administradores.</div>;
+  }
+
+  if (user.requiresPasswordChange) {
+    return <Navigate to="/change-password" replace />;
   }
 
   const handleLogout = () => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { dbService } from '../../services/db';
-import { Plus, User, Shield, Briefcase } from 'lucide-react';
+import { Plus, User, Shield, Briefcase, Edit, Trash2 } from 'lucide-react';
 
 export default function UsersManager() {
   const [users, setUsers] = useState([]);
@@ -11,7 +11,10 @@ export default function UsersManager() {
   const [name, setName] = useState('');
   const [role, setRole] = useState('empresarial');
   const [organizationId, setOrganizationId] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  
+  const [editingUser, setEditingUser] = useState(null);
 
   const loadData = async () => {
     const fetchedUsers = await dbService.getUsers();
@@ -34,16 +37,31 @@ export default function UsersManager() {
     }
 
     try {
-      // Create user with generic password for now
-      await dbService.createUser({
-        email,
-        name,
-        role,
-        organization_id: role === 'empresarial' ? organizationId : null,
-        password: 'password123' // Contraseña genérica por defecto
-      });
+      if (editingUser) {
+        const updates = {
+          email,
+          name,
+          role,
+          organization_id: role === 'empresarial' ? organizationId : null,
+        };
+        if (password.trim()) updates.password = password.trim();
+        await dbService.updateUser(editingUser.id, updates);
+      } else {
+        if (!password.trim()) {
+          setError('La contraseña es requerida para usuarios nuevos.');
+          return;
+        }
+        await dbService.createUser({
+          email,
+          name,
+          role,
+          organization_id: role === 'empresarial' ? organizationId : null,
+          password: password.trim()
+        });
+      }
       
       setShowModal(false);
+      setEditingUser(null);
       resetForm();
       loadData();
     } catch (err) {
@@ -51,11 +69,34 @@ export default function UsersManager() {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
+      try {
+        await dbService.deleteUser(id);
+        loadData();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+  };
+
+  const openEditModal = (user) => {
+    setEditingUser(user);
+    setName(user.name || '');
+    setEmail(user.email || '');
+    setRole(user.role || 'empresarial');
+    setOrganizationId(user.organization_id || '');
+    setPassword('');
+    setError('');
+    setShowModal(true);
+  };
+
   const resetForm = () => {
     setEmail('');
     setName('');
     setRole('empresarial');
     setOrganizationId('');
+    setPassword('');
     setError('');
   };
 
@@ -99,6 +140,7 @@ export default function UsersManager() {
               <th className="p-4 font-semibold text-slate-700">Nombre / Email</th>
               <th className="p-4 font-semibold text-slate-700">Rol</th>
               <th className="p-4 font-semibold text-slate-700">Organización Asignada</th>
+              <th className="p-4 font-semibold text-slate-700 text-right">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -114,6 +156,26 @@ export default function UsersManager() {
                 <td className="p-4 text-slate-600">
                   {getOrgName(user.organization_id)}
                 </td>
+                <td className="p-4 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => openEditModal(user)}
+                      className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Editar Usuario"
+                    >
+                      <Edit size={16} />
+                    </button>
+                    {user.id !== 'admin-1' && (
+                      <button
+                        onClick={() => handleDelete(user.id)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Eliminar Usuario"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -123,7 +185,7 @@ export default function UsersManager() {
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h2 className="text-xl font-bold text-slate-800 mb-4">Nuevo Usuario</h2>
+            <h2 className="text-xl font-bold text-slate-800 mb-4">{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</h2>
             
             {error && <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">{error}</div>}
             
@@ -183,14 +245,24 @@ export default function UsersManager() {
                 </div>
               )}
               
-              <div className="pt-2 text-xs text-slate-500">
-                La contraseña inicial generada será: <strong className="text-slate-700">password123</strong>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {editingUser ? 'Nueva Contraseña (dejar en blanco para mantener)' : 'Contraseña Temporal'}
+                </label>
+                <input
+                  type="text"
+                  required={!editingUser}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                  placeholder={editingUser ? 'Solo si deseas cambiarla...' : 'Ej. TempPass123'}
+                />
               </div>
 
               <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => { setShowModal(false); resetForm(); }}
+                  onClick={() => { setShowModal(false); setEditingUser(null); resetForm(); }}
                   className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-medium transition-colors"
                 >
                   Cancelar
@@ -199,7 +271,7 @@ export default function UsersManager() {
                   type="submit"
                   className="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-xl font-medium transition-colors"
                 >
-                  Crear Usuario
+                  {editingUser ? 'Guardar Cambios' : 'Crear Usuario'}
                 </button>
               </div>
             </form>

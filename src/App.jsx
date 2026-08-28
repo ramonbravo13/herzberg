@@ -6,6 +6,9 @@ import { AuthProvider } from './contexts/AuthContext';
 import LandingPage from './pages/public/LandingPage';
 import EvaluationPortal from './pages/public/EvaluationPortal';
 import Login from './pages/auth/Login';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
+import ForceChangePassword from './pages/auth/ForceChangePassword';
 
 // Admin
 import AdminLayout from './layouts/AdminLayout';
@@ -25,6 +28,9 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/evaluate/:token" element={<EvaluationPortal />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/change-password" element={<ForceChangePassword />} />
 
           {/* Portal Privado (Dashboard) */}
           <Route path="/dashboard" element={<DashboardLayout />}>

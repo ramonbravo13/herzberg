@@ -116,6 +116,7 @@ export const dbService = {
     const newUser = {
       id: uuidv4(),
       ...userData,
+      requiresPasswordChange: true,
       createdAt: new Date().toISOString()
     };
     db.users.push(newUser);
@@ -123,6 +124,31 @@ export const dbService = {
     // Return without password
     const { password, ...userWithoutPassword } = newUser;
     return userWithoutPassword;
+  },
+
+  updateUser: async (id, updates) => {
+    const db = getDB();
+    const index = db.users.findIndex(u => u.id === id);
+    if (index > -1) {
+      if (updates.email && db.users.some(u => u.email === updates.email && u.id !== id)) {
+        throw new Error('El correo ya está en uso por otro usuario');
+      }
+      db.users[index] = { ...db.users[index], ...updates };
+      saveDB(db);
+      const { password, ...userWithoutPassword } = db.users[index];
+      return userWithoutPassword;
+    }
+    throw new Error('Usuario no encontrado');
+  },
+
+  deleteUser: async (id) => {
+    const db = getDB();
+    if (id === 'admin-1') {
+      throw new Error('No puedes eliminar al administrador principal');
+    }
+    db.users = db.users.filter(u => u.id !== id);
+    saveDB(db);
+    return true;
   },
   
   updateUserPassword: async (userId, newPassword) => {
@@ -134,6 +160,46 @@ export const dbService = {
        return true;
     }
     throw new Error('Usuario no encontrado');
+  },
+
+  confirmPasswordChange: async (userId, newPassword) => {
+    const db = getDB();
+    const userIndex = db.users.findIndex(u => u.id === userId);
+    if(userIndex > -1) {
+       db.users[userIndex].password = newPassword;
+       db.users[userIndex].requiresPasswordChange = false;
+       saveDB(db);
+       const { password, ...userWithoutPassword } = db.users[userIndex];
+       return userWithoutPassword;
+    }
+    throw new Error('Usuario no encontrado');
+  },
+
+  generatePasswordResetToken: async (email) => {
+    const db = getDB();
+    const userIndex = db.users.findIndex(u => u.email === email);
+    if(userIndex > -1) {
+      const token = uuidv4();
+      db.users[userIndex].resetToken = token;
+      db.users[userIndex].resetTokenExpiry = Date.now() + 3600000; // 1 hour
+      saveDB(db);
+      return token;
+    }
+    throw new Error('No existe una cuenta con ese correo electrónico');
+  },
+
+  resetPasswordWithToken: async (token, newPassword) => {
+    const db = getDB();
+    const userIndex = db.users.findIndex(u => u.resetToken === token && u.resetTokenExpiry > Date.now());
+    if (userIndex > -1) {
+      db.users[userIndex].password = newPassword;
+      db.users[userIndex].requiresPasswordChange = false;
+      delete db.users[userIndex].resetToken;
+      delete db.users[userIndex].resetTokenExpiry;
+      saveDB(db);
+      return true;
+    }
+    throw new Error('El enlace de recuperación es inválido o ha expirado');
   },
 
   // --- EVALUATIONS ---
