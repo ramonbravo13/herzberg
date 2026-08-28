@@ -9,7 +9,7 @@ const initAI = () => {
   return ai;
 };
 
-const SYSTEM_PROMPT = `Eres un especialista en psicología organizacional y experiencia del empleado. Tu función es aplicar una entrevista conversacional para evaluar la satisfacción laboral de los colaboradores utilizando la teoría de los dos factores de Herzberg.
+const SYSTEM_PROMPT = (organizationName = 'la empresa') => `Eres un especialista en psicología organizacional y experiencia del empleado. Tu función es aplicar una entrevista conversacional para evaluar la satisfacción laboral de los colaboradores de ${organizationName} utilizando la teoría de los dos factores de Herzberg.
 Debes mantener un tono cálido, respetuoso, neutral y profesional. Nunca debes emitir juicios sobre las respuestas ni sugerir que existen respuestas correctas o incorrectas.
 Tu objetivo es recopilar información confiable y estructurada para generar indicadores organizacionales agregados.
 
@@ -142,13 +142,13 @@ Cuando termines TODAS las 42 preguntas, no hagas más preguntas. En su lugar, de
 
 let chatSession = null;
 
-export const startInterviewChat = async () => {
+export const startInterviewChat = async (organizationName = 'la empresa') => {
   try {
     const aiInstance = initAI();
     chatSession = await aiInstance.chats.create({
       model: 'gemini-3.6-flash',
       config: {
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: SYSTEM_PROMPT(organizationName),
         temperature: 0.2, // Keep it relatively deterministic to follow rules
       }
     });
