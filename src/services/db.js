@@ -50,6 +50,16 @@ export const dbService = {
   // --- ORGANIZATIONS ---
   getOrganizations: async () => {
     const db = getDB();
+    // Inject default periods for backwards compatibility
+    let updated = false;
+    db.organizations.forEach(org => {
+      if (!org.periods) {
+        org.currentPeriod = 1;
+        org.periods = [{ id: 1, name: 'Periodo 1', startDate: org.createdAt, endDate: null }];
+        updated = true; // wait, map is better but save is needed only if updated
+      }
+    });
+    if (updated) saveDB(db);
     return db.organizations;
   },
 
@@ -60,7 +70,9 @@ export const dbService = {
       name,
       evaluation_token: uuidv4(),
       createdAt: new Date().toISOString(),
-      subscriptionEndDate
+      subscriptionEndDate,
+      currentPeriod: 1,
+      periods: [{ id: 1, name: 'Periodo 1', startDate: new Date().toISOString(), endDate: null }]
     };
     db.organizations.push(newOrg);
     saveDB(db);
@@ -96,6 +108,33 @@ export const dbService = {
     db.evaluations = db.evaluations.filter(e => e.organization_id !== id);
     saveDB(db);
     return true;
+  },
+
+  restartOrganizationPeriod: async (orgId) => {
+    const db = getDB();
+    const index = db.organizations.findIndex(o => o.id === orgId);
+    if (index > -1) {
+      let org = db.organizations[index];
+      // Backwards compatibility check
+      if (!org.periods) {
+        org.currentPeriod = 1;
+        org.periods = [{ id: 1, name: 'Periodo 1', startDate: org.createdAt, endDate: null }];
+      }
+      // close current period
+      const current = org.periods.find(p => p.id === org.currentPeriod);
+      if (current) current.endDate = new Date().toISOString();
+      
+      org.currentPeriod += 1;
+      org.periods.push({
+        id: org.currentPeriod,
+        name: `Periodo ${org.currentPeriod}`,
+        startDate: new Date().toISOString(),
+        endDate: null
+      });
+      saveDB(db);
+      return org;
+    }
+    throw new Error('Organización no encontrada');
   },
 
   getOrganizationByToken: async (token) => {
@@ -211,9 +250,12 @@ export const dbService = {
   // --- EVALUATIONS ---
   saveEvaluation: async (organizationId, results) => {
     const db = getDB();
+    const org = db.organizations.find(o => o.id === organizationId);
+    const period = org ? (org.currentPeriod || 1) : 1;
     const evaluation = {
       id: uuidv4(),
       organization_id: organizationId,
+      period,
       results,
       createdAt: new Date().toISOString()
     };
@@ -224,11 +266,19 @@ export const dbService = {
 
   getEvaluationsByOrganization: async (organizationId) => {
     const db = getDB();
-    return db.evaluations.filter(e => e.organization_id === organizationId).map(e => e.results);
+    // we return the full evaluation object now because we need 'period' to filter in the UI
+    return db.evaluations.filter(e => e.organization_id === organizationId).map(e => ({
+      ...e.results,
+      period: e.period || 1
+    }));
   },
   
   getAllEvaluations: async () => {
     const db = getDB();
-    return db.evaluations;
+    return db.evaluations.map(e => ({
+      ...e.results,
+      period: e.period || 1,
+      organization_id: e.organization_id // necessary for UI filtering if needed
+    }));
   }
 };
