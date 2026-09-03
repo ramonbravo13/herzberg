@@ -135,7 +135,11 @@ export default function UsersManager() {
           <p className="text-slate-600">Gestiona los accesos a los portales Dashboard y Admin</p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            resetForm();
+            setEditingUser(null);
+            setShowModal(true);
+          }}
           className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all"
         >
           <Plus size={20} />
@@ -263,9 +267,10 @@ export default function UsersManager() {
                       <p className="text-sm text-slate-500">No hay organizaciones creadas.</p>
                     ) : (
                       organizations.map(org => (
-                        <label key={org.id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-colors cursor-pointer">
+                        <div key={org.id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-colors">
                           <input
                             type="checkbox"
+                            id={`org-${org.id}`}
                             checked={allowedOrganizations.includes(org.id)}
                             onChange={(e) => {
                               const checked = e.target.checked;
@@ -277,10 +282,12 @@ export default function UsersManager() {
                                 }
                               });
                             }}
-                            className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
+                            className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary cursor-pointer"
                           />
-                          <span className="text-sm font-medium text-slate-700">{org.name}</span>
-                        </label>
+                          <label htmlFor={`org-${org.id}`} className="text-sm font-medium text-slate-700 cursor-pointer flex-1 select-none">
+                            {org.name}
+                          </label>
+                        </div>
                       ))
                     )}
                   </div>
