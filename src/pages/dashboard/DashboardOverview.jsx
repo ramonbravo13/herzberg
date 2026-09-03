@@ -116,7 +116,7 @@ export default function DashboardOverview() {
       {/* Sidebar de Periodos (Hover Auto-Expand en Desktop) */}
       {activeOrg && (
         <div 
-          className={`flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-white shadow-sm border border-slate-200 rounded-2xl relative z-20 ${
+          className={`flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-white shadow-sm border border-slate-200 rounded-2xl relative z-20 lg:sticky lg:top-24 ${
             isSidebarOpen ? 'w-full lg:w-72' : 'w-full lg:w-[72px]'
           }`}
           onMouseEnter={() => { if(window.innerWidth >= 1024) setIsSidebarOpen(true); }}
