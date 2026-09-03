@@ -268,11 +268,14 @@ export default function UsersManager() {
                             type="checkbox"
                             checked={allowedOrganizations.includes(org.id)}
                             onChange={(e) => {
-                              if (e.target.checked) {
-                                setAllowedOrganizations([...allowedOrganizations, org.id]);
-                              } else {
-                                setAllowedOrganizations(allowedOrganizations.filter(id => id !== org.id));
-                              }
+                              const checked = e.target.checked;
+                              setAllowedOrganizations(prev => {
+                                if (checked) {
+                                  return [...prev, org.id];
+                                } else {
+                                  return prev.filter(id => id !== org.id);
+                                }
+                              });
                             }}
                             className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                           />
