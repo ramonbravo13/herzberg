@@ -108,9 +108,20 @@ export default function DashboardOverview() {
       )}
 
       {user.role === 'empresarial' && organizations.length > 0 && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">{organizations[0].name}</h1>
-          <p className="text-slate-600 mt-1">Resultados de la evaluación de satisfacción laboral.</p>
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6 flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">{organizations[0].name}</h1>
+            <p className="text-slate-600 mt-1">Resultados de la evaluación de satisfacción laboral.</p>
+          </div>
+          {organizations[0]?.evaluation_token && (
+            <button
+              onClick={() => handleCopyLink(organizations[0].evaluation_token)}
+              className="flex items-center gap-2 text-sm text-primary bg-primary/10 hover:bg-primary/20 px-4 py-2 rounded-xl transition-colors font-medium"
+            >
+              {copied ? <Check size={16} /> : <LinkIcon size={16} />}
+              {copied ? '¡Copiado!' : 'Copiar Link del Chatbot'}
+            </button>
+          )}
         </div>
       )}
 
