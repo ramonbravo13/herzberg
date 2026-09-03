@@ -11,6 +11,8 @@ export default function OrganizationsManager() {
   const [copiedId, setCopiedId] = useState(null);
   const [editingOrg, setEditingOrg] = useState(null);
   const [editOrgName, setEditOrgName] = useState('');
+  const [newOrgDate, setNewOrgDate] = useState('');
+  const [editOrgDate, setEditOrgDate] = useState('');
 
   const loadOrganizations = async () => {
     const orgs = await dbService.getOrganizations();
@@ -72,8 +74,9 @@ export default function OrganizationsManager() {
   const handleCreate = async (e) => {
     e.preventDefault();
     if (!newOrgName.trim()) return;
-    await dbService.createOrganization(newOrgName.trim());
+    await dbService.createOrganization(newOrgName.trim(), newOrgDate || null);
     setNewOrgName('');
+    setNewOrgDate('');
     setShowModal(false);
     loadOrganizations();
   };
@@ -93,9 +96,13 @@ export default function OrganizationsManager() {
     e.preventDefault();
     if (!editOrgName.trim()) return;
     try {
-      await dbService.updateOrganization(editingOrg.id, editOrgName.trim());
+      await dbService.updateOrganization(editingOrg.id, { 
+        name: editOrgName.trim(), 
+        subscriptionEndDate: editOrgDate || null 
+      });
       setEditingOrg(null);
       setEditOrgName('');
+      setEditOrgDate('');
       loadOrganizations();
     } catch (err) {
       alert(err.message);
@@ -138,14 +145,15 @@ export default function OrganizationsManager() {
             <tr className="bg-slate-50 border-b border-slate-200">
               <th className="p-4 font-semibold text-slate-700">Nombre</th>
               <th className="p-4 font-semibold text-slate-700">Enlace de Evaluación (Público)</th>
-              <th className="p-4 font-semibold text-slate-700">Fecha de Creación</th>
+              <th className="p-4 font-semibold text-slate-700">Creación</th>
+              <th className="p-4 font-semibold text-slate-700">Vencimiento</th>
               <th className="p-4 font-semibold text-slate-700">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {organizations.length === 0 ? (
               <tr>
-                <td colSpan="4" className="p-8 text-center text-slate-500">
+                <td colSpan="5" className="p-8 text-center text-slate-500">
                   No hay organizaciones registradas.
                 </td>
               </tr>
@@ -176,6 +184,15 @@ export default function OrganizationsManager() {
                     <td className="p-4 text-slate-600 text-sm">
                       {new Date(org.createdAt).toLocaleDateString()}
                     </td>
+                    <td className="p-4 text-sm">
+                      {org.subscriptionEndDate ? (
+                        <span className={new Date(org.subscriptionEndDate) < new Date() ? "text-red-600 font-medium" : "text-slate-600"}>
+                          {new Date(org.subscriptionEndDate).toLocaleDateString()}
+                        </span>
+                      ) : (
+                        <span className="text-slate-400">Sin límite</span>
+                      )}
+                    </td>
                     <td className="p-4">
                       <div className="flex items-center gap-2">
                         <button
@@ -187,7 +204,7 @@ export default function OrganizationsManager() {
                           <span className="hidden sm:inline">Dashboard</span>
                         </button>
                         <button
-                          onClick={() => { setEditingOrg(org); setEditOrgName(org.name); }}
+                          onClick={() => { setEditingOrg(org); setEditOrgName(org.name); setEditOrgDate(org.subscriptionEndDate || ''); }}
                           className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                           title="Editar Organización"
                         >
@@ -229,6 +246,17 @@ export default function OrganizationsManager() {
                   placeholder="Ej. Acme Corp"
                 />
               </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Fecha de Vencimiento (Opcional)
+                </label>
+                <input
+                  type="date"
+                  value={newOrgDate}
+                  onChange={(e) => setNewOrgDate(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                />
+              </div>
               <div className="flex justify-end gap-3 mt-6">
                 <button
                   type="button"
@@ -264,6 +292,17 @@ export default function OrganizationsManager() {
                   autoFocus
                   value={editOrgName}
                   onChange={(e) => setEditOrgName(e.target.value)}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Fecha de Vencimiento (Opcional)
+                </label>
+                <input
+                  type="date"
+                  value={editOrgDate}
+                  onChange={(e) => setEditOrgDate(e.target.value)}
                   className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                 />
               </div>

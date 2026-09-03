@@ -16,7 +16,11 @@ export default function EvaluationPortal() {
       try {
         const org = await dbService.getOrganizationByToken(token);
         if (org) {
-          setOrganization(org);
+          if (org.subscriptionEndDate && new Date(org.subscriptionEndDate) < new Date()) {
+            navigate('/expired', { replace: true });
+          } else {
+            setOrganization(org);
+          }
         } else {
           setError('Enlace de evaluación inválido o expirado.');
         }
@@ -27,7 +31,7 @@ export default function EvaluationPortal() {
     if (token) {
       fetchOrg();
     }
-  }, [token]);
+  }, [token, navigate]);
 
   const handleComplete = async (results) => {
     try {

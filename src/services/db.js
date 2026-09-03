@@ -53,24 +53,30 @@ export const dbService = {
     return db.organizations;
   },
 
-  createOrganization: async (name) => {
+  createOrganization: async (name, subscriptionEndDate = null) => {
     const db = getDB();
     const newOrg = {
       id: uuidv4(),
       name,
       evaluation_token: uuidv4(),
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      subscriptionEndDate
     };
     db.organizations.push(newOrg);
     saveDB(db);
     return newOrg;
   },
 
-  updateOrganization: async (id, newName) => {
+  updateOrganization: async (id, updates) => {
     const db = getDB();
     const index = db.organizations.findIndex(o => o.id === id);
     if (index > -1) {
-      db.organizations[index].name = newName;
+      if (typeof updates === 'string') {
+        // Backwards compatibility
+        db.organizations[index].name = updates;
+      } else {
+        db.organizations[index] = { ...db.organizations[index], ...updates };
+      }
       saveDB(db);
       return db.organizations[index];
     }

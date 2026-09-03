@@ -14,14 +14,25 @@ export default function DashboardLayout() {
   const [profileEmail, setProfileEmail] = React.useState(user?.email || '');
   const [orgToken, setOrgToken] = React.useState(null);
   const [copied, setCopied] = React.useState(false);
+  const [isExpired, setIsExpired] = React.useState(false);
 
   React.useEffect(() => {
     if (user?.role === 'empresarial' && user?.organization_id) {
       dbService.getOrganizationById(user.organization_id).then(org => {
-        if (org) setOrgToken(org.evaluation_token);
+        if (org) {
+          if (org.subscriptionEndDate && new Date(org.subscriptionEndDate) < new Date()) {
+            setIsExpired(true);
+          } else {
+            setOrgToken(org.evaluation_token);
+          }
+        }
       });
     }
   }, [user]);
+
+  if (isExpired) {
+    return <Navigate to="/expired" replace />;
+  }
 
   const handleCopyLink = () => {
     if (orgToken) {

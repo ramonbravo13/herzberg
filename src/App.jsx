@@ -9,6 +9,7 @@ import Login from './pages/auth/Login';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import ForceChangePassword from './pages/auth/ForceChangePassword';
+import SubscriptionExpired from './pages/public/SubscriptionExpired';
 
 // Admin
 import AdminLayout from './layouts/AdminLayout';
@@ -31,6 +32,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/change-password" element={<ForceChangePassword />} />
+          <Route path="/expired" element={<SubscriptionExpired />} />
 
           {/* Portal Privado (Dashboard) */}
           <Route path="/dashboard" element={<DashboardLayout />}>
