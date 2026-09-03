@@ -11,6 +11,7 @@ export default function UsersManager() {
   const [name, setName] = useState('');
   const [role, setRole] = useState('empresarial');
   const [organizationId, setOrganizationId] = useState('');
+  const [allowedOrganizations, setAllowedOrganizations] = useState([]);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
@@ -43,6 +44,7 @@ export default function UsersManager() {
           name,
           role,
           organization_id: role === 'empresarial' ? organizationId : null,
+          allowed_organizations: role === 'corporativo' ? allowedOrganizations : null,
         };
         if (password.trim()) updates.password = password.trim();
         await dbService.updateUser(editingUser.id, updates);
@@ -56,6 +58,7 @@ export default function UsersManager() {
           name,
           role,
           organization_id: role === 'empresarial' ? organizationId : null,
+          allowed_organizations: role === 'corporativo' ? allowedOrganizations : null,
           password: password.trim()
         });
       }
@@ -86,6 +89,7 @@ export default function UsersManager() {
     setEmail(user.email || '');
     setRole(user.role || 'empresarial');
     setOrganizationId(user.organization_id || '');
+    setAllowedOrganizations(user.allowed_organizations || []);
     setPassword('');
     setError('');
     setShowModal(true);
@@ -96,6 +100,7 @@ export default function UsersManager() {
     setName('');
     setRole('empresarial');
     setOrganizationId('');
+    setAllowedOrganizations([]);
     setPassword('');
     setError('');
   };
@@ -111,9 +116,14 @@ export default function UsersManager() {
     }
   };
 
-  const getOrgName = (orgId) => {
-    if (!orgId) return '-';
-    const org = organizations.find(o => o.id === orgId);
+  const getOrgName = (user) => {
+    if (user.role === 'admin') return 'Todas';
+    if (user.role === 'corporativo') {
+      const count = (user.allowed_organizations || []).length;
+      return count > 0 ? `${count} organizaciones asignadas` : 'Ninguna (Bloqueado)';
+    }
+    if (!user.organization_id) return '-';
+    const org = organizations.find(o => o.id === user.organization_id);
     return org ? org.name : 'Desconocida';
   };
 
@@ -154,7 +164,7 @@ export default function UsersManager() {
                   {getRoleBadge(user.role)}
                 </td>
                 <td className="p-4 text-slate-600">
-                  {getOrgName(user.organization_id)}
+                  {getOrgName(user)}
                 </td>
                 <td className="p-4 text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -242,6 +252,35 @@ export default function UsersManager() {
                       <option key={org.id} value={org.id}>{org.name}</option>
                     ))}
                   </select>
+                </div>
+              )}
+
+              {role === 'corporativo' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Organizaciones Permitidas</label>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 max-h-48 overflow-y-auto space-y-2">
+                    {organizations.length === 0 ? (
+                      <p className="text-sm text-slate-500">No hay organizaciones creadas.</p>
+                    ) : (
+                      organizations.map(org => (
+                        <label key={org.id} className="flex items-center gap-3 p-2 hover:bg-white rounded-lg border border-transparent hover:border-slate-200 transition-colors cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={allowedOrganizations.includes(org.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setAllowedOrganizations([...allowedOrganizations, org.id]);
+                              } else {
+                                setAllowedOrganizations(allowedOrganizations.filter(id => id !== org.id));
+                              }
+                            }}
+                            className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
+                          />
+                          <span className="text-sm font-medium text-slate-700">{org.name}</span>
+                        </label>
+                      ))
+                    )}
+                  </div>
                 </div>
               )}
               

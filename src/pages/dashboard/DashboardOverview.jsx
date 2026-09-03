@@ -15,7 +15,13 @@ export default function DashboardOverview() {
   const loadData = async () => {
     setLoading(true);
     if (user.role === 'corporativo' || user.role === 'admin') {
-      const orgs = await dbService.getOrganizations();
+      let orgs = await dbService.getOrganizations();
+      
+      if (user.role === 'corporativo') {
+        const allowed = user.allowed_organizations || [];
+        orgs = orgs.filter(o => allowed.includes(o.id));
+      }
+
       setOrganizations(orgs);
       if (orgs.length > 0 && !selectedOrgId) {
         setSelectedOrgId('all'); // Option to see all combined or just the first one
@@ -34,7 +40,13 @@ export default function DashboardOverview() {
     if (!selectedOrgId) return;
     
     if (selectedOrgId === 'all') {
-      const allEvals = await dbService.getAllEvaluations();
+      let allEvals = await dbService.getAllEvaluations();
+      
+      if (user.role === 'corporativo') {
+        const allowed = user.allowed_organizations || [];
+        allEvals = allEvals.filter(e => allowed.includes(e.organization_id));
+      }
+
       setEvaluations(allEvals.map(e => e.results));
     } else {
       const orgEvals = await dbService.getEvaluationsByOrganization(selectedOrgId);
