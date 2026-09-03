@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { dbService } from '../../services/db';
 import Dashboard from '../../components/Dashboard';
-import { Link as LinkIcon, Check, PlusCircle, AlertTriangle } from 'lucide-react';
+import { Link as LinkIcon, Check, PlusCircle, AlertTriangle, Calendar, ChevronDown } from 'lucide-react';
 
 export default function DashboardOverview() {
   const { user } = useAuth();
@@ -17,6 +17,7 @@ export default function DashboardOverview() {
   const [selectedPeriod, setSelectedPeriod] = useState('active');
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [isRestarting, setIsRestarting] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     setSelectedPeriod('active');
@@ -110,58 +111,80 @@ export default function DashboardOverview() {
   const activeOrg = selectedOrgId !== 'all' ? organizations.find(o => o.id === selectedOrgId) : null;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col lg:flex-row gap-6 items-start">
       
-      {/* Sidebar de Periodos */}
+      {/* Sidebar de Periodos (Colapsable) */}
       {activeOrg && (
-        <div className="w-full lg:w-72 flex-shrink-0 space-y-4">
+        <div className={`w-full ${isSidebarOpen ? 'lg:w-72' : 'lg:w-auto'} flex-shrink-0 transition-all duration-300`}>
           <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="text-sm font-bold text-slate-500 mb-3 uppercase tracking-wider">Ciclo Actual</h3>
             <button
-              onClick={() => setSelectedPeriod('active')}
-              className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-colors ${
-                selectedPeriod === 'active'
-                  ? 'bg-primary text-white shadow-md'
-                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-              }`}
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="flex items-center justify-between w-full text-left focus:outline-none gap-4"
             >
-              Dashboard Activo (Periodo {activeOrg.currentPeriod})
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <Calendar size={20} />
+                </div>
+                <div className={`${!isSidebarOpen ? 'hidden lg:block' : ''}`}>
+                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Gestión de Periodos</h3>
+                  <p className="text-sm font-medium text-slate-800">
+                    {selectedPeriod === 'active' ? `Periodo ${activeOrg.currentPeriod} (Activo)` : `Periodo ${selectedPeriod}`}
+                  </p>
+                </div>
+              </div>
+              <ChevronDown size={20} className={`transition-transform text-slate-400 ${isSidebarOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {activeOrg.periods && activeOrg.periods.length > 1 && (
-              <div className="mt-6 pt-6 border-t border-slate-100">
-                <h3 className="text-sm font-bold text-slate-500 mb-3 uppercase tracking-wider">Histórico</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                  {[...activeOrg.periods]
-                    .filter(p => p.id !== activeOrg.currentPeriod)
-                    .sort((a, b) => b.id - a.id)
-                    .map(p => (
-                    <button
-                      key={p.id}
-                      onClick={() => setSelectedPeriod(p.id)}
-                      className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-colors ${
-                        selectedPeriod === p.id
-                          ? 'bg-slate-200 text-slate-800 font-bold'
-                          : 'bg-transparent text-slate-600 hover:bg-slate-100'
-                      }`}
-                    >
-                      {p.name}
-                      {p.startDate && <div className="text-xs font-normal opacity-70 mt-0.5">{new Date(p.startDate).toLocaleDateString()} {p.endDate ? `- ${new Date(p.endDate).toLocaleDateString()}` : ''}</div>}
-                    </button>
-                  ))}
+            {isSidebarOpen && (
+              <div className="mt-4 pt-4 border-t border-slate-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                <h3 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Ciclo Actual</h3>
+                <button
+                  onClick={() => { setSelectedPeriod('active'); setIsSidebarOpen(false); }}
+                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-colors ${
+                    selectedPeriod === 'active'
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                  }`}
+                >
+                  Dashboard Activo (Periodo {activeOrg.currentPeriod})
+                </button>
+
+                {activeOrg.periods && activeOrg.periods.length > 1 && (
+                  <div className="mt-6 pt-6 border-t border-slate-100">
+                    <h3 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Histórico</h3>
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                      {[...activeOrg.periods]
+                        .filter(p => p.id !== activeOrg.currentPeriod)
+                        .sort((a, b) => b.id - a.id)
+                        .map(p => (
+                        <button
+                          key={p.id}
+                          onClick={() => { setSelectedPeriod(p.id); setIsSidebarOpen(false); }}
+                          className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-colors ${
+                            selectedPeriod === p.id
+                              ? 'bg-slate-200 text-slate-800 font-bold'
+                              : 'bg-transparent text-slate-600 hover:bg-slate-100'
+                          }`}
+                        >
+                          {p.name}
+                          {p.startDate && <div className="text-xs font-normal opacity-70 mt-0.5">{new Date(p.startDate).toLocaleDateString()} {p.endDate ? `- ${new Date(p.endDate).toLocaleDateString()}` : ''}</div>}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-6 pt-6 border-t border-slate-100">
+                  <button
+                    onClick={() => { setShowRestartConfirm(true); setIsSidebarOpen(false); }}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2 text-primary bg-primary/10 hover:bg-primary/20 rounded-xl transition-colors font-medium text-sm"
+                  >
+                    <PlusCircle size={16} />
+                    Iniciar Nuevo Periodo
+                  </button>
                 </div>
               </div>
             )}
-
-            <div className="mt-6 pt-6 border-t border-slate-100">
-              <button
-                onClick={() => setShowRestartConfirm(true)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-primary bg-primary/10 hover:bg-primary/20 rounded-xl transition-colors font-medium text-sm"
-              >
-                <PlusCircle size={16} />
-                Iniciar Nuevo Periodo
-              </button>
-            </div>
           </div>
         </div>
       )}
