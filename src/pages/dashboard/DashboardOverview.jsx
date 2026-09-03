@@ -78,7 +78,7 @@ export default function DashboardOverview() {
             onChange={(e) => setSelectedOrgId(e.target.value)}
             className="px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none min-w-[250px]"
           >
-            <option value="all">Vista Global (Todas las empresas)</option>
+            <option value="all">Vista Global (Empresas permitidas)</option>
             {organizations.map(org => (
               <option key={org.id} value={org.id}>{org.name}</option>
             ))}

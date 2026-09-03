@@ -233,7 +233,7 @@ export default function UsersManager() {
                   className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none"
                 >
                   <option value="empresarial">Empresarial (1 Organización)</option>
-                  <option value="corporativo">Corporativo (Todas)</option>
+                  <option value="corporativo">Corporativo (Múltiples Organizaciones)</option>
                   <option value="admin">Administrador del Sistema</option>
                 </select>
               </div>
