@@ -113,30 +113,37 @@ export default function DashboardOverview() {
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
       
-      {/* Sidebar de Periodos (Colapsable) */}
+      {/* Sidebar de Periodos (Hover Auto-Expand en Desktop) */}
       {activeOrg && (
-        <div className={`w-full ${isSidebarOpen ? 'lg:w-72' : 'lg:w-auto'} flex-shrink-0 transition-all duration-300`}>
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+        <div 
+          className={`flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-white shadow-sm border border-slate-200 rounded-2xl relative z-20 ${
+            isSidebarOpen ? 'w-full lg:w-72' : 'w-full lg:w-[72px]'
+          }`}
+          onMouseEnter={() => { if(window.innerWidth >= 1024) setIsSidebarOpen(true); }}
+          onMouseLeave={() => { if(window.innerWidth >= 1024) setIsSidebarOpen(false); }}
+        >
+          {/* Inner container with fixed width to prevent text wrapping during transition */}
+          <div className="p-4 w-full lg:w-72">
             <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              onClick={() => { if(window.innerWidth < 1024) setIsSidebarOpen(!isSidebarOpen); }}
               className="flex items-center justify-between w-full text-left focus:outline-none gap-4"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg flex-shrink-0 h-10 w-10 flex items-center justify-center">
                   <Calendar size={20} />
                 </div>
-                <div className={`${!isSidebarOpen ? 'hidden lg:block' : ''}`}>
+                <div className={`whitespace-nowrap transition-opacity duration-300 ${!isSidebarOpen ? 'lg:opacity-0 lg:invisible' : 'opacity-100 visible'}`}>
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Gestión de Periodos</h3>
                   <p className="text-sm font-medium text-slate-800">
                     {selectedPeriod === 'active' ? `Periodo ${activeOrg.currentPeriod} (Activo)` : `Periodo ${selectedPeriod}`}
                   </p>
                 </div>
               </div>
-              <ChevronDown size={20} className={`transition-transform text-slate-400 ${isSidebarOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={20} className={`flex-shrink-0 transition-transform text-slate-400 ${isSidebarOpen ? 'rotate-180' : ''} ${!isSidebarOpen ? 'lg:opacity-0 lg:invisible' : 'opacity-100 visible'}`} />
             </button>
 
-            {isSidebarOpen && (
-              <div className="mt-4 pt-4 border-t border-slate-100 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className={`transition-all duration-300 overflow-hidden ${isSidebarOpen ? 'opacity-100 max-h-[800px] mt-4 pt-4 border-t border-slate-100' : 'opacity-0 max-h-0 hidden lg:block'}`}>
+              <div className="whitespace-nowrap">
                 <h3 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Ciclo Actual</h3>
                 <button
                   onClick={() => { setSelectedPeriod('active'); setIsSidebarOpen(false); }}
@@ -184,7 +191,7 @@ export default function DashboardOverview() {
                   </button>
                 </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       )}
