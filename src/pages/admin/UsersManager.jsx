@@ -219,7 +219,8 @@ export default function UsersManager() {
                   </div>
                 </td>
               </tr>
-            ))}
+            ))
+            )}
           </tbody>
         </table>
       </div>
