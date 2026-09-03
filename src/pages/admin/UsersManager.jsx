@@ -6,6 +6,7 @@ export default function UsersManager() {
   const [users, setUsers] = useState([]);
   const [organizations, setOrganizations] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [filterOrgId, setFilterOrgId] = useState('');
   
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
@@ -127,24 +128,44 @@ export default function UsersManager() {
     return org ? org.name : 'Desconocida';
   };
 
+  const filteredUsers = users.filter(user => {
+    if (!filterOrgId) return true;
+    if (user.role === 'admin') return false; // Hide admins when filtering by specific org
+    if (user.role === 'empresarial') return user.organization_id === filterOrgId;
+    if (user.role === 'corporativo') return (user.allowed_organizations || []).includes(filterOrgId);
+    return false;
+  });
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Usuarios</h1>
           <p className="text-slate-600">Gestiona los accesos a los portales Dashboard y Admin</p>
         </div>
-        <button
-          onClick={() => {
-            resetForm();
-            setEditingUser(null);
-            setShowModal(true);
-          }}
-          className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all"
-        >
-          <Plus size={20} />
-          Nuevo Usuario
-        </button>
+        <div className="flex items-center gap-4">
+          <select
+            value={filterOrgId}
+            onChange={(e) => setFilterOrgId(e.target.value)}
+            className="px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+          >
+            <option value="">Todas las organizaciones</option>
+            {organizations.map(org => (
+              <option key={org.id} value={org.id}>{org.name}</option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              resetForm();
+              setEditingUser(null);
+              setShowModal(true);
+            }}
+            className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all whitespace-nowrap"
+          >
+            <Plus size={20} />
+            Nuevo Usuario
+          </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -158,7 +179,14 @@ export default function UsersManager() {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {filteredUsers.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="p-8 text-center text-slate-500">
+                  No hay usuarios que coincidan con este filtro.
+                </td>
+              </tr>
+            ) : (
+              filteredUsers.map((user) => (
               <tr key={user.id} className="border-b border-slate-100 hover:bg-slate-50">
                 <td className="p-4">
                   <div className="font-medium text-slate-800">{user.name || 'Sin nombre'}</div>
