@@ -18,7 +18,7 @@ export default function Dashboard({ data }) {
   const dataArray = Array.isArray(data) ? data : [data];
   if (dataArray.length === 0 || (!dataArray[0] || !dataArray[0].respuestas)) return <div>No hay datos para mostrar.</div>;
 
-  const isAggregated = dataArray.length > 1;
+  const isAggregated = true; // Siempre mostrar gráficos organizacionales, incluso si hay 1 sola respuesta
 
   const chartData = INDICES_CONFIG.map(ind => {
     const score = calculateIndex(ind.vars, dataArray);
