@@ -248,20 +248,43 @@ export const dbService = {
   },
 
   // --- EVALUATIONS ---
-  saveEvaluation: async (organizationId, results) => {
+  saveEvaluation: async (organizationId, results, participantId = null) => {
     const db = getDB();
     const org = db.organizations.find(o => o.id === organizationId);
     const period = org ? (org.currentPeriod || 1) : 1;
+    
+    if (participantId) {
+      const alreadyCompleted = db.evaluations.some(e => 
+        e.organization_id === organizationId && 
+        e.period === period && 
+        e.participant_id === participantId
+      );
+      if (alreadyCompleted) {
+        throw new Error('Ya has completado esta encuesta en el periodo actual.');
+      }
+    }
+
     const evaluation = {
       id: uuidv4(),
       organization_id: organizationId,
       period,
+      participant_id: participantId,
       results,
       createdAt: new Date().toISOString()
     };
     db.evaluations.push(evaluation);
     saveDB(db);
     return evaluation;
+  },
+
+  checkParticipantCompletion: async (organizationId, period, participantId) => {
+    const db = getDB();
+    if (!participantId) return false;
+    return db.evaluations.some(e => 
+      e.organization_id === organizationId && 
+      e.period === period && 
+      e.participant_id === participantId
+    );
   },
 
   getEvaluationsByOrganization: async (organizationId) => {

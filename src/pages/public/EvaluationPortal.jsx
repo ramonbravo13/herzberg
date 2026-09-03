@@ -2,6 +2,16 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { dbService } from '../../services/db';
 import Chat from '../../components/Chat';
+import { v4 as uuidv4 } from 'uuid';
+
+const getOrCreateParticipantId = () => {
+  let id = localStorage.getItem('herzberg_participant_id');
+  if (!id) {
+    id = uuidv4();
+    localStorage.setItem('herzberg_participant_id', id);
+  }
+  return id;
+};
 
 export default function EvaluationPortal() {
   const { token } = useParams();
@@ -10,6 +20,7 @@ export default function EvaluationPortal() {
   const [error, setError] = useState(null);
   const [started, setStarted] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [alreadyCompleted, setAlreadyCompleted] = useState(false);
 
   useEffect(() => {
     const fetchOrg = async () => {
@@ -19,7 +30,14 @@ export default function EvaluationPortal() {
           if (org.subscriptionEndDate && new Date(org.subscriptionEndDate) < new Date()) {
             navigate('/expired', { replace: true });
           } else {
-            setOrganization(org);
+            const pid = getOrCreateParticipantId();
+            const period = org.currentPeriod || 1;
+            const isCompleted = await dbService.checkParticipantCompletion(org.id, period, pid);
+            if (isCompleted) {
+              setAlreadyCompleted(true);
+            } else {
+              setOrganization(org);
+            }
           }
         } else {
           setError('Enlace de evaluación inválido o expirado.');
@@ -35,11 +53,16 @@ export default function EvaluationPortal() {
 
   const handleComplete = async (results) => {
     try {
-      await dbService.saveEvaluation(organization.id, results);
+      const pid = getOrCreateParticipantId();
+      await dbService.saveEvaluation(organization.id, results, pid);
       setCompleted(true);
     } catch (err) {
       console.error("Error guardando evaluación:", err);
-      alert("Hubo un error al guardar tus respuestas. Por favor, contacta a soporte.");
+      if (err.message?.includes('Ya has completado')) {
+        setAlreadyCompleted(true);
+      } else {
+        alert("Hubo un error al guardar tus respuestas. Por favor, contacta a soporte.");
+      }
     }
   };
 
@@ -50,6 +73,20 @@ export default function EvaluationPortal() {
           <div className="text-red-500 mb-4 text-4xl">⚠️</div>
           <h1 className="text-xl font-bold text-slate-800 mb-2">Error</h1>
           <p className="text-slate-600">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (alreadyCompleted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl text-center border border-slate-200">
+          <div className="text-amber-500 mb-4 text-4xl">🔒</div>
+          <h1 className="text-xl font-bold text-slate-800 mb-2">Evaluación Completada</h1>
+          <p className="text-slate-600">
+            Ya has completado y enviado exitosamente esta encuesta durante el periodo actual. ¡Muchas gracias por tu participación!
+          </p>
         </div>
       </div>
     );

@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { dbService } from '../../services/db';
 import Dashboard from '../../components/Dashboard';
-import { Link as LinkIcon, Check, PlusCircle, AlertTriangle, Calendar, ChevronDown } from 'lucide-react';
+import { Link as LinkIcon, Check, PlusCircle, AlertTriangle, Calendar, ChevronDown, Users, Target } from 'lucide-react';
 
 export default function DashboardOverview() {
   const { user } = useAuth();
@@ -94,6 +94,30 @@ export default function DashboardOverview() {
     }
   };
 
+  const handleSetHeadcount = async () => {
+    const activeOrg = organizations.find(o => o.id === selectedOrgId);
+    if (!activeOrg) return;
+    
+    const input = prompt('Ingresa la meta de participantes esperados para este periodo:', activeOrg.expected_headcount || '');
+    if (input !== null) {
+      const num = parseInt(input, 10);
+      if (!isNaN(num) && num > 0) {
+        try {
+          const updated = await dbService.updateOrganization(activeOrg.id, { expected_headcount: num });
+          setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
+        } catch(err) {
+          alert('Error al guardar la meta de participación');
+        }
+      } else if (input === '') {
+        // Allow removing the goal
+        try {
+          const updated = await dbService.updateOrganization(activeOrg.id, { expected_headcount: null });
+          setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
+        } catch(err) {}
+      }
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, [user, selectedOrgId]); // Keep loadData stable or disable exhaustive deps warning, but actually we don't need loadData to be a dep if it's declared here. Wait, better to just put it above.
@@ -109,6 +133,10 @@ export default function DashboardOverview() {
   }
 
   const activeOrg = selectedOrgId !== 'all' ? organizations.find(o => o.id === selectedOrgId) : null;
+  
+  const totalResponses = evaluations.length;
+  const expectedResponses = activeOrg?.expected_headcount || 0;
+  const progressPercent = expectedResponses > 0 ? Math.min(Math.round((totalResponses / expectedResponses) * 100), 100) : 0;
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start">
@@ -224,7 +252,7 @@ export default function DashboardOverview() {
         )}
 
         {user.role === 'empresarial' && activeOrg && (
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mb-6 flex justify-between items-center flex-wrap gap-4">
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center flex-wrap gap-4">
             <div>
               <h1 className="text-2xl font-bold text-slate-800">{activeOrg.name}</h1>
               <p className="text-slate-600 mt-1">Resultados de la evaluación de satisfacción laboral.</p>
@@ -237,6 +265,54 @@ export default function DashboardOverview() {
                 {copied ? <Check size={16} /> : <LinkIcon size={16} />}
                 {copied ? '¡Copiado!' : 'Copiar Link del Chatbot'}
               </button>
+            )}
+          </div>
+        )}
+
+        {/* Participation Dashboard */}
+        {activeOrg && (
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                  <Users size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">Participación</h3>
+                  <p className="text-sm text-slate-500">Respuestas válidas completadas</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="text-2xl font-black text-slate-800">
+                    {totalResponses} <span className="text-base font-medium text-slate-400">/ {expectedResponses || '?'}</span>
+                  </div>
+                </div>
+                <button 
+                  onClick={handleSetHeadcount}
+                  title="Configurar Meta de Participación"
+                  className="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors"
+                >
+                  <Target size={20} />
+                </button>
+              </div>
+            </div>
+            
+            {expectedResponses > 0 && (
+              <div>
+                <div className="flex justify-between text-sm font-medium mb-2">
+                  <span className="text-slate-600">Avance hacia la meta</span>
+                  <span className="text-emerald-600">{progressPercent}%</span>
+                </div>
+                <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                  <div 
+                    className="bg-emerald-500 h-3 rounded-full transition-all duration-1000 ease-out relative" 
+                    style={{ width: `${progressPercent}%` }}
+                  >
+                    <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
