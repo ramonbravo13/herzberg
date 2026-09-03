@@ -80,7 +80,7 @@ export default function DashboardLayout() {
                 <BarChart3 size={20} />
               </div>
               <span className="font-bold text-xl text-slate-800">
-                Dashboard {user.role === 'corporativo' && 'Corporativo'}
+                Clima laboral IA {user.role === 'corporativo' && 'Corporativo'}
               </span>
             </div>
             
