@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { dbService } from '../../services/db';
 import Dashboard from '../../components/Dashboard';
+import { Link as LinkIcon, Check } from 'lucide-react';
 
 export default function DashboardOverview() {
   const { user } = useAuth();
@@ -11,6 +12,14 @@ export default function DashboardOverview() {
   const [evaluations, setEvaluations] = useState([]);
   const [selectedOrgId, setSelectedOrgId] = useState(location.state?.orgId || '');
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = (token) => {
+    const link = `${window.location.origin}/evaluate/${token}`;
+    navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -83,6 +92,18 @@ export default function DashboardOverview() {
               <option key={org.id} value={org.id}>{org.name}</option>
             ))}
           </select>
+          {selectedOrgId !== 'all' && (
+            <button
+              onClick={() => {
+                const org = organizations.find(o => o.id === selectedOrgId);
+                if (org?.evaluation_token) handleCopyLink(org.evaluation_token);
+              }}
+              className="ml-auto flex items-center gap-2 text-sm text-primary bg-primary/10 hover:bg-primary/20 px-4 py-2 rounded-xl transition-colors font-medium"
+            >
+              {copied ? <Check size={16} /> : <LinkIcon size={16} />}
+              {copied ? '¡Copiado!' : 'Copiar Link del Chatbot'}
+            </button>
+          )}
         </div>
       )}
 
