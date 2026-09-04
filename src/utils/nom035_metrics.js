@@ -122,12 +122,45 @@ export const getRiskLevelG3 = (score) => {
 
 export const getRiskColorAndAction = (level) => {
   switch(level) {
-    case 'Nulo': return { color: 'text-emerald-500', hex: '#10b981', bg: 'bg-emerald-100', action: 'Riesgo despreciable. No se requieren medidas adicionales.' };
-    case 'Bajo': return { color: 'text-blue-500', hex: '#3b82f6', bg: 'bg-blue-100', action: 'Difusión reforzada de la política de prevención y programas existentes.' };
-    case 'Medio': return { color: 'text-yellow-500', hex: '#eab308', bg: 'bg-yellow-100', action: 'Revisión de política, programas de prevención y reforzamiento de la difusión (Nivel Organizacional).' };
-    case 'Alto': return { color: 'text-orange-500', hex: '#f97316', bg: 'bg-orange-100', action: 'Análisis por categoría/dominio. Programa de intervención y campañas (Nivel Grupal).' };
-    case 'Muy Alto': return { color: 'text-red-500', hex: '#ef4444', bg: 'bg-red-100', action: 'Intervención urgente. Evaluaciones clínicas específicas y cambio en políticas (Nivel Individual y Organizacional).' };
-    default: return { color: 'text-slate-500', hex: '#64748b', bg: 'bg-slate-100', action: '' };
+    case 'Nulo': return { 
+      color: 'text-emerald-500', hex: '#10b981', bg: 'bg-emerald-100', 
+      action: 'Riesgo despreciable. No se requieren medidas adicionales.',
+      implicaciones: 'El entorno de trabajo está libre de factores de riesgo psicosocial perjudiciales a nivel sistémico.',
+      recomendaciones: 'No se requieren medidas correctivas inmediatas. El objetivo es mantener la Política de Prevención vigente y continuar fomentando un entorno organizacional favorable.',
+      sanciones: 'Nulo. Ante una inspección de la STPS, solo se verificará el cumplimiento documental (tener la política por escrito y haber aplicado los cuestionarios correspondientes).'
+    };
+    case 'Bajo': return { 
+      color: 'text-blue-500', hex: '#3b82f6', bg: 'bg-blue-100', 
+      action: 'Difusión reforzada de la política de prevención.',
+      implicaciones: 'Existen algunos factores de riesgo aislados que, por el momento, no representan una amenaza significativa para la salud mental y emocional del colectivo.',
+      recomendaciones: 'Es necesario fortalecer la difusión de la Política de Prevención de Riesgos Psicosociales y los programas existentes. Mantener una comunicación constante sobre las vías de denuncia.',
+      sanciones: 'Muy bajo. La autoridad exigirá únicamente comprobar que la política y las medidas preventivas se difunden correctamente entre los trabajadores.'
+    };
+    case 'Medio': return { 
+      color: 'text-yellow-600', hex: '#ca8a04', bg: 'bg-yellow-100', 
+      action: 'Revisión de política y programas de prevención (Nivel Organizacional).',
+      implicaciones: 'Presencia moderada de factores de riesgo. El clima laboral empieza a verse afectado, existiendo probabilidad de desgaste en ciertas áreas de la empresa si no se actúa.',
+      recomendaciones: 'Obligación de revisar la política de prevención. Se deben actualizar los programas de capacitación y establecer medidas preventivas a Nivel Organizacional, involucrando a los líderes.',
+      sanciones: 'Moderado. En caso de inspección, la STPS solicitará evidencia de los programas de prevención e intervención instaurados a partir de esta evaluación. Omisiones pueden derivar en multas.'
+    };
+    case 'Alto': return { 
+      color: 'text-orange-600', hex: '#ea580c', bg: 'bg-orange-100', 
+      action: 'Programa de intervención focalizado (Nivel Grupal).',
+      implicaciones: 'Los factores de riesgo psicosocial son evidentes y sistémicos. Existe alta probabilidad de estrés crónico (burnout), rotación de personal, o violencia laboral en áreas específicas.',
+      recomendaciones: 'Obligación normativa de implementar un "Programa de Intervención" formal y documentado. Requiere campañas de sensibilización, capacitación obligatoria a jefes, y modificación de procesos (cargas de trabajo, turnos).',
+      sanciones: 'Alto. Las multas por incumplimiento en este nivel van de 250 a 5,000 UMAs (aprox. $27,142 a $542,850 MXN) por cada trabajador afectado o infracción no subsanada.'
+    };
+    case 'Muy Alto': return { 
+      color: 'text-red-600', hex: '#dc2626', bg: 'bg-red-100', 
+      action: 'Intervención Urgente y canalización (Nivel Individual y Organizacional).',
+      implicaciones: 'Entorno de trabajo altamente tóxico o peligroso. Los empleados están sometidos a niveles de estrés que dañan su salud física y psicológica de forma inminente.',
+      recomendaciones: 'Intervención de emergencia. Rediseño inmediato de puestos, cambio de liderazgos o procesos. Además, se requieren evaluaciones clínicas y psicológicas específicas al personal expuesto (Numerales 8.1 y 8.2).',
+      sanciones: 'Crítico. Multas severas (máximo rigor de UMAS). Riesgo de demandas laborales por "enfermedades de trabajo" (estrés agudo) ante el IMSS. Posibles medidas cautelares severas por parte de la STPS.'
+    };
+    default: return { 
+      color: 'text-slate-500', hex: '#64748b', bg: 'bg-slate-100', 
+      action: '', implicaciones: '', recomendaciones: '', sanciones: ''
+    };
   }
 };
 

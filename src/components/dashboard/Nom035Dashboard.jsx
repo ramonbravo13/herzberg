@@ -135,9 +135,25 @@ export default function Nom035Dashboard({ dataArray }) {
                 <div className={`text-3xl font-bold ${hasG3 ? infoG3.color : infoG2.color}`}>{hasG3 ? avgG3 : avgG2} pts</div>
               </div>
             </div>
-            
-            <div className="mt-6 pt-4 border-t border-black/5">
-              <p className="text-sm font-medium"><strong>Hoja de Ruta de Acción (Nivel Macro):</strong> {hasG3 ? infoG3.action : infoG2.action}</p>
+            <div className="mt-6 pt-4 border-t border-black/5 flex flex-col gap-4">
+              <div>
+                <p className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-1">
+                  <Activity size={16} /> Implicaciones del Nivel de Riesgo
+                </p>
+                <p className="text-sm text-slate-700 leading-relaxed">{hasG3 ? infoG3.implicaciones : infoG2.implicaciones}</p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-1">
+                  <Briefcase size={16} /> Recomendaciones y Obligaciones
+                </p>
+                <p className="text-sm text-slate-700 leading-relaxed">{hasG3 ? infoG3.recomendaciones : infoG2.recomendaciones}</p>
+              </div>
+              <div className="bg-red-50 p-3 rounded-lg border border-red-100">
+                <p className="text-sm font-bold text-red-800 mb-1 flex items-center gap-1">
+                  <AlertTriangle size={16} /> Riesgo de Sanción (STPS)
+                </p>
+                <p className="text-sm text-red-700 leading-relaxed">{hasG3 ? infoG3.sanciones : infoG2.sanciones}</p>
+              </div>
             </div>
           </div>
         </div>
