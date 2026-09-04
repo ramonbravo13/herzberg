@@ -1,4 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
+import { getNom035Prompt } from './utils/nom035_prompt';
 
 // Initialize the Google Gen AI SDK lazily to prevent crashes on load if the key is missing
 let ai = null;
@@ -9,7 +10,7 @@ const initAI = () => {
   return ai;
 };
 
-const SYSTEM_PROMPT = (organizationName = 'la empresa') => `Eres un especialista en psicología organizacional y experiencia del empleado. Tu función es aplicar una entrevista conversacional para evaluar la satisfacción laboral de los colaboradores de ${organizationName} utilizando la teoría de los dos factores de Herzberg.
+const SYSTEM_PROMPT = (organizationName = 'la empresa', headcount = 1) => `Eres un especialista en psicología organizacional y experiencia del empleado. Tu función es aplicar una entrevista conversacional para evaluar la satisfacción laboral de los colaboradores de ${organizationName} utilizando la teoría de los dos factores de Herzberg.
 Debes mantener un tono cálido, respetuoso, neutral y profesional. Nunca debes emitir juicios sobre las respuestas ni sugerir que existen respuestas correctas o incorrectas.
 Tu objetivo es recopilar información confiable y estructurada para generar indicadores organizacionales agregados.
 
@@ -108,6 +109,8 @@ PREGUNTAS ABIERTAS
 P41. ¿Qué es lo que más valoras de trabajar aquí? (Guardar texto completo)
 P42. Si pudieras cambiar una sola cosa para mejorar tu experiencia laboral, ¿qué cambiarías? (Guardar texto completo)
 
+${getNom035Prompt(headcount)}
+
 REGLAS DE CONVERSACIÓN
 - Haz una sola pregunta a la vez.
 - Espera la respuesta antes de continuar con la siguiente pregunta.
@@ -115,10 +118,10 @@ REGLAS DE CONVERSACIÓN
 - No interpretes ni critiques las respuestas.
 - No intentes persuadir al usuario.
 - No modifiques las preguntas, usa exactamente el texto provisto.
-- Informa periódicamente el avance (ej: "Llevamos 10 de 42 preguntas.").
+- Informa periódicamente el avance.
 
 FORMATO DE SALIDA FINAL
-Cuando termines TODAS las 42 preguntas, no hagas más preguntas. En su lugar, debes generar un objeto JSON estructurado con TODAS las respuestas recolectadas y finalizar la conversación. El JSON DEBE estar en el siguiente formato y no debe contener ningún otro texto antes o después:
+Cuando termines TODAS las preguntas (tanto las de Herzberg como las de NOM-035), no hagas más preguntas. En su lugar, debes generar un objeto JSON estructurado con TODAS las respuestas recolectadas y finalizar la conversación. El JSON DEBE estar en el siguiente formato y no debe contener ningún otro texto antes o después:
 {
   "departamento": "string",
   "antiguedad": "string",
@@ -126,7 +129,6 @@ Cuando termines TODAS las 42 preguntas, no hagas más preguntas. En su lugar, de
   "respuestas": {
     "logro_1": number,
     "logro_2": number,
-    // ... incluir todas las 40 variables numéricas del 1 al 5 (y 0-10 para enps)
     "seguridad_3": number,
     "satisfaccion_global": number,
     "compromiso": number,
@@ -136,19 +138,25 @@ Cuando termines TODAS las 42 preguntas, no hagas más preguntas. En su lugar, de
   "comentarios": {
     "fortaleza": "Respuesta a P41",
     "mejora": "Respuesta a P42"
+  },
+  "nom035_respuestas": {
+    "ats_1": "SI",
+    "ats_2": "NO",
+    "g2_1": 4,
+    "g3_1": 2
   }
 }
 `;
 
 let chatSession = null;
 
-export const startInterviewChat = async (organizationName = 'la empresa') => {
+export const startInterviewChat = async (organizationName = 'la empresa', headcount = 1) => {
   try {
     const aiInstance = initAI();
     chatSession = await aiInstance.chats.create({
       model: 'gemini-3.6-flash',
       config: {
-        systemInstruction: SYSTEM_PROMPT(organizationName),
+        systemInstruction: SYSTEM_PROMPT(organizationName, headcount),
         temperature: 0.2, // Keep it relatively deterministic to follow rules
       }
     });

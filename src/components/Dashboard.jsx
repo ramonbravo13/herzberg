@@ -11,6 +11,7 @@ import FlightRiskDrivers from './dashboard/FlightRiskDrivers';
 import EnpsRadar from './dashboard/EnpsRadar';
 import BurnoutRisk from './dashboard/BurnoutRisk';
 import RetentionMatrix from './dashboard/RetentionMatrix';
+import Nom035Dashboard from './dashboard/Nom035Dashboard';
 
 export default function Dashboard({ data }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -66,6 +67,16 @@ export default function Dashboard({ data }) {
             )}
           </div>
         </header>
+
+        <div className="pt-8 pb-4 mt-8 mb-6">
+          <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3">
+            <span className="bg-indigo-600 text-white p-2 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            </span>
+            Evaluación de Clima Laboral (Modelo Herzberg)
+          </h2>
+          <p className="text-slate-500 mt-2">Métricas de satisfacción, compromiso y riesgo de rotación basadas en factores intrínsecos y extrínsecos.</p>
+        </div>
 
         <TheoryContext />
 
@@ -180,6 +191,18 @@ export default function Dashboard({ data }) {
             </ul>
           </div>
         </div>
+
+        <div className="pt-12 pb-4 border-t-2 border-slate-200 mt-16 mb-6">
+          <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3">
+            <span className="bg-emerald-600 text-white p-2 rounded-xl">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            Cumplimiento Normativo: NOM-035-STPS-2018
+          </h2>
+          <p className="text-slate-500 mt-2">Identificación, análisis y prevención de Factores de Riesgo Psicosocial.</p>
+        </div>
+        
+        <Nom035Dashboard dataArray={dataArray} />
 
       </div>
 

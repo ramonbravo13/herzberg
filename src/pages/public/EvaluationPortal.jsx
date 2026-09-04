@@ -114,7 +114,7 @@ export default function EvaluationPortal() {
   if (started) {
     return (
       <div className="max-w-3xl mx-auto py-8 px-4 h-screen">
-        <Chat onComplete={handleComplete} onExit={() => setStarted(false)} organizationName={organization.name} />
+        <Chat onComplete={handleComplete} onExit={() => setStarted(false)} organizationName={organization.name} expectedHeadcount={organization.expected_headcount} />
       </div>
     );
   }

@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import { Send, Loader2, Bot, LogOut } from 'lucide-react';
 import { startInterviewChat, sendMessageToBot } from '../gemini';
 
-export default function Chat({ onComplete, onExit, organizationName }) {
+export default function Chat({ onComplete, onExit, organizationName, expectedHeadcount = 1 }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,7 @@ export default function Chat({ onComplete, onExit, organizationName }) {
     const initChat = async () => {
       setLoading(true);
       try {
-        const text = await startInterviewChat(organizationName);
+        const text = await startInterviewChat(organizationName, expectedHeadcount);
         setMessages([{ role: 'model', text }]);
       } catch (err) {
         setError(err.message || "Error al iniciar el chat");
