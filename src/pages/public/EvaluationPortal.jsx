@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { dbService } from '../../services/db';
 import Chat from '../../components/Chat';
+import ClinicalNameForm from '../../components/ClinicalNameForm';
+import { evaluateGuia1 } from '../../utils/nom035_metrics';
 import { v4 as uuidv4 } from 'uuid';
 
 const getOrCreateParticipantId = () => {
@@ -21,6 +23,7 @@ export default function EvaluationPortal() {
   const [started, setStarted] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [alreadyCompleted, setAlreadyCompleted] = useState(false);
+  const [clinicalPendingResults, setClinicalPendingResults] = useState(null);
 
   useEffect(() => {
     const fetchOrg = async () => {
@@ -53,6 +56,11 @@ export default function EvaluationPortal() {
 
   const handleComplete = async (results) => {
     try {
+      if (results.nom035_respuestas && evaluateGuia1(results.nom035_respuestas)) {
+        setClinicalPendingResults(results);
+        return; // Wait for ClinicalNameForm
+      }
+
       const pid = getOrCreateParticipantId();
       await dbService.saveEvaluation(organization.id, results, pid);
       setCompleted(true);
@@ -60,6 +68,24 @@ export default function EvaluationPortal() {
       console.error("Error guardando evaluación:", err);
       if (err.message?.includes('Ya has completado')) {
         setAlreadyCompleted(true);
+      } else {
+        alert("Hubo un error al guardar tus respuestas. Por favor, contacta a soporte.");
+      }
+    }
+  };
+
+  const handleClinicalSubmit = async (name) => {
+    try {
+      const resultsWithName = { ...clinicalPendingResults, nombre_clinico: name };
+      const pid = getOrCreateParticipantId();
+      await dbService.saveEvaluation(organization.id, resultsWithName, pid);
+      setClinicalPendingResults(null);
+      setCompleted(true);
+    } catch (err) {
+      console.error("Error guardando evaluación clínica:", err);
+      if (err.message?.includes('Ya has completado')) {
+        setAlreadyCompleted(true);
+        setClinicalPendingResults(null);
       } else {
         alert("Hubo un error al guardar tus respuestas. Por favor, contacta a soporte.");
       }
@@ -94,6 +120,18 @@ export default function EvaluationPortal() {
 
   if (!organization) {
     return <div className="min-h-screen flex items-center justify-center bg-slate-50">Cargando...</div>;
+  }
+
+  if (clinicalPendingResults) {
+    return (
+      <ClinicalNameForm 
+        onSubmit={handleClinicalSubmit} 
+        onCancel={() => {
+          setClinicalPendingResults(null);
+          setStarted(false); // Discard evaluation
+        }} 
+      />
+    );
   }
 
   if (completed) {
