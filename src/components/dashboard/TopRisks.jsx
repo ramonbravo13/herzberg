@@ -1,5 +1,6 @@
 import React from 'react';
 import { calculateIndex, QUESTION_MAP } from '../../utils/metrics';
+import { AlertTriangle } from 'lucide-react';
 import ChartCard from '../charts/ChartCard';
 
 export default function TopRisks({ dataArray }) {
@@ -21,7 +22,7 @@ export default function TopRisks({ dataArray }) {
     <ChartCard 
       title="Top 3 Focos Rojos de Acción"
       subtitle="Estas son las 3 preguntas exactas con peor calificación en toda la evaluación. Representan las áreas de riesgo más críticas que requieren atención inmediata por parte del liderazgo."
-      icon={<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>}
+      icon={AlertTriangle}
       iconColor="text-red-500"
       iconBg="bg-red-50 border-red-100"
       className="border-red-200 shadow-[0_2px_15px_-3px_rgba(239,68,68,0.1)]"
