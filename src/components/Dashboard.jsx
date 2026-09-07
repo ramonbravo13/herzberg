@@ -15,7 +15,8 @@ import Nom035Dashboard from './dashboard/Nom035Dashboard';
 import ChartCard from './charts/ChartCard';
 import ChartTooltip from './charts/ChartTooltip';
 import { chartTheme } from './charts/theme';
-import { Activity } from 'lucide-react';
+import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
+import { PieChart, Pie, Cell as PieCell } from 'recharts';
 
 export default function Dashboard({ data }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -87,52 +88,153 @@ export default function Dashboard({ data }) {
         {isAggregated && <TopRisks dataArray={dataArray} />}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <ScoreCard title="Satisfacción Global" score={satisfaccionScore} onClick={() => setSelectedMetric('satisfaccion')} />
-          <ScoreCard title="Compromiso" score={compromisoScore} onClick={() => setSelectedMetric('compromiso')} />
-          <ScoreCard title="Riesgo de Rotación" score={rotacionRiesgo} inverseRisk={true} onClick={() => setSelectedMetric('rotacion')} />
-          <ScoreCard title="eNPS Promedio" score={enpsScore} onClick={() => setSelectedMetric('enps')} />
+          <ScoreCard 
+            title="Satisfacción Global" 
+            score={satisfaccionScore} 
+            subtitle="Felicidad general" 
+            icon={Smile} 
+            colorClass="emerald"
+            onClick={() => setSelectedMetric('satisfaccion')} 
+          />
+          <ScoreCard 
+            title="Compromiso" 
+            score={compromisoScore} 
+            subtitle="Sentido de pertenencia" 
+            icon={Target}
+            colorClass="indigo"
+            onClick={() => setSelectedMetric('compromiso')} 
+          />
+          <ScoreCard 
+            title="Riesgo de Rotación" 
+            score={rotacionRiesgo} 
+            subtitle="Probabilidad de salida"
+            icon={TrendingUp}
+            colorClass={rotacionRiesgo > 40 ? "red" : "amber"}
+            inverseRisk={true} 
+            onClick={() => setSelectedMetric('rotacion')} 
+          />
+          <ScoreCard 
+            title="eNPS Promedio" 
+            score={enpsScore} 
+            subtitle="Lealtad del empleado"
+            icon={Users}
+            colorClass="blue"
+            onClick={() => setSelectedMetric('enps')} 
+          />
         </div>
 
-        <ChartCard 
-          title="Índices por Factor" 
-          subtitle="Haz clic en cualquier barra para ver los detalles de distribución."
-          icon={Activity}
-        >
-          <div className="mb-4 text-center max-w-3xl mx-auto flex flex-wrap justify-center gap-6">
-            <span className="text-sm"><strong className="text-emerald-500 font-bold">80-100:</strong> Fortaleza</span>
-            <span className="text-sm"><strong className="text-amber-500 font-bold">60-79:</strong> Aceptable</span>
-            <span className="text-sm"><strong className="text-orange-500 font-bold">40-59:</strong> Riesgo</span>
-            <span className="text-sm"><strong className="text-red-500 font-bold">0-39:</strong> Riesgo Alto</span>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ChartCard 
+              title="Índices por Factor" 
+              subtitle="Haz clic en cualquier barra para ver los detalles de distribución."
+              icon={Activity}
+            >
+              <div className="mb-4 text-center max-w-3xl mx-auto flex flex-wrap justify-center gap-6">
+                <span className="text-sm"><strong className="text-emerald-500 font-bold">80-100:</strong> Fortaleza</span>
+                <span className="text-sm"><strong className="text-amber-500 font-bold">60-79:</strong> Aceptable</span>
+                <span className="text-sm"><strong className="text-orange-500 font-bold">40-59:</strong> Riesgo</span>
+                <span className="text-sm"><strong className="text-red-500 font-bold">0-39:</strong> Riesgo Alto</span>
+              </div>
+              <div className="h-[400px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} />
+                    <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
+                    <YAxis dataKey="name" type="category" width={150} {...chartTheme.axis} />
+                    <Tooltip 
+                      cursor={chartTheme.tooltip.cursor}
+                      content={<ChartTooltip 
+                        formatter={(val, name, props) => (
+                          <span style={{ color: props.payload.fill }}>{val}% - {getRiskLabel(val)}</span>
+                        )}
+                        labelFormatter={() => null}
+                      />}
+                    />
+                    <Bar 
+                      dataKey="score" 
+                      radius={chartTheme.bar.horizontalRadius}
+                      cursor="pointer"
+                      onClick={(data) => setSelectedMetric(data.name)}
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity duration-300" />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
           </div>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} />
-                <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
-                <YAxis dataKey="name" type="category" width={150} {...chartTheme.axis} />
-                <Tooltip 
-                  cursor={chartTheme.tooltip.cursor}
-                  content={<ChartTooltip 
-                    formatter={(val, name, props) => (
-                      <span style={{ color: props.payload.fill }}>{val}% - {getRiskLabel(val)}</span>
-                    )}
-                    labelFormatter={() => null}
-                  />}
-                />
-                <Bar 
-                  dataKey="score" 
-                  radius={chartTheme.bar.horizontalRadius}
-                  cursor="pointer"
-                  onClick={(data) => setSelectedMetric(data.name)}
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity duration-300" />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+
+          <div className="lg:col-span-1">
+            <ChartCard 
+              title="Distribución eNPS" 
+              subtitle="Promotores, Pasivos y Detractores"
+              icon={PieChartIcon}
+            >
+              <div className="flex flex-col items-center justify-center h-full">
+                <div className="h-[250px] w-full relative">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: '#34d399' },
+                          { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: '#fbbf24' },
+                          { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: '#f87171' }
+                        ].filter(d => d.value > 0)}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={70}
+                        outerRadius={100}
+                        paddingAngle={2}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {
+                          [
+                            { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: '#34d399' },
+                            { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: '#fbbf24' },
+                            { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: '#f87171' }
+                          ].filter(d => d.value > 0).map((entry, index) => (
+                            <PieCell key={`cell-${index}`} fill={entry.color} className="hover:brightness-110 transition-all duration-300" />
+                          ))
+                        }
+                      </Pie>
+                      <Tooltip 
+                        content={<ChartTooltip 
+                          formatter={(val, name, props) => (
+                            <span style={{ color: props.payload.color }}>{val} Personas</span>
+                          )}
+                        />}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  {/* Central KPI */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
+                    <span className="text-4xl font-black text-slate-800 tracking-tight">{enpsScore}</span>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">eNPS</span>
+                  </div>
+                </div>
+                {/* Legend Below Doughnut */}
+                <div className="flex justify-center gap-4 mt-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
+                    <span className="text-sm font-semibold text-slate-600">Promotores</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+                    <span className="text-sm font-semibold text-slate-600">Pasivos</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                    <span className="text-sm font-semibold text-slate-600">Detractores</span>
+                  </div>
+                </div>
+              </div>
+            </ChartCard>
           </div>
-        </ChartCard>
+        </div>
 
         {isAggregated && (
           <>
@@ -214,22 +316,36 @@ export default function Dashboard({ data }) {
   );
 }
 
-function ScoreCard({ title, score, inverseRisk = false, onClick }) {
-  let color = getRiskColor(score);
+function ScoreCard({ title, score, subtitle, icon: Icon, colorClass = "indigo", inverseRisk = false, onClick }) {
+  let riskColor = getRiskColor(score);
   if (inverseRisk) {
-    color = getRiskColor(100 - score);
+    riskColor = getRiskColor(100 - score);
   }
+
+  // Map colorClass to tailwind classes for the pastel circle
+  const bgColors = {
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
+    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100",
+    red: "bg-red-50 text-red-600 border-red-100",
+    amber: "bg-amber-50 text-amber-600 border-amber-100",
+    blue: "bg-blue-50 text-blue-600 border-blue-100"
+  };
+  
+  const iconStyle = bgColors[colorClass] || bgColors.indigo;
 
   return (
     <div 
       onClick={onClick}
-      className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] border border-slate-100/60 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 active:scale-[0.98] group relative"
+      className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] border border-slate-100/80 cursor-pointer transition-all duration-300 active:scale-[0.98] flex items-center gap-4 group"
     >
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-slate-300">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-110 ${iconStyle}`}>
+        {Icon && <Icon size={24} strokeWidth={2.5} />}
       </div>
-      <h3 className="text-slate-500 text-sm font-medium mb-2">{title}</h3>
-      <div className="text-4xl font-black tracking-tight" style={{ color }}>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-slate-800 text-sm font-bold truncate">{title}</h3>
+        {subtitle && <p className="text-slate-500 text-xs font-medium truncate mt-0.5">{subtitle}</p>}
+      </div>
+      <div className="text-2xl font-black tracking-tight shrink-0" style={{ color: riskColor }}>
         {score}
       </div>
     </div>
