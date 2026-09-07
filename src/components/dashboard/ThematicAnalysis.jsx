@@ -1,4 +1,5 @@
 import React from 'react';
+import ChartCard from '../charts/ChartCard';
 
 const THEMES = [
   { id: 'salario', label: 'Salario y Compensación', keywords: ['salario', 'sueldo', 'pago', 'dinero'], color: 'bg-green-500' },
@@ -53,29 +54,29 @@ export default function ThematicAnalysis({ dataArray }) {
   })).sort((a, b) => b.count - a.count).filter(t => t.count > 0);
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-      <h2 className="text-xl font-bold text-slate-800 mb-2">Análisis Temático de Comentarios</h2>
-      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-        Agrupación automática de los comentarios abiertos (fortalezas y áreas de mejora) basada en palabras clave. Indica sobre qué temas están hablando más los colaboradores.
-      </p>
-
+    <ChartCard 
+      title="Análisis Temático de Comentarios"
+      subtitle="Agrupación automática de los comentarios abiertos (fortalezas y áreas de mejora) basada en palabras clave. Indica sobre qué temas están hablando más los colaboradores."
+    >
       {results.length === 0 ? (
-        <p className="text-sm text-slate-500 italic">No se detectaron temas clave en los comentarios.</p>
+        <div className="flex items-center justify-center p-8 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 mt-4">
+          <p className="text-sm text-slate-500 font-medium">No se detectaron temas clave en los comentarios.</p>
+        </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-6 mt-6">
           {results.map(res => (
-            <div key={res.id}>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="font-semibold text-slate-700">{res.label}</span>
-                <span className="text-slate-500 font-medium">{res.pct}% ({res.count} menciones)</span>
+            <div key={res.id} className="group">
+              <div className="flex justify-between items-end mb-2">
+                <span className="font-bold text-slate-700 text-sm">{res.label}</span>
+                <span className="text-slate-500 font-medium text-xs tracking-wide">{res.pct}% <span className="opacity-60 font-normal">({res.count} menciones)</span></span>
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-2.5">
-                <div className={`${res.color} h-2.5 rounded-full`} style={{ width: `${res.pct}%` }}></div>
+              <div className="w-full bg-slate-100 rounded-full h-2.5 shadow-inner overflow-hidden">
+                <div className={`${res.color} h-full rounded-full transition-all duration-1000 ease-out group-hover:brightness-110`} style={{ width: `${res.pct}%` }}></div>
               </div>
             </div>
           ))}
         </div>
       )}
-    </div>
+    </ChartCard>
   );
 }

@@ -12,6 +12,10 @@ import EnpsRadar from './dashboard/EnpsRadar';
 import BurnoutRisk from './dashboard/BurnoutRisk';
 import RetentionMatrix from './dashboard/RetentionMatrix';
 import Nom035Dashboard from './dashboard/Nom035Dashboard';
+import ChartCard from './charts/ChartCard';
+import ChartTooltip from './charts/ChartTooltip';
+import { chartTheme } from './charts/theme';
+import { Activity } from 'lucide-react';
 
 export default function Dashboard({ data }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -89,53 +93,46 @@ export default function Dashboard({ data }) {
           <ScoreCard title="eNPS Promedio" score={enpsScore} onClick={() => setSelectedMetric('enps')} />
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <div className="mb-6 text-center max-w-3xl mx-auto">
-            <h2 className="text-xl font-bold text-slate-800 mb-3">Índices por Factor (0 - 100)</h2>
-            <div className="text-sm text-slate-600 flex flex-wrap justify-center gap-6 mb-2">
-              <span><strong className="text-emerald-600">80-100:</strong> Fortaleza</span>
-              <span><strong className="text-amber-500">60-79:</strong> Aceptable</span>
-              <span><strong className="text-orange-500">40-59:</strong> Riesgo</span>
-              <span><strong className="text-red-500">0-39:</strong> Riesgo Alto</span>
-            </div>
-            <p className="text-xs text-slate-400 italic">(Haz clic en cualquier barra para ver los detalles)</p>
+        <ChartCard 
+          title="Índices por Factor" 
+          subtitle="Haz clic en cualquier barra para ver los detalles de distribución."
+          icon={Activity}
+        >
+          <div className="mb-4 text-center max-w-3xl mx-auto flex flex-wrap justify-center gap-6">
+            <span className="text-sm"><strong className="text-emerald-500 font-bold">80-100:</strong> Fortaleza</span>
+            <span className="text-sm"><strong className="text-amber-500 font-bold">60-79:</strong> Aceptable</span>
+            <span className="text-sm"><strong className="text-orange-500 font-bold">40-59:</strong> Riesgo</span>
+            <span className="text-sm"><strong className="text-red-500 font-bold">0-39:</strong> Riesgo Alto</span>
           </div>
           <div className="h-[400px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                <XAxis type="number" domain={[0, 100]} />
-                <YAxis dataKey="name" type="category" width={150} tick={{ fontSize: 12 }} />
+                <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} />
+                <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
+                <YAxis dataKey="name" type="category" width={150} {...chartTheme.axis} />
                 <Tooltip 
-                  cursor={{fill: 'transparent'}}
-                  content={({ active, payload }) => {
-                    if (active && payload && payload.length) {
-                      const val = payload[0].value;
-                      return (
-                        <div className="bg-white p-3 border border-slate-200 shadow-xl rounded-lg pointer-events-none">
-                          <p className="font-semibold text-slate-800">{payload[0].payload.name}</p>
-                          <p className="text-lg font-bold" style={{color: getRiskColor(val)}}>{val}% - {getRiskLabel(val)}</p>
-                          <p className="text-xs text-slate-400 mt-1">Clic para ver detalles</p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  }}
+                  cursor={chartTheme.tooltip.cursor}
+                  content={<ChartTooltip 
+                    formatter={(val, name, props) => (
+                      <span style={{ color: props.payload.fill }}>{val}% - {getRiskLabel(val)}</span>
+                    )}
+                    labelFormatter={() => null}
+                  />}
                 />
                 <Bar 
                   dataKey="score" 
-                  radius={[0, 4, 4, 0]}
+                  radius={chartTheme.bar.horizontalRadius}
                   cursor="pointer"
                   onClick={(data) => setSelectedMetric(data.name)}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity" />
+                    <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity duration-300" />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
+        </ChartCard>
 
         {isAggregated && (
           <>
@@ -226,13 +223,13 @@ function ScoreCard({ title, score, inverseRisk = false, onClick }) {
   return (
     <div 
       onClick={onClick}
-      className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-md hover:border-primary/30 transition-all active:scale-[0.98] group relative"
+      className="bg-white p-6 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] border border-slate-100/60 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-300 active:scale-[0.98] group relative"
     >
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-slate-300">
+      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-slate-300">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
       </div>
       <h3 className="text-slate-500 text-sm font-medium mb-2">{title}</h3>
-      <div className="text-4xl font-black" style={{ color }}>
+      <div className="text-4xl font-black tracking-tight" style={{ color }}>
         {score}
       </div>
     </div>

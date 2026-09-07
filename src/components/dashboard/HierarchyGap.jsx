@@ -1,6 +1,9 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
+import ChartCard from '../charts/ChartCard';
+import ChartTooltip from '../charts/ChartTooltip';
+import { chartTheme } from '../charts/theme';
 
 export default function HierarchyGap({ dataArray }) {
   if (!dataArray || dataArray.length < 2) return null;
@@ -27,32 +30,32 @@ export default function HierarchyGap({ dataArray }) {
   });
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-      <h2 className="text-xl font-bold text-slate-800 mb-2">Brecha Jerárquica ("Ceguera de Taller")</h2>
-      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-        Compara la percepción de los líderes (Coordinación/Directivos) contra la base operativa. Una brecha grande indica que los directivos perciben una realidad mucho más positiva (o desconectada) que el resto de la empresa.
-      </p>
-
+    <ChartCard 
+      title="Brecha Jerárquica (&quot;Ceguera de Taller&quot;)"
+      subtitle="Compara la percepción de los líderes (Coordinación/Directivos) contra la base operativa. Una brecha grande indica que los directivos perciben una realidad mucho más positiva (o desconectada) que el resto de la empresa."
+      footer={
+        <div className="flex gap-6 text-xs font-semibold text-slate-500 justify-center">
+          <div>Muestra Líderes: {lideres.length}</div>
+          <div>Muestra Operativos: {operativos.length}</div>
+        </div>
+      }
+    >
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" tick={{fontSize: 11}} />
-            <YAxis domain={[0, 100]} tick={{fontSize: 12}} />
+            <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} vertical={false} />
+            <XAxis dataKey="name" {...chartTheme.axis} />
+            <YAxis domain={[0, 100]} {...chartTheme.axis} />
             <Tooltip 
-              cursor={{fill: 'transparent'}}
-              contentStyle={{borderRadius: '10px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}}
+              cursor={chartTheme.tooltip.cursor}
+              content={<ChartTooltip formatter={(val) => `${val}%`} />}
             />
-            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-            <Bar dataKey="Líderes" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Operativos" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} iconType="circle" />
+            <Bar dataKey="Líderes" fill={chartTheme.colors.primary} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" />
+            <Bar dataKey="Operativos" fill={chartTheme.colors.warning} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" />
           </BarChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-4 flex gap-4 text-xs text-slate-500 justify-center">
-        <div>Muestra Líderes: {lideres.length}</div>
-        <div>Muestra Operativos: {operativos.length}</div>
-      </div>
-    </div>
+    </ChartCard>
   );
 }

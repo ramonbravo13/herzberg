@@ -1,6 +1,9 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { calculateIndex } from '../../utils/metrics';
+import ChartCard from '../charts/ChartCard';
+import ChartTooltip from '../charts/ChartTooltip';
+import { chartTheme } from '../charts/theme';
 
 // Order definition for tenure sorting
 const TENURE_ORDER = {
@@ -35,42 +38,48 @@ export default function TenureGap({ dataArray }) {
   });
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-      <h2 className="text-xl font-bold text-slate-800 mb-2">Brecha por Antigüedad (Tenure Gap)</h2>
-      <p className="text-sm text-slate-600 mb-6 leading-relaxed">
-        Analiza cómo evoluciona la <strong>Satisfacción Global</strong> frente al <strong>Riesgo de Rotación</strong> a lo largo del ciclo de vida del colaborador en la organización.
-      </p>
-
-      <div className="h-[350px]">
+    <ChartCard 
+      title="Brecha por Antigüedad (Tenure Gap)"
+      subtitle={<>Analiza cómo evoluciona la <strong>Satisfacción Global</strong> frente al <strong>Riesgo de Rotación</strong> a lo largo del ciclo de vida del colaborador en la organización.</>}
+    >
+      <div className="h-[350px] mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="name" tick={{fontSize: 12}} />
-            <YAxis domain={[0, 100]} tick={{fontSize: 12}} />
+            <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} vertical={false} />
+            <XAxis dataKey="name" {...chartTheme.axis} />
+            <YAxis domain={[0, 100]} {...chartTheme.axis} />
             <Tooltip 
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
+              cursor={chartTheme.tooltip.cursor}
+              content={(props) => {
+                if (props.active && props.payload && props.payload.length) {
+                  const size = props.payload[0].payload.size;
                   return (
-                    <div className="bg-white p-3 border border-slate-200 shadow-xl rounded-lg">
-                      <p className="font-bold text-slate-800 mb-2">{label}</p>
-                      {payload.map(p => (
-                        <p key={p.dataKey} className="text-sm font-semibold" style={{color: p.color}}>
-                          {p.name}: {p.value}%
-                        </p>
-                      ))}
-                      <p className="text-xs text-slate-400 mt-2">Muestra: {payload[0].payload.size} personas</p>
+                    <div className="bg-white/95 backdrop-blur-md p-4 border border-slate-100 shadow-xl rounded-xl z-50">
+                      <p className="font-bold text-slate-800 mb-2 pb-2 border-b border-slate-100">{props.label}</p>
+                      <div className="space-y-1.5">
+                        {props.payload.map(p => (
+                          <div key={p.dataKey} className="flex items-center justify-between gap-6 text-sm">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: p.color }} />
+                              <span className="text-slate-600 font-medium">{p.name}</span>
+                            </div>
+                            <span className="font-bold text-slate-800">{p.value}%</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-slate-400 mt-3 font-medium uppercase tracking-wider">Muestra: {size} personas</p>
                     </div>
                   );
                 }
                 return null;
               }}
             />
-            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-            <Bar dataKey="satisfaccion" name="Satisfacción Global" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="riesgoRotacion" name="Riesgo de Rotación" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} iconType="circle" />
+            <Bar dataKey="satisfaccion" name="Satisfacción Global" fill={chartTheme.colors.info} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" />
+            <Bar dataKey="riesgoRotacion" name="Riesgo de Rotación" fill={chartTheme.colors.danger} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" />
           </BarChart>
         </ResponsiveContainer>
       </div>
-    </div>
+    </ChartCard>
   );
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import ChartCard from '../charts/ChartCard';
 
 export default function BurnoutRisk({ dataArray }) {
   if (!dataArray || dataArray.length < 2) return null;
@@ -37,33 +38,34 @@ export default function BurnoutRisk({ dataArray }) {
   }
 
   return (
-    <div className={`p-6 rounded-2xl shadow-sm border ${statusClass} flex flex-col justify-center`}>
-      <div className="flex items-start gap-4 mb-4">
-        <div className={`p-3 rounded-full bg-white shadow-sm ${textColor}`}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {icon}
-          </svg>
+    <ChartCard 
+      title="Índice de Burnout Severo"
+      subtitle="Colaboradores con sobrecarga extrema y nulo apoyo de su líder."
+      className={statusClass}
+    >
+      <div className="flex flex-col justify-center h-full">
+        <div className="flex items-start gap-4 mb-4">
+          <div className={`p-3 rounded-xl shadow-sm border border-white/50 shrink-0 bg-white ${textColor}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              {icon}
+            </svg>
+          </div>
+          <div className="flex flex-col">
+            <div className={`text-5xl font-black tracking-tight ${textColor}`}>{burnoutPct}%</div>
+            <div className="text-sm font-medium text-slate-500 opacity-80 mt-1">de la plantilla ({burnoutCount} personas)</div>
+          </div>
         </div>
-        <div>
-          <h2 className={`text-xl font-bold ${textColor}`}>Índice de Burnout Severo</h2>
-          <p className="text-sm text-slate-600 mt-1">Colaboradores con sobrecarga extrema y nulo apoyo de su líder.</p>
+        
+        <div className="mt-8 pt-6 border-t border-slate-200/50">
+          <div className="flex justify-between items-center text-sm font-medium text-slate-600 mb-2">
+            <span>En riesgo moderado (alta carga o bajo apoyo)</span>
+            <span className="font-bold text-slate-800">{atRiskPct}%</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-2 shadow-inner overflow-hidden">
+            <div className="bg-orange-400 h-full rounded-full transition-all duration-1000 ease-out" style={{width: `${atRiskPct}%`}}></div>
+          </div>
         </div>
       </div>
-      
-      <div className="flex items-end gap-3 mt-2">
-        <div className={`text-5xl font-black ${textColor}`}>{burnoutPct}%</div>
-        <div className="text-sm text-slate-500 mb-2">de la plantilla ({burnoutCount} personas)</div>
-      </div>
-      
-      <div className="mt-6 pt-4 border-t border-slate-200/50">
-        <div className="flex justify-between items-center text-sm text-slate-600 mb-1">
-          <span>En riesgo moderado (alta carga o bajo apoyo)</span>
-          <span className="font-bold">{atRiskPct}%</span>
-        </div>
-        <div className="w-full bg-white rounded-full h-2">
-          <div className="bg-orange-400 h-2 rounded-full" style={{width: `${atRiskPct}%`}}></div>
-        </div>
-      </div>
-    </div>
+    </ChartCard>
   );
 }
