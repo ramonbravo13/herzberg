@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { ArrowRight, Brain, BarChart3, Shield, Users } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -54,8 +55,13 @@ export default function LandingPage() {
             <div className="absolute inset-0 bg-gradient-to-tr from-indigo-400 to-fuchsia-400 rounded-full animate-[spin_20s_linear_infinite]" style={{ animationDuration: '30s' }}></div>
           </div>
           
-          <div className="text-center max-w-4xl mx-auto relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-medium text-sm mb-8 animate-fade-in-up">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-center max-w-4xl mx-auto relative z-10"
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 font-medium text-sm mb-8">
               <span className="flex h-2 w-2 rounded-full bg-indigo-500"></span>
               Plataforma Inteligente de Evaluación
             </div>
@@ -68,15 +74,15 @@ export default function LandingPage() {
               Descubre de forma automatizada y precisa qué motiva a tus colaboradores aplicando la teoría de Herzberg potenciada por Gemini.
             </p>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-4">
               <button
                 onClick={handleLoginClick}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg hover:shadow-xl hover:shadow-indigo-500/30 transition-all hover:-translate-y-1"
+                className="px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg shadow-lg hover:shadow-indigo-500/30 transition-all hover:-translate-y-1 active:scale-95"
               >
                 Acceso Corporativo
               </button>
             </div>
-          </div>
+          </motion.div>
         </div>
       </main>
 
@@ -89,35 +95,53 @@ export default function LandingPage() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all hover:-translate-y-2 group">
-              <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="p-8 rounded-3xl bg-white/70 backdrop-blur-sm border border-slate-200 hover:shadow-xl hover:shadow-indigo-500/5 transition-all hover:-translate-y-2 group"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
                 <Brain size={28} />
               </div>
               <h3 className="text-xl font-bold mb-3 text-slate-800">Entrevistas con IA</h3>
               <p className="text-slate-600 leading-relaxed">
                 Un chatbot inteligente conversa con el trabajador, simulando una entrevista humana empática y extrayendo los factores clave de motivación.
               </p>
-            </div>
+            </motion.div>
             
-            <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all hover:-translate-y-2 group">
-              <div className="w-14 h-14 rounded-2xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="p-8 rounded-3xl bg-white/70 backdrop-blur-sm border border-slate-200 hover:shadow-xl hover:shadow-fuchsia-500/5 transition-all hover:-translate-y-2 group"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-fuchsia-50 text-fuchsia-600 border border-fuchsia-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
                 <BarChart3 size={28} />
               </div>
               <h3 className="text-xl font-bold mb-3 text-slate-800">Analítica en Tiempo Real</h3>
               <p className="text-slate-600 leading-relaxed">
                 Visualiza los resultados en potentes dashboards organizacionales. Compara los factores de higiene vs factores motivacionales instantáneamente.
               </p>
-            </div>
+            </motion.div>
             
-            <div className="p-8 rounded-3xl bg-slate-50 border border-slate-100 hover:shadow-xl hover:shadow-slate-200/50 transition-all hover:-translate-y-2 group">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="p-8 rounded-3xl bg-white/70 backdrop-blur-sm border border-slate-200 hover:shadow-xl hover:shadow-emerald-500/5 transition-all hover:-translate-y-2 group"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-sm">
                 <Shield size={28} />
               </div>
               <h3 className="text-xl font-bold mb-3 text-slate-800">Privado y Seguro</h3>
               <p className="text-slate-600 leading-relaxed">
                 El acceso corporativo y empresarial está estrictamente delimitado para proteger la confidencialidad de la información de tu organización.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
