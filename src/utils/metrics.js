@@ -26,10 +26,10 @@ export const calculateIndex = (vars, dataArray) => {
 };
 
 export const getRiskColor = (score) => {
-  if (score >= 80) return '#10b981'; // Fortaleza (Green)
-  if (score >= 60) return '#f59e0b'; // Aceptable (Yellow/Orange)
-  if (score >= 40) return '#f97316'; // Riesgo moderado (Orange)
-  return '#ef4444'; // Riesgo alto (Red)
+  if (score >= 80) return '#10b981'; // emerald-500
+  if (score >= 60) return '#f59e0b'; // amber-500
+  if (score >= 40) return '#f59e0b'; // amber-500
+  return '#f43f5e'; // rose-500
 };
 
 export const getRiskLabel = (score) => {
@@ -40,10 +40,10 @@ export const getRiskLabel = (score) => {
 };
 
 export const getRiskBgColorClass = (score) => {
-  if (score >= 80) return 'bg-emerald-100 text-emerald-800'; 
-  if (score >= 60) return 'bg-amber-100 text-amber-800'; 
-  if (score >= 40) return 'bg-orange-100 text-orange-800'; 
-  return 'bg-red-100 text-red-800'; 
+  if (score >= 80) return 'bg-emerald-50 text-emerald-700'; 
+  if (score >= 60) return 'bg-amber-50 text-amber-700'; 
+  if (score >= 40) return 'bg-amber-50 text-amber-700'; 
+  return 'bg-rose-50 text-rose-700'; 
 };
 
 export const QUESTION_MAP = {

@@ -486,7 +486,7 @@ function TheoryContext() {
       {isOpen && (
         <div className="mt-5 pt-5 border-t border-slate-100 text-sm text-slate-600 leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <p>
-            Este dashboard basa sus métricas en la <strong>Teoría de los Dos Factores de Frederick Herzberg</strong>, un estándar global en psicología organizacional. Herzberg postula que la satisfacción y la insatisfacción no son opuestos directos, sino que son generadas por dos grupos distintos de variables que deben gestionarse de forma independiente:
+            Este dashboard basa sus métricas en la Teoría de los Dos Factores de Frederick Herzberg, un estándar global en psicología organizacional. Herzberg postula que la satisfacción y la insatisfacción no son opuestos directos, sino que son generadas por dos grupos distintos de variables que deben gestionarse de forma independiente:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100">
@@ -494,19 +494,19 @@ function TheoryContext() {
                 <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                 <h4 className="font-bold text-emerald-800">1. Factores Motivacionales</h4>
               </div>
-              <p className="text-emerald-700/90 text-justify">Son intrínsecos a la naturaleza del trabajo en sí (Logro, Reconocimiento, Responsabilidad, Crecimiento Profesional). <strong>Su presencia genera verdadera satisfacción y fomenta el compromiso a largo plazo</strong>. Su carencia no genera quejas inmediatas, pero produce empleados estancados y sin iniciativa.</p>
+              <p className="text-emerald-700/90 text-justify">Son intrínsecos a la naturaleza del trabajo en sí (Logro, Reconocimiento, Responsabilidad, Crecimiento Profesional). Su presencia genera verdadera satisfacción y fomenta el compromiso a largo plazo. Su carencia no genera quejas inmediatas, pero produce empleados estancados y sin iniciativa.</p>
             </div>
             <div className="bg-amber-50/50 p-5 rounded-xl border border-amber-100">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-amber-500"></div>
                 <h4 className="font-bold text-amber-800">2. Factores de Higiene</h4>
               </div>
-              <p className="text-amber-700/90 text-justify">Son externos al empleado (Salario, Políticas, Relaciones, Seguridad Laboral, Supervisión). <strong>Su deficiencia causa una profunda insatisfacción y motiva la fuga de talento</strong>. Sin embargo, aunque sean excelentes, los empleados rápidamente los dan por sentado, por lo que no generan motivación real por sí solos.</p>
+              <p className="text-amber-700/90 text-justify">Son externos al empleado (Salario, Políticas, Relaciones, Seguridad Laboral, Supervisión). Su deficiencia causa una profunda insatisfacción y motiva la fuga de talento. Sin embargo, aunque sean excelentes, los empleados rápidamente los dan por sentado, por lo que no generan motivación real por sí solos.</p>
             </div>
           </div>
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mt-2">
             <p className="font-semibold text-slate-800 mb-1">¿Cómo leer estas métricas?</p>
-            <p>A través de la IA se evaluaron 36 variables estandarizadas. Las respuestas se promedian en un índice del <strong>0 al 100</strong>. Valores por encima de 80 representan <strong className="text-emerald-600">Fortalezas</strong>, mientras que índices por debajo de 60 se consideran de <strong className="text-orange-500">Riesgo</strong> y requieren intervención para evitar pérdida de productividad o rotación.</p>
+            <p>A través de la IA se evaluaron 36 variables estandarizadas. Las respuestas se promedian en un índice del 0 al 100. Valores por encima de 80 representan <span className="font-semibold text-emerald-600">Fortalezas</span>, mientras que índices por debajo de 60 se consideran de <span className="font-semibold text-orange-500">Riesgo</span> y requieren intervención para evitar pérdida de productividad o rotación.</p>
           </div>
         </div>
       )}

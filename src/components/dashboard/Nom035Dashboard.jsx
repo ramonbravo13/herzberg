@@ -137,19 +137,19 @@ export default function Nom035Dashboard({ dataArray }) {
                 <p className="text-sm font-bold text-slate-800 mb-1.5 flex items-center gap-2">
                   <Activity size={16} className="text-slate-400" /> Implicaciones del Nivel de Riesgo
                 </p>
-                <p className="text-sm text-slate-600 leading-relaxed font-medium">{hasG3 ? infoG3.implicaciones : infoG2.implicaciones}</p>
+                <p className="text-sm text-slate-600 leading-relaxed">{hasG3 ? infoG3.implicaciones : infoG2.implicaciones}</p>
               </div>
               <div>
                 <p className="text-sm font-bold text-slate-800 mb-1.5 flex items-center gap-2">
                   <Briefcase size={16} className="text-slate-400" /> Recomendaciones y Obligaciones
                 </p>
-                <p className="text-sm text-slate-600 leading-relaxed font-medium">{hasG3 ? infoG3.recomendaciones : infoG2.recomendaciones}</p>
+                <p className="text-sm text-slate-600 leading-relaxed">{hasG3 ? infoG3.recomendaciones : infoG2.recomendaciones}</p>
               </div>
               <div className="bg-red-50/50 p-4 rounded-xl border border-red-100 mt-2">
                 <p className="text-sm font-bold text-red-800 mb-1.5 flex items-center gap-2">
                   <AlertTriangle size={16} className="text-red-600" /> Riesgo de Sanción (STPS)
                 </p>
-                <p className="text-sm text-red-700/90 leading-relaxed font-medium">{hasG3 ? infoG3.sanciones : infoG2.sanciones}</p>
+                <p className="text-sm text-red-700/90 leading-relaxed">{hasG3 ? infoG3.sanciones : infoG2.sanciones}</p>
               </div>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function Nom035Dashboard({ dataArray }) {
           </ChartCard>
 
           <ChartCard title="Dominios Críticos (Focos Rojos)" icon={AlertTriangle} iconColor="text-red-500" iconBg="bg-red-50" className="lg:col-span-1">
-             <p className="text-sm text-slate-600 mb-4 font-medium">
+             <p className="text-sm text-slate-600 mb-4">
                La norma STPS exige realizar programas de intervención a nivel grupal para los siguientes dominios, ya que superan los umbrales permisibles.
              </p>
              

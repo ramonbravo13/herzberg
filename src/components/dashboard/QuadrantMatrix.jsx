@@ -60,8 +60,8 @@ export default function QuadrantMatrix({ dataArray }) {
                   return (
                     <div className="bg-white/95 backdrop-blur-md p-4 border border-slate-100 shadow-xl rounded-xl z-50">
                       <p className="font-bold text-slate-800 mb-2 pb-2 border-b border-slate-100">{data.name}</p>
-                      <p className="text-sm text-slate-600">Higiene: <span className="font-bold text-slate-800">{data.x}%</span></p>
-                      <p className="text-sm text-slate-600 mt-1">Motivación: <span className="font-bold text-slate-800">{data.y}%</span></p>
+                      <p className="text-sm text-slate-600">Higiene: <span className="font-bold text-slate-800">{Number(data.x).toFixed(1)}%</span></p>
+                      <p className="text-sm text-slate-600 mt-1">Motivación: <span className="font-bold text-slate-800">{Number(data.y).toFixed(1)}%</span></p>
                       <p className="text-xs text-slate-400 mt-3 font-medium uppercase tracking-wider">Muestra: {data.size} personas</p>
                     </div>
                   );

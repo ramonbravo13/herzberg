@@ -48,7 +48,7 @@ export default function HierarchyGap({ dataArray }) {
             <YAxis domain={[0, 100]} {...chartTheme.axis} />
             <Tooltip 
               cursor={chartTheme.tooltip.cursor}
-              content={<ChartTooltip formatter={(val) => `${val}%`} />}
+              content={<ChartTooltip formatter={(val) => `${Number(val).toFixed(1)}%`} />}
             />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} iconType="circle" />
             <Bar dataKey="Líderes" fill={chartTheme.colors.primary} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" />

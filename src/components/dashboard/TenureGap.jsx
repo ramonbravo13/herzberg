@@ -63,7 +63,7 @@ export default function TenureGap({ dataArray }) {
                               <div className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" style={{ backgroundColor: p.color }} />
                               <span className="text-slate-600 font-medium">{p.name}</span>
                             </div>
-                            <span className="font-bold text-slate-800">{p.value}%</span>
+                            <span className="font-bold text-slate-800">{Number(p.value).toFixed(1)}%</span>
                           </div>
                         ))}
                       </div>

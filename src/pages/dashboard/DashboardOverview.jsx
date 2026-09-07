@@ -17,7 +17,6 @@ export default function DashboardOverview() {
   const [selectedPeriod, setSelectedPeriod] = useState('active');
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [isRestarting, setIsRestarting] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     setSelectedPeriod('active');
@@ -139,135 +138,89 @@ export default function DashboardOverview() {
   const progressPercent = expectedResponses > 0 ? Math.min(Math.round((totalResponses / expectedResponses) * 100), 100) : 0;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 items-start">
+    <div className="flex flex-col gap-6">
       
-      {/* Sidebar de Periodos (Hover Auto-Expand en Desktop) */}
-      {activeOrg && (
-        <div 
-          className={`flex-shrink-0 transition-all duration-300 ease-in-out overflow-hidden bg-white shadow-sm border border-slate-200 rounded-2xl relative z-20 lg:sticky lg:top-24 ${
-            isSidebarOpen ? 'w-full lg:w-72' : 'w-full lg:w-[72px]'
-          }`}
-          onMouseEnter={() => { if(window.innerWidth >= 1024) setIsSidebarOpen(true); }}
-          onMouseLeave={() => { if(window.innerWidth >= 1024) setIsSidebarOpen(false); }}
-        >
-          {/* Inner container with fixed width to prevent text wrapping during transition */}
-          <div className="p-4 w-full lg:w-72">
-            <button
-              onClick={() => { if(window.innerWidth < 1024) setIsSidebarOpen(!isSidebarOpen); }}
-              className="flex items-center justify-between w-full text-left focus:outline-none gap-4"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg flex-shrink-0 h-10 w-10 flex items-center justify-center">
-                  <Calendar size={20} />
-                </div>
-                <div className={`whitespace-nowrap transition-opacity duration-300 ${!isSidebarOpen ? 'lg:opacity-0 lg:invisible' : 'opacity-100 visible'}`}>
-                  <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Gestión de Periodos</h3>
-                  <p className="text-sm font-medium text-slate-800">
-                    {selectedPeriod === 'active' ? `Periodo ${activeOrg.currentPeriod} (Activo)` : `Periodo ${selectedPeriod}`}
-                  </p>
-                </div>
+      {/* Control Bar Unificada */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-4">
+        
+        {/* Lado izquierdo: Org y Título */}
+        <div className="flex items-center gap-4 flex-1">
+          {user.role === 'empresarial' && activeOrg ? (
+            <div>
+              <h1 className="text-xl font-bold text-slate-800">{activeOrg.name}</h1>
+              <p className="text-sm text-slate-500 font-medium">Resultados de Evaluación</p>
+            </div>
+          ) : (user.role === 'corporativo' || user.role === 'admin') ? (
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg shrink-0">
+                <Users size={20} />
               </div>
-              <ChevronDown size={20} className={`flex-shrink-0 transition-transform text-slate-400 ${isSidebarOpen ? 'rotate-180' : ''} ${!isSidebarOpen ? 'lg:opacity-0 lg:invisible' : 'opacity-100 visible'}`} />
-            </button>
-
-            <div className={`transition-all duration-300 overflow-hidden ${isSidebarOpen ? 'opacity-100 max-h-[800px] mt-4 pt-4 border-t border-slate-100' : 'opacity-0 max-h-0 hidden lg:block'}`}>
-              <div className="whitespace-nowrap">
-                <h3 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Ciclo Actual</h3>
-                <button
-                  onClick={() => { setSelectedPeriod('active'); setIsSidebarOpen(false); }}
-                  className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-colors ${
-                    selectedPeriod === 'active'
-                      ? 'bg-primary text-white shadow-md'
-                      : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
-                  }`}
+              <div className="flex flex-col">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Organización</label>
+                <select
+                  value={selectedOrgId}
+                  onChange={(e) => setSelectedOrgId(e.target.value)}
+                  className="bg-transparent text-sm font-bold text-slate-800 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-8"
                 >
-                  Dashboard Activo (Periodo {activeOrg.currentPeriod})
-                </button>
-
-                {activeOrg.periods && activeOrg.periods.length > 1 && (
-                  <div className="mt-6 pt-6 border-t border-slate-100">
-                    <h3 className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Histórico</h3>
-                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                      {[...activeOrg.periods]
-                        .filter(p => p.id !== activeOrg.currentPeriod)
-                        .sort((a, b) => b.id - a.id)
-                        .map(p => (
-                        <button
-                          key={p.id}
-                          onClick={() => { setSelectedPeriod(p.id); setIsSidebarOpen(false); }}
-                          className={`w-full text-left px-4 py-2.5 rounded-xl text-sm transition-colors ${
-                            selectedPeriod === p.id
-                              ? 'bg-slate-200 text-slate-800 font-bold'
-                              : 'bg-transparent text-slate-600 hover:bg-slate-100'
-                          }`}
-                        >
-                          {p.name}
-                          {p.startDate && <div className="text-xs font-normal opacity-70 mt-0.5">{new Date(p.startDate).toLocaleDateString()} {p.endDate ? `- ${new Date(p.endDate).toLocaleDateString()}` : ''}</div>}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="mt-6 pt-6 border-t border-slate-100">
-                  <button
-                    onClick={() => { setShowRestartConfirm(true); setIsSidebarOpen(false); }}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 text-primary bg-primary/10 hover:bg-primary/20 rounded-xl transition-colors font-medium text-sm"
-                  >
-                    <PlusCircle size={16} />
-                    Iniciar Nuevo Periodo
-                  </button>
-                </div>
+                  <option value="all">Vista Global (Todas)</option>
+                  {organizations.map(org => (
+                    <option key={org.id} value={org.id}>{org.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
-          </div>
+          ) : null}
         </div>
-      )}
+
+        {/* Lado derecho: Periodo y Acciones */}
+        <div className="flex flex-wrap items-center gap-3">
+          {activeOrg && (
+            <div className="flex items-center gap-2 border-r border-slate-200 pr-4 mr-1">
+              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg shrink-0">
+                <Calendar size={18} />
+              </div>
+              <select
+                value={selectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value)}
+                className="bg-transparent text-sm font-semibold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-6"
+              >
+                <option value="active">Activo (Periodo {activeOrg.currentPeriod})</option>
+                {activeOrg.periods && activeOrg.periods
+                  .filter(p => p.id !== activeOrg.currentPeriod)
+                  .sort((a, b) => b.id - a.id)
+                  .map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))
+                }
+              </select>
+            </div>
+          )}
+
+          {activeOrg && (
+            <button
+              onClick={() => setShowRestartConfirm(true)}
+              className="flex items-center gap-2 px-4 h-10 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-100"
+              title="Iniciar Nuevo Periodo"
+            >
+              <PlusCircle size={16} />
+              <span className="hidden sm:inline">Nuevo Periodo</span>
+            </button>
+          )}
+
+          {activeOrg?.evaluation_token && (
+            <button
+              onClick={() => handleCopyLink(activeOrg.evaluation_token)}
+              className="flex items-center gap-2 px-4 h-10 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm"
+            >
+              {copied ? <Check size={16} /> : <LinkIcon size={16} />}
+              <span className="hidden sm:inline">{copied ? '¡Copiado!' : 'Copiar Link del Chatbot'}</span>
+            </button>
+          )}
+        </div>
+      </div>
 
       {/* Contenido Principal */}
-      <div className="flex-1 space-y-6 min-w-0">
-        {(user.role === 'corporativo' || user.role === 'admin') && (
-          <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center gap-4">
-            <label className="font-medium text-slate-700">Seleccionar Organización:</label>
-            <select
-              value={selectedOrgId}
-              onChange={(e) => setSelectedOrgId(e.target.value)}
-              className="px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none min-w-[250px]"
-            >
-              <option value="all">Vista Global (Empresas permitidas)</option>
-              {organizations.map(org => (
-                <option key={org.id} value={org.id}>{org.name}</option>
-              ))}
-            </select>
-            {activeOrg?.evaluation_token && (
-              <button
-                onClick={() => handleCopyLink(activeOrg.evaluation_token)}
-                className="ml-auto flex items-center gap-2 text-sm text-primary bg-primary/10 hover:bg-primary/20 px-4 py-2 rounded-xl transition-colors font-medium"
-              >
-                {copied ? <Check size={16} /> : <LinkIcon size={16} />}
-                {copied ? '¡Copiado!' : 'Copiar Link del Chatbot'}
-              </button>
-            )}
-          </div>
-        )}
-
-        {user.role === 'empresarial' && activeOrg && (
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">{activeOrg.name}</h1>
-              <p className="text-slate-600 mt-1">Resultados de la evaluación de satisfacción laboral.</p>
-            </div>
-            {activeOrg.evaluation_token && (
-              <button
-                onClick={() => handleCopyLink(activeOrg.evaluation_token)}
-                className="flex items-center gap-2 text-sm text-primary bg-primary/10 hover:bg-primary/20 px-4 py-2 rounded-xl transition-colors font-medium"
-              >
-                {copied ? <Check size={16} /> : <LinkIcon size={16} />}
-                {copied ? '¡Copiado!' : 'Copiar Link del Chatbot'}
-              </button>
-            )}
-          </div>
-        )}
+      <div className="space-y-6">
 
         {/* Participation Dashboard */}
         {activeOrg && (
