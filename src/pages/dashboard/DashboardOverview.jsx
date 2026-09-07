@@ -41,8 +41,10 @@ export default function DashboardOverview() {
       }
 
       setOrganizations(orgs);
-      if (orgs.length > 0 && !selectedOrgId) {
-        setSelectedOrgId('all'); // Option to see all combined or just the first one
+      if (orgs.length === 1 && !selectedOrgId) {
+        setSelectedOrgId(orgs[0].id);
+      } else if (orgs.length > 1 && !selectedOrgId) {
+        setSelectedOrgId('all'); // Option to see all combined
       }
     } else if (user.role === 'empresarial') {
       const org = await dbService.getOrganizationById(user.organization_id);
@@ -163,7 +165,9 @@ export default function DashboardOverview() {
                   onChange={(e) => setSelectedOrgId(e.target.value)}
                   className="bg-transparent text-sm font-bold text-slate-800 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-8"
                 >
-                  <option value="all">Vista Global (Todas)</option>
+                  {organizations.length > 1 && (
+                    <option value="all">Vista Global (Todas)</option>
+                  )}
                   {organizations.map(org => (
                     <option key={org.id} value={org.id}>{org.name}</option>
                   ))}
