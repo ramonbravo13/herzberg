@@ -5,6 +5,7 @@ import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import ChartGradients from '../charts/ChartGradients';
 import { chartTheme } from '../charts/theme';
+import { categoryColors, getGradientUrl } from '../../utils/themeColors';
 
 export default function HierarchyGap({ dataArray }) {
   if (!dataArray || dataArray.length < 2) return null;
@@ -53,8 +54,8 @@ export default function HierarchyGap({ dataArray }) {
               content={<ChartTooltip formatter={(val) => `${Number(val).toFixed(1)}%`} />}
             />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} iconType="circle" />
-            <Bar dataKey="Líderes" fill="url(#colorPrimary)" radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
-            <Bar dataKey="Operativos" fill="url(#colorWarning)" radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
+            <Bar dataKey="Líderes" fill={getGradientUrl(categoryColors['Líderes'])} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
+            <Bar dataKey="Operativos" fill={getGradientUrl(categoryColors['Operativos'])} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
           </BarChart>
         </ResponsiveContainer>
       </div>

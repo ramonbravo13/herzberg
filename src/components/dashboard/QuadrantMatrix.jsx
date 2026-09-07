@@ -4,6 +4,7 @@ import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import { chartTheme } from '../charts/theme';
+import { getCategoryColor } from '../../utils/themeColors';
 
 export default function QuadrantMatrix({ dataArray }) {
   if (!dataArray || dataArray.length < 2) return null; // Needs aggregated data to be useful
@@ -29,12 +30,7 @@ export default function QuadrantMatrix({ dataArray }) {
     };
   });
 
-  // Calculate colors based on quadrants (threshold 60)
-  const getDotColor = (x, y) => {
-    if (x >= 60 && y >= 60) return '#10b981'; // Ideal
-    if (x < 60 && y < 60) return '#ef4444'; // Riesgo
-    return '#f59e0b'; // Mixed
-  };
+
 
   return (
     <ChartCard 
@@ -69,19 +65,19 @@ export default function QuadrantMatrix({ dataArray }) {
                 return null;
               }}
             />
-            <Scatter name="Departamentos" data={data} fill="#8884d8" animationDuration={800} animationEasing="ease-out">
+            <Scatter name="Departamentos" data={data} animationDuration={800} animationEasing="ease-out">
               {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={getDotColor(entry.x, entry.y)} className="hover:opacity-80 transition-opacity duration-300" />
+                <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name, index)} className="hover:opacity-80 transition-opacity duration-300" />
               ))}
             </Scatter>
           </ScatterChart>
         </ResponsiveContainer>
 
         {/* Quadrant Labels */}
-        <div className="absolute top-4 right-6 text-emerald-500/40 font-black text-lg pointer-events-none uppercase tracking-widest">Ideal</div>
-        <div className="absolute bottom-10 left-16 text-red-500/40 font-black text-lg pointer-events-none uppercase tracking-widest">Riesgo Fuga</div>
-        <div className="absolute bottom-10 right-6 text-amber-500/40 font-black text-lg pointer-events-none uppercase tracking-widest">Cómodos</div>
-        <div className="absolute top-4 left-16 text-amber-500/40 font-black text-lg pointer-events-none uppercase tracking-widest">Apasionados / Quemados</div>
+        <div className="absolute top-4 right-6 text-slate-300/80 font-black text-lg pointer-events-none uppercase tracking-widest">Ideal</div>
+        <div className="absolute bottom-10 left-16 text-slate-300/80 font-black text-lg pointer-events-none uppercase tracking-widest">Riesgo Fuga</div>
+        <div className="absolute bottom-10 right-6 text-slate-300/80 font-black text-lg pointer-events-none uppercase tracking-widest">Cómodos</div>
+        <div className="absolute top-4 left-16 text-slate-300/80 font-black text-lg pointer-events-none uppercase tracking-widest">Apasionados / Quemados</div>
       </div>
     </ChartCard>
   );

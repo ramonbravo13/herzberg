@@ -18,6 +18,7 @@ import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import ChartGradients from '../charts/ChartGradients';
 import { chartTheme } from '../charts/theme';
+import { getGradientUrl } from '../../utils/themeColors';
 
 export default function Nom035Dashboard({ dataArray }) {
   const [showClinicalModal, setShowClinicalModal] = React.useState(false);
@@ -179,13 +180,7 @@ export default function Nom035Dashboard({ dataArray }) {
                    />
                    <Bar dataKey="score" radius={chartTheme.bar.horizontalRadius} animationDuration={800} animationEasing="ease-out">
                      {catData.map((entry, index) => {
-                        const gradientMap = {
-                          '#10b981': 'url(#colorSuccess)',
-                          '#f59e0b': 'url(#colorWarning)',
-                          '#f43f5e': 'url(#colorDanger)'
-                        };
-                        const gradient = gradientMap[entry.hex] || entry.hex;
-                        return <Cell key={`cell-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
+                        return <Cell key={`cell-${index}`} fill={getGradientUrl(entry.hex)} className="hover:opacity-80 transition-opacity duration-300" />;
                      })}
                    </Bar>
                  </BarChart>

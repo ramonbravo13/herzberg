@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
-import { calculateIndex, getRiskColor, getRiskLabel, INDICES_CONFIG } from '../utils/metrics';
+import { calculateIndex, getRiskLabel, INDICES_CONFIG } from '../utils/metrics';
+import { categoryColors, getCategoryColor, getGradientColor, globalPalette } from '../utils/themeColors';
 import TopRisks from './dashboard/TopRisks';
 import QuadrantMatrix from './dashboard/QuadrantMatrix';
 import Heatmap from './dashboard/Heatmap';
@@ -28,9 +29,9 @@ export default function Dashboard({ data }) {
 
   const isAggregated = true; // Siempre mostrar gráficos organizacionales, incluso si hay 1 sola respuesta
 
-  const chartData = INDICES_CONFIG.map(ind => {
+  const chartData = INDICES_CONFIG.map((ind, idx) => {
     const score = calculateIndex(ind.vars, dataArray);
-    return { name: ind.name, score, fill: getRiskColor(score) };
+    return { name: ind.name, score, fill: getCategoryColor(ind.name, idx) };
   });
 
   const satisfaccionScore = calculateIndex(['satisfaccion_global'], dataArray);
@@ -95,7 +96,6 @@ export default function Dashboard({ data }) {
             score={satisfaccionScore} 
             subtitle="Felicidad general" 
             icon={Smile} 
-            colorClass="emerald"
             onClick={() => setSelectedMetric('satisfaccion')} 
           />
           <ScoreCard 
@@ -103,7 +103,6 @@ export default function Dashboard({ data }) {
             score={compromisoScore} 
             subtitle="Sentido de pertenencia" 
             icon={Target}
-            colorClass="indigo"
             onClick={() => setSelectedMetric('compromiso')} 
           />
           <ScoreCard 
@@ -111,8 +110,6 @@ export default function Dashboard({ data }) {
             score={rotacionRiesgo} 
             subtitle="Probabilidad de salida"
             icon={TrendingUp}
-            colorClass={rotacionRiesgo > 40 ? "red" : "amber"}
-            inverseRisk={true} 
             onClick={() => setSelectedMetric('rotacion')} 
           />
           <ScoreCard 
@@ -120,7 +117,6 @@ export default function Dashboard({ data }) {
             score={enpsScore} 
             subtitle="Lealtad del empleado"
             icon={Users}
-            colorClass="blue"
             onClick={() => setSelectedMetric('enps')} 
           />
         </div>
@@ -133,10 +129,7 @@ export default function Dashboard({ data }) {
               icon={Activity}
             >
               <div className="mb-4 text-center max-w-3xl mx-auto flex flex-wrap justify-center gap-6">
-                <span className="text-sm"><strong className="text-emerald-500 font-bold">80-100:</strong> Fortaleza</span>
-                <span className="text-sm"><strong className="text-amber-500 font-bold">60-79:</strong> Aceptable</span>
-                <span className="text-sm"><strong className="text-orange-500 font-bold">40-59:</strong> Riesgo</span>
-                <span className="text-sm"><strong className="text-red-500 font-bold">0-39:</strong> Riesgo Alto</span>
+                <span className="text-sm text-slate-500">Métricas analizadas según factores específicos de Herzberg</span>
               </div>
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -163,15 +156,8 @@ export default function Dashboard({ data }) {
                       animationEasing="ease-out"
                     >
                       {chartData.map((entry, index) => {
-                        // Use gradient if possible, else fallback to fill color
-                        const gradientMap = {
-                          '#10b981': 'url(#colorSuccess)',
-                          '#f59e0b': 'url(#colorWarning)',
-                          '#ef4444': 'url(#colorDanger)',
-                          '#6366f1': 'url(#colorPrimary)',
-                          '#3b82f6': 'url(#colorInfo)'
-                        };
-                        const gradient = gradientMap[entry.fill] || entry.fill;
+                        const globalIdx = globalPalette.indexOf(entry.fill);
+                        const gradient = globalIdx !== -1 ? `url(#gradient-${globalIdx})` : entry.fill;
                         return <Cell key={`cell-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
                       })}
                     </Bar>
@@ -194,9 +180,9 @@ export default function Dashboard({ data }) {
                       <ChartGradients />
                       <Pie
                         data={[
-                          { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: '#34d399' },
-                          { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: '#fbbf24' },
-                          { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: '#f87171' }
+                          { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: categoryColors['Promotores'] },
+                          { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: categoryColors['Pasivos'] },
+                          { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: categoryColors['Detractores'] }
                         ].filter(d => d.value > 0)}
                         cx="50%"
                         cy="50%"
@@ -335,36 +321,27 @@ export default function Dashboard({ data }) {
   );
 }
 
-function ScoreCard({ title, score, subtitle, icon: Icon, colorClass = "indigo", inverseRisk = false, onClick }) {
-  let riskColor = getRiskColor(score);
-  if (inverseRisk) {
-    riskColor = getRiskColor(100 - score);
-  }
-
-  // Map colorClass to tailwind classes for the pastel circle
-  const bgColors = {
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100",
-    red: "bg-red-50 text-red-600 border-red-100",
-    amber: "bg-amber-50 text-amber-600 border-amber-100",
-    blue: "bg-blue-50 text-blue-600 border-blue-100"
-  };
-  
-  const iconStyle = bgColors[colorClass] || bgColors.indigo;
+function ScoreCard({ title, score, subtitle, icon: Icon, onClick }) {
+  const hexColor = getCategoryColor(title);
+  const iconBg = getGradientColor(hexColor, 0.1);
+  const iconBorder = getGradientColor(hexColor, 0.2);
 
   return (
     <div 
       onClick={onClick}
       className="bg-white p-5 rounded-2xl shadow-sm hover:shadow-md border border-slate-200/60 cursor-pointer transition-all duration-300 hover:-translate-y-1 active:scale-95 flex items-center gap-4 group"
     >
-      <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-110 ${iconStyle}`}>
+      <div 
+        className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-110"
+        style={{ backgroundColor: iconBg, color: hexColor, borderColor: iconBorder }}
+      >
         {Icon && <Icon size={24} strokeWidth={2.5} />}
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="text-slate-800 text-sm font-bold truncate">{title}</h3>
         {subtitle && <p className="text-slate-500 text-xs font-medium truncate mt-0.5">{subtitle}</p>}
       </div>
-      <div className="text-2xl font-black tracking-tight shrink-0" style={{ color: riskColor }}>
+      <div className="text-2xl font-black tracking-tight shrink-0" style={{ color: hexColor }}>
         <AnimatedNumber value={score} duration={1.5} />
       </div>
     </div>

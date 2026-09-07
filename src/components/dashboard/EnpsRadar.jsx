@@ -4,6 +4,7 @@ import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import { chartTheme } from '../charts/theme';
+import { categoryColors, getGradientColor } from '../../utils/themeColors';
 
 export default function EnpsRadar({ dataArray }) {
   const [selectedSegment, setSelectedSegment] = useState('all');
@@ -60,36 +61,33 @@ export default function EnpsRadar({ dataArray }) {
           <button 
             onClick={() => toggleSegment('promoters')}
             className={`px-4 py-1.5 rounded-full transition-all duration-300 border flex items-center gap-2 focus:outline-none active:scale-95 ${
-              isVisible('promoters')
-                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm' 
-                : 'bg-white text-slate-400 border-slate-100 opacity-50 hover:opacity-100 hover:bg-slate-50'
+              !isVisible('promoters') ? 'bg-white text-slate-400 border-slate-100 opacity-50 hover:opacity-100 hover:bg-slate-50' : ''
             }`}
+            style={isVisible('promoters') ? { backgroundColor: getGradientColor(categoryColors['Promotores'], 0.1), color: categoryColors['Promotores'], borderColor: getGradientColor(categoryColors['Promotores'], 0.2) } : {}}
           >
-            <div className={`w-2 h-2 rounded-full ${isVisible('promoters') ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+            <div className={`w-2 h-2 rounded-full`} style={{ backgroundColor: isVisible('promoters') ? categoryColors['Promotores'] : '#cbd5e1' }}></div>
             Promotores ({promotores.length})
           </button>
 
           <button 
             onClick={() => toggleSegment('passives')}
             className={`px-4 py-1.5 rounded-full transition-all duration-300 border flex items-center gap-2 focus:outline-none active:scale-95 ${
-              isVisible('passives')
-                ? 'bg-amber-50 text-amber-700 border-amber-200 shadow-sm' 
-                : 'bg-white text-slate-400 border-slate-100 opacity-50 hover:opacity-100 hover:bg-slate-50'
+              !isVisible('passives') ? 'bg-white text-slate-400 border-slate-100 opacity-50 hover:opacity-100 hover:bg-slate-50' : ''
             }`}
+            style={isVisible('passives') ? { backgroundColor: getGradientColor(categoryColors['Pasivos'], 0.1), color: categoryColors['Pasivos'], borderColor: getGradientColor(categoryColors['Pasivos'], 0.2) } : {}}
           >
-            <div className={`w-2 h-2 rounded-full ${isVisible('passives') ? 'bg-amber-500' : 'bg-slate-300'}`}></div>
+            <div className={`w-2 h-2 rounded-full`} style={{ backgroundColor: isVisible('passives') ? categoryColors['Pasivos'] : '#cbd5e1' }}></div>
             Pasivos ({pasivos.length})
           </button>
 
           <button 
             onClick={() => toggleSegment('detractors')}
             className={`px-4 py-1.5 rounded-full transition-all duration-300 border flex items-center gap-2 focus:outline-none active:scale-95 ${
-              isVisible('detractors')
-                ? 'bg-red-50 text-red-700 border-red-200 shadow-sm' 
-                : 'bg-white text-slate-400 border-slate-100 opacity-50 hover:opacity-100 hover:bg-slate-50'
+              !isVisible('detractors') ? 'bg-white text-slate-400 border-slate-100 opacity-50 hover:opacity-100 hover:bg-slate-50' : ''
             }`}
+            style={isVisible('detractors') ? { backgroundColor: getGradientColor(categoryColors['Detractores'], 0.1), color: categoryColors['Detractores'], borderColor: getGradientColor(categoryColors['Detractores'], 0.2) } : {}}
           >
-            <div className={`w-2 h-2 rounded-full ${isVisible('detractors') ? 'bg-red-500' : 'bg-slate-300'}`}></div>
+            <div className={`w-2 h-2 rounded-full`} style={{ backgroundColor: isVisible('detractors') ? categoryColors['Detractores'] : '#cbd5e1' }}></div>
             Detractores ({detractores.length})
           </button>
         </div>
@@ -103,13 +101,13 @@ export default function EnpsRadar({ dataArray }) {
             <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{fontSize: 10, fill: '#94a3b8'}} tickCount={6} axisLine={false} />
             <Tooltip content={<ChartTooltip />} cursor={chartTheme.tooltip.cursor} />
             {isVisible('promoters') && (
-              <Radar name="Promotores" dataKey="Promotores" stroke={chartTheme.colors.success} fill={chartTheme.colors.success} fillOpacity={0.15} strokeWidth={2} animationDuration={800} animationEasing="ease-out" />
+              <Radar name="Promotores" dataKey="Promotores" stroke={categoryColors['Promotores']} fill={categoryColors['Promotores']} fillOpacity={0.15} strokeWidth={2} animationDuration={800} animationEasing="ease-out" />
             )}
             {isVisible('passives') && (
-              <Radar name="Pasivos" dataKey="Pasivos" stroke={chartTheme.colors.warning} fill={chartTheme.colors.warning} fillOpacity={0.1} strokeWidth={2} animationDuration={800} animationEasing="ease-out" />
+              <Radar name="Pasivos" dataKey="Pasivos" stroke={categoryColors['Pasivos']} fill={categoryColors['Pasivos']} fillOpacity={0.1} strokeWidth={2} animationDuration={800} animationEasing="ease-out" />
             )}
             {isVisible('detractors') && (
-              <Radar name="Detractores" dataKey="Detractores" stroke={chartTheme.colors.danger} fill={chartTheme.colors.danger} fillOpacity={0.15} strokeWidth={2} animationDuration={800} animationEasing="ease-out" />
+              <Radar name="Detractores" dataKey="Detractores" stroke={categoryColors['Detractores']} fill={categoryColors['Detractores']} fillOpacity={0.15} strokeWidth={2} animationDuration={800} animationEasing="ease-out" />
             )}
           </RadarChart>
         </ResponsiveContainer>

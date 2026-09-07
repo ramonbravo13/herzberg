@@ -1,13 +1,15 @@
 import React from 'react';
 import ChartCard from '../charts/ChartCard';
 
+import { globalPalette } from '../../utils/themeColors';
+
 const THEMES = [
-  { id: 'salario', label: 'Salario y Compensación', keywords: ['salario', 'sueldo', 'pago', 'dinero'], color: 'bg-green-500' },
-  { id: 'crecimiento', label: 'Crecimiento Profesional', keywords: ['crecimiento', 'promocion', 'ascenso', 'oportunidad', 'carrera'], color: 'bg-blue-500' },
-  { id: 'clima', label: 'Clima Laboral y Equipo', keywords: ['ambiente', 'compañero', 'equipo', 'clima'], color: 'bg-emerald-500' },
-  { id: 'carga', label: 'Carga Laboral / Horarios', keywords: ['carga', 'horario', 'flexibilidad', 'tiempo', 'estrés'], color: 'bg-orange-500' },
-  { id: 'liderazgo', label: 'Liderazgo y Comunicación', keywords: ['jefe', 'líder', 'liderazgo', 'comunicación', 'gerente'], color: 'bg-purple-500' },
-  { id: 'instalaciones', label: 'Instalaciones y Recursos', keywords: ['instalación', 'instalaciones', 'herramienta', 'recurso', 'equipo'], color: 'bg-slate-500' },
+  { id: 'salario', label: 'Salario y Compensación', keywords: ['salario', 'sueldo', 'pago', 'dinero'], hex: globalPalette[0] },
+  { id: 'crecimiento', label: 'Crecimiento Profesional', keywords: ['crecimiento', 'promocion', 'ascenso', 'oportunidad', 'carrera'], hex: globalPalette[1] },
+  { id: 'clima', label: 'Clima Laboral y Equipo', keywords: ['ambiente', 'compañero', 'equipo', 'clima'], hex: globalPalette[2] },
+  { id: 'carga', label: 'Carga Laboral / Horarios', keywords: ['carga', 'horario', 'flexibilidad', 'tiempo', 'estrés'], hex: globalPalette[3] },
+  { id: 'liderazgo', label: 'Liderazgo y Comunicación', keywords: ['jefe', 'líder', 'liderazgo', 'comunicación', 'gerente'], hex: globalPalette[4] },
+  { id: 'instalaciones', label: 'Instalaciones y Recursos', keywords: ['instalación', 'instalaciones', 'herramienta', 'recurso', 'equipo'], hex: globalPalette[5] },
 ];
 
 export default function ThematicAnalysis({ dataArray }) {
@@ -71,7 +73,7 @@ export default function ThematicAnalysis({ dataArray }) {
                 <span className="text-slate-500 font-medium text-xs tracking-wide">{res.pct}% <span className="opacity-60 font-normal">({res.count} menciones)</span></span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-2.5 shadow-inner overflow-hidden">
-                <div className={`${res.color} h-full rounded-full transition-all duration-1000 ease-out group-hover:brightness-110`} style={{ width: `${res.pct}%` }}></div>
+                <div className={`h-full rounded-full transition-all duration-1000 ease-out group-hover:brightness-110`} style={{ width: `${res.pct}%`, backgroundColor: res.hex }}></div>
               </div>
             </div>
           ))}

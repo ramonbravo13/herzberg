@@ -123,35 +123,35 @@ export const getRiskLevelG3 = (score) => {
 export const getRiskColorAndAction = (level) => {
   switch(level) {
     case 'Nulo': return { 
-      color: 'text-emerald-700', hex: '#10b981', bg: 'bg-emerald-50', 
+      color: categoryColors['Nulo'], hex: categoryColors['Nulo'], bg: getGradientColor(categoryColors['Nulo'], 0.1), 
       action: 'Riesgo despreciable. No se requieren medidas adicionales.',
       implicaciones: 'El entorno de trabajo está libre de factores de riesgo psicosocial perjudiciales a nivel sistémico.',
       recomendaciones: 'No se requieren medidas correctivas inmediatas. El objetivo es mantener la Política de Prevención vigente y continuar fomentando un entorno organizacional favorable.',
       sanciones: 'Nulo. Ante una inspección de la STPS, solo se verificará el cumplimiento documental (tener la política por escrito y haber aplicado los cuestionarios correspondientes).'
     };
     case 'Bajo': return { 
-      color: 'text-emerald-700', hex: '#10b981', bg: 'bg-emerald-50', 
+      color: categoryColors['Bajo'], hex: categoryColors['Bajo'], bg: getGradientColor(categoryColors['Bajo'], 0.1), 
       action: 'Difusión reforzada de la política de prevención.',
       implicaciones: 'Existen algunos factores de riesgo aislados que, por el momento, no representan una amenaza significativa para la salud mental y emocional del colectivo.',
       recomendaciones: 'Es necesario fortalecer la difusión de la Política de Prevención de Riesgos Psicosociales y los programas existentes. Mantener una comunicación constante sobre las vías de denuncia.',
       sanciones: 'Muy bajo. La autoridad exigirá únicamente comprobar que la política y las medidas preventivas se difunden correctamente entre los trabajadores.'
     };
     case 'Medio': return { 
-      color: 'text-amber-700', hex: '#f59e0b', bg: 'bg-amber-50', 
+      color: categoryColors['Medio'], hex: categoryColors['Medio'], bg: getGradientColor(categoryColors['Medio'], 0.1), 
       action: 'Revisión de política y programas de prevención (Nivel Organizacional).',
       implicaciones: 'Presencia moderada de factores de riesgo. El clima laboral empieza a verse afectado, existiendo probabilidad de desgaste en ciertas áreas de la empresa si no se actúa.',
       recomendaciones: 'Obligación de revisar la política de prevención. Se deben actualizar los programas de capacitación y establecer medidas preventivas a Nivel Organizacional, involucrando a los líderes.',
       sanciones: 'Moderado. En caso de inspección, la STPS solicitará evidencia de los programas de prevención e intervención instaurados a partir de esta evaluación. Omisiones pueden derivar en multas.'
     };
     case 'Alto': return { 
-      color: 'text-rose-700', hex: '#f43f5e', bg: 'bg-rose-50', 
+      color: categoryColors['Alto'], hex: categoryColors['Alto'], bg: getGradientColor(categoryColors['Alto'], 0.1), 
       action: 'Programa de intervención focalizado (Nivel Grupal).',
       implicaciones: 'Los factores de riesgo psicosocial son evidentes y sistémicos. Existe alta probabilidad de estrés crónico (burnout), rotación de personal, o violencia laboral en áreas específicas.',
       recomendaciones: 'Obligación normativa de implementar un "Programa de Intervención" formal y documentado. Requiere campañas de sensibilización, capacitación obligatoria a jefes, y modificación de procesos (cargas de trabajo, turnos).',
       sanciones: 'Alto. Las multas por incumplimiento en este nivel van de 250 a 5,000 UMAs (aprox. $27,142 a $542,850 MXN) por cada trabajador afectado o infracción no subsanada.'
     };
     case 'Muy Alto': return { 
-      color: 'text-rose-700', hex: '#f43f5e', bg: 'bg-rose-50', 
+      color: categoryColors['Muy Alto'], hex: categoryColors['Muy Alto'], bg: getGradientColor(categoryColors['Muy Alto'], 0.1), 
       action: 'Intervención Urgente y canalización (Nivel Individual y Organizacional).',
       implicaciones: 'Entorno de trabajo altamente tóxico o peligroso. Los empleados están sometidos a niveles de estrés que dañan su salud física y psicológica de forma inminente.',
       recomendaciones: 'Intervención de emergencia. Rediseño inmediato de puestos, cambio de liderazgos o procesos. Además, se requieren evaluaciones clínicas y psicológicas específicas al personal expuesto (Numerales 8.1 y 8.2).',

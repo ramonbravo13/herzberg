@@ -1,23 +1,18 @@
+import { globalPalette, categoryColors } from '../../utils/themeColors';
+
 export const chartTheme = {
   colors: {
-    primary: '#6366f1', // indigo-500
-    secondary: '#14b8a6', // teal-500
-    success: '#10b981', // emerald-500
-    warning: '#f59e0b', // amber-500
-    danger: '#ef4444', // red-500
-    info: '#3b82f6', // blue-500
-    slate: '#64748b', // slate-500
+    // Map existing references to the new strict global palette to prevent breaking missing variables
+    primary: globalPalette[0], // Blue
+    secondary: globalPalette[1], // Purple
+    success: categoryColors['Promotores'], // Green (mapped for specific uses, but components should use categoryColors)
+    warning: categoryColors['Pasivos'], // Yellow
+    danger: categoryColors['Detractores'], // Pink
+    info: globalPalette[0], // Blue
+    slate: '#64748b', // Keeping slate for grid and text
+    
     // A modern palette for categorical data
-    categorical: [
-      '#6366f1', // indigo
-      '#10b981', // emerald
-      '#f59e0b', // amber
-      '#ef4444', // red
-      '#8b5cf6', // violet
-      '#ec4899', // pink
-      '#0ea5e9', // sky
-      '#f97316', // orange
-    ],
+    categorical: globalPalette,
   },
   axis: {
     tick: { fill: '#94a3b8', fontSize: 12, fontWeight: 500, fontFamily: 'inherit' }, // slate-400

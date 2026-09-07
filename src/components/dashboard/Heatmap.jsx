@@ -1,5 +1,6 @@
 import React from 'react';
-import { calculateIndex, INDICES_CONFIG, getRiskBgColorClass } from '../../utils/metrics';
+import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
+import { getCategoryColor, getGradientColor } from '../../utils/themeColors';
 import ChartCard from '../charts/ChartCard';
 
 export default function Heatmap({ dataArray }) {
@@ -43,10 +44,13 @@ export default function Heatmap({ dataArray }) {
                   <td className="p-4 text-slate-400 text-sm font-medium text-center">{arr.length}</td>
                   {INDICES_CONFIG.map(ind => {
                     const score = calculateIndex(ind.vars, arr);
-                    const bgClass = getRiskBgColorClass(score);
+                    const hexColor = getCategoryColor(ind.name, INDICES_CONFIG.indexOf(ind));
                     return (
                       <td key={ind.name} className="p-2 text-center">
-                        <div className={`py-2 px-3 rounded-xl font-bold text-sm ${bgClass} shadow-sm group-hover:shadow-md transition-shadow`}>
+                        <div 
+                          className="py-2 px-3 rounded-xl font-bold text-sm shadow-sm group-hover:shadow-md transition-shadow border" 
+                          style={{ backgroundColor: getGradientColor(hexColor, 0.1), color: hexColor, borderColor: getGradientColor(hexColor, 0.2) }}
+                        >
                           {score}%
                         </div>
                       </td>

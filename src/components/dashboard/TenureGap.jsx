@@ -5,6 +5,7 @@ import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import ChartGradients from '../charts/ChartGradients';
 import { chartTheme } from '../charts/theme';
+import { categoryColors, getGradientUrl } from '../../utils/themeColors';
 
 // Order definition for tenure sorting
 const TENURE_ORDER = {
@@ -77,8 +78,8 @@ export default function TenureGap({ dataArray }) {
               }}
             />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} iconType="circle" />
-            <Bar dataKey="satisfaccion" name="Satisfacción Global" fill="url(#colorInfo)" radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
-            <Bar dataKey="riesgoRotacion" name="Riesgo de Rotación" fill="url(#colorDanger)" radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
+            <Bar dataKey="satisfaccion" name="Satisfacción Global" fill={getGradientUrl(categoryColors['satisfaccion'])} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
+            <Bar dataKey="riesgoRotacion" name="Riesgo de Rotación" fill={getGradientUrl(categoryColors['riesgoRotacion'])} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
           </BarChart>
         </ResponsiveContainer>
       </div>
