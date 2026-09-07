@@ -14,9 +14,11 @@ import RetentionMatrix from './dashboard/RetentionMatrix';
 import Nom035Dashboard from './dashboard/Nom035Dashboard';
 import ChartCard from './charts/ChartCard';
 import ChartTooltip from './charts/ChartTooltip';
+import ChartGradients from './charts/ChartGradients';
 import { chartTheme } from './charts/theme';
 import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
 import { PieChart, Pie, Cell as PieCell } from 'recharts';
+import AnimatedNumber from './ui/AnimatedNumber';
 
 export default function Dashboard({ data }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -51,7 +53,7 @@ export default function Dashboard({ data }) {
   const mejoras = dataArray.map(d => d.comentarios?.mejora).filter(Boolean).slice(0, 3);
 
   return (
-    <div className="p-6 bg-slate-50 min-h-screen">
+    <div className="p-6 bg-slate-50/50 min-h-screen">
       <div className="max-w-6xl mx-auto space-y-8">
         
         <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -139,7 +141,8 @@ export default function Dashboard({ data }) {
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} />
+                    <ChartGradients />
+                    <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
                     <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
                     <YAxis dataKey="name" type="category" width={150} {...chartTheme.axis} />
                     <Tooltip 
@@ -156,10 +159,21 @@ export default function Dashboard({ data }) {
                       radius={chartTheme.bar.horizontalRadius}
                       cursor="pointer"
                       onClick={(data) => setSelectedMetric(data.name)}
+                      animationDuration={800}
+                      animationEasing="ease-out"
                     >
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.fill} className="hover:opacity-80 transition-opacity duration-300" />
-                      ))}
+                      {chartData.map((entry, index) => {
+                        // Use gradient if possible, else fallback to fill color
+                        const gradientMap = {
+                          '#10b981': 'url(#colorSuccess)',
+                          '#f59e0b': 'url(#colorWarning)',
+                          '#ef4444': 'url(#colorDanger)',
+                          '#6366f1': 'url(#colorPrimary)',
+                          '#3b82f6': 'url(#colorInfo)'
+                        };
+                        const gradient = gradientMap[entry.fill] || entry.fill;
+                        return <Cell key={`cell-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -177,6 +191,7 @@ export default function Dashboard({ data }) {
                 <div className="h-[250px] w-full relative">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
+                      <ChartGradients />
                       <Pie
                         data={[
                           { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: '#34d399' },
@@ -190,6 +205,8 @@ export default function Dashboard({ data }) {
                         paddingAngle={2}
                         dataKey="value"
                         stroke="none"
+                        animationDuration={800}
+                        animationEasing="ease-out"
                       >
                         {
                           [
@@ -212,7 +229,9 @@ export default function Dashboard({ data }) {
                   </ResponsiveContainer>
                   {/* Central KPI */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
-                    <span className="text-4xl font-black text-slate-800 tracking-tight">{enpsScore}</span>
+                    <span className="text-4xl font-black text-slate-800 tracking-tight">
+                      <AnimatedNumber value={enpsScore} duration={2} />
+                    </span>
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">eNPS</span>
                   </div>
                 </div>
@@ -336,7 +355,7 @@ function ScoreCard({ title, score, subtitle, icon: Icon, colorClass = "indigo", 
   return (
     <div 
       onClick={onClick}
-      className="bg-white p-5 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] border border-slate-100/80 cursor-pointer transition-all duration-300 active:scale-[0.98] flex items-center gap-4 group"
+      className="bg-white p-5 rounded-2xl shadow-sm hover:shadow-md border border-slate-200/60 cursor-pointer transition-all duration-300 hover:-translate-y-1 active:scale-95 flex items-center gap-4 group"
     >
       <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border shadow-sm transition-transform group-hover:scale-110 ${iconStyle}`}>
         {Icon && <Icon size={24} strokeWidth={2.5} />}
@@ -346,7 +365,7 @@ function ScoreCard({ title, score, subtitle, icon: Icon, colorClass = "indigo", 
         {subtitle && <p className="text-slate-500 text-xs font-medium truncate mt-0.5">{subtitle}</p>}
       </div>
       <div className="text-2xl font-black tracking-tight shrink-0" style={{ color: riskColor }}>
-        {score}
+        <AnimatedNumber value={score} duration={1.5} />
       </div>
     </div>
   );

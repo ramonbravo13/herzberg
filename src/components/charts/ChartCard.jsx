@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 export default function ChartCard({ 
   title, 
@@ -12,7 +13,13 @@ export default function ChartCard({
   className = ""
 }) {
   return (
-    <div className={`bg-white p-6 rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)] border border-slate-100/60 transition-all duration-300 flex flex-col h-full ${className}`}>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-20px" }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className={`bg-white p-6 rounded-2xl shadow-sm hover:shadow-md border border-slate-200/60 hover:-translate-y-1 transition-all duration-300 flex flex-col h-full ${className}`}
+    >
       {(title || Icon || action) && (
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-start gap-3">
@@ -37,6 +44,6 @@ export default function ChartCard({
           {footer}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -16,6 +16,7 @@ import { AlertTriangle, ShieldCheck, Stethoscope, Briefcase, Activity } from 'lu
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
+import ChartGradients from '../charts/ChartGradients';
 import { chartTheme } from '../charts/theme';
 
 export default function Nom035Dashboard({ dataArray }) {
@@ -163,7 +164,8 @@ export default function Nom035Dashboard({ dataArray }) {
              <div className="h-[350px]">
                <ResponsiveContainer width="100%" height="100%">
                  <BarChart data={catData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-                   <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} />
+                   <ChartGradients />
+                   <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
                    <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
                    <YAxis dataKey="name" type="category" width={140} {...chartTheme.axis} />
                    <Tooltip 
@@ -175,10 +177,16 @@ export default function Nom035Dashboard({ dataArray }) {
                         labelFormatter={() => null}
                      />}
                    />
-                   <Bar dataKey="score" radius={chartTheme.bar.horizontalRadius}>
-                     {catData.map((entry, index) => (
-                       <Cell key={`cell-${index}`} fill={entry.hex} className="hover:opacity-80 transition-opacity duration-300" />
-                     ))}
+                   <Bar dataKey="score" radius={chartTheme.bar.horizontalRadius} animationDuration={800} animationEasing="ease-out">
+                     {catData.map((entry, index) => {
+                        const gradientMap = {
+                          '#10b981': 'url(#colorSuccess)',
+                          '#f59e0b': 'url(#colorWarning)',
+                          '#f43f5e': 'url(#colorDanger)'
+                        };
+                        const gradient = gradientMap[entry.hex] || entry.hex;
+                        return <Cell key={`cell-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
+                     })}
                    </Bar>
                  </BarChart>
                </ResponsiveContainer>

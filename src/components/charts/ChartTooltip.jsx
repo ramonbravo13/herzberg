@@ -3,9 +3,9 @@ import React from 'react';
 export default function ChartTooltip({ active, payload, label, formatter, labelFormatter, customTitle }) {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/95 backdrop-blur-md p-4 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.08)] rounded-xl z-50 min-w-[150px] animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-slate-900/95 backdrop-blur-md p-4 border border-slate-700 shadow-2xl rounded-xl z-50 min-w-[150px] animate-in fade-in zoom-in-95 duration-200">
         {(label || customTitle) && (
-          <div className="text-sm font-semibold text-slate-800 mb-2 pb-2 border-b border-slate-100">
+          <div className="text-sm font-semibold text-slate-100 mb-2 pb-2 border-b border-slate-700/50">
             {customTitle || (labelFormatter ? labelFormatter(label) : label)}
           </div>
         )}
@@ -22,11 +22,11 @@ export default function ChartTooltip({ active, payload, label, formatter, labelF
                     className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" 
                     style={{ backgroundColor: entry.color || entry.fill || '#cbd5e1' }} 
                   />
-                  <span className="text-slate-600 font-medium">
+                  <span className="text-slate-300 font-medium">
                     {entry.name}
                   </span>
                 </div>
-                <span className="font-bold text-slate-800">
+                <span className="font-bold text-white">
                   {displayValue}
                 </span>
               </div>

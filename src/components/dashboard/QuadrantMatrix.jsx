@@ -44,7 +44,7 @@ export default function QuadrantMatrix({ dataArray }) {
       <div className="h-[400px] relative mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-            <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} opacity={0.8} />
+            <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} opacity={0.3} />
             <XAxis type="number" dataKey="x" name="Higiene" domain={[0, 100]} {...chartTheme.axis} label={{ value: 'Índice Higiene (0-100)', position: 'bottom', offset: 0, fontSize: 12, fill: '#64748b' }} />
             <YAxis type="number" dataKey="y" name="Motivación" domain={[0, 100]} {...chartTheme.axis} label={{ value: 'Índice Motivacional (0-100)', angle: -90, position: 'left', offset: 0, fontSize: 12, fill: '#64748b' }} />
             
@@ -69,7 +69,7 @@ export default function QuadrantMatrix({ dataArray }) {
                 return null;
               }}
             />
-            <Scatter name="Departamentos" data={data} fill="#8884d8">
+            <Scatter name="Departamentos" data={data} fill="#8884d8" animationDuration={800} animationEasing="ease-out">
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={getDotColor(entry.x, entry.y)} className="hover:opacity-80 transition-opacity duration-300" />
               ))}

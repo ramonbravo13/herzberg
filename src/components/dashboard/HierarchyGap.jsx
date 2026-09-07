@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
+import ChartGradients from '../charts/ChartGradients';
 import { chartTheme } from '../charts/theme';
 
 export default function HierarchyGap({ dataArray }) {
@@ -43,7 +44,8 @@ export default function HierarchyGap({ dataArray }) {
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} vertical={false} />
+            <ChartGradients />
+            <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} vertical={false} strokeOpacity={0.4} />
             <XAxis dataKey="name" {...chartTheme.axis} />
             <YAxis domain={[0, 100]} {...chartTheme.axis} />
             <Tooltip 
@@ -51,8 +53,8 @@ export default function HierarchyGap({ dataArray }) {
               content={<ChartTooltip formatter={(val) => `${Number(val).toFixed(1)}%`} />}
             />
             <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '20px' }} iconType="circle" />
-            <Bar dataKey="Líderes" fill={chartTheme.colors.primary} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" />
-            <Bar dataKey="Operativos" fill={chartTheme.colors.warning} radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" />
+            <Bar dataKey="Líderes" fill="url(#colorPrimary)" radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
+            <Bar dataKey="Operativos" fill="url(#colorWarning)" radius={chartTheme.bar.radius} className="hover:opacity-80 transition-opacity duration-300" animationDuration={800} animationEasing="ease-out" />
           </BarChart>
         </ResponsiveContainer>
       </div>

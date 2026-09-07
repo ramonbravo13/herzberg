@@ -57,7 +57,7 @@ export default function RetentionMatrix({ dataArray }) {
       <div className="h-[400px] relative mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-            <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} opacity={0.8} />
+            <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} opacity={0.3} />
             <XAxis type="number" dataKey="x" name="Satisfacción" domain={[1, 5]} tickCount={5} {...chartTheme.axis} label={{ value: 'Satisfacción Global (1-5)', position: 'bottom', offset: 0, fontSize: 12, fill: '#64748b' }} />
             <YAxis type="number" dataKey="y" name="Permanencia" domain={[1, 5]} tickCount={5} {...chartTheme.axis} label={{ value: 'Intención Permanencia (1-5)', angle: -90, position: 'left', offset: 0, fontSize: 12, fill: '#64748b' }} />
             
@@ -81,7 +81,7 @@ export default function RetentionMatrix({ dataArray }) {
                 return null;
               }}
             />
-            <Scatter name="Colaboradores" data={jitterData} opacity={0.7}>
+            <Scatter name="Colaboradores" data={jitterData} opacity={0.7} animationDuration={800} animationEasing="ease-out">
               {jitterData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={getDotColor(entry.x, entry.y)} className="hover:opacity-100 transition-opacity duration-300" />
               ))}

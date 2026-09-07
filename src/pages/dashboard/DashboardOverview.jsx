@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { dbService } from '../../services/db';
 import Dashboard from '../../components/Dashboard';
+import AnimatedNumber from '../../components/ui/AnimatedNumber';
 import { Link as LinkIcon, Check, PlusCircle, AlertTriangle, Calendar, ChevronDown, Users, Target } from 'lucide-react';
 
 export default function DashboardOverview() {
@@ -199,7 +200,7 @@ export default function DashboardOverview() {
           {activeOrg && (
             <button
               onClick={() => setShowRestartConfirm(true)}
-              className="flex items-center gap-2 px-4 h-10 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-100"
+              className="flex items-center gap-2 px-4 h-10 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-all active:scale-95 border border-amber-100"
               title="Iniciar Nuevo Periodo"
             >
               <PlusCircle size={16} />
@@ -210,7 +211,7 @@ export default function DashboardOverview() {
           {activeOrg?.evaluation_token && (
             <button
               onClick={() => handleCopyLink(activeOrg.evaluation_token)}
-              className="flex items-center gap-2 px-4 h-10 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 h-10 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all active:scale-95 shadow-sm"
             >
               {copied ? <Check size={16} /> : <LinkIcon size={16} />}
               <span className="hidden sm:inline">{copied ? '¡Copiado!' : 'Copiar Link del Chatbot'}</span>
@@ -238,7 +239,8 @@ export default function DashboardOverview() {
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <div className="text-2xl font-black text-slate-800">
-                    {totalResponses} <span className="text-base font-medium text-slate-400">/ {expectedResponses || '?'}</span>
+                    <AnimatedNumber value={totalResponses} duration={1} /> 
+                    <span className="text-base font-medium text-slate-400">/ <AnimatedNumber value={expectedResponses || 0} duration={1} /></span>
                   </div>
                 </div>
                 <button 
@@ -255,7 +257,7 @@ export default function DashboardOverview() {
               <div>
                 <div className="flex justify-between text-sm font-medium mb-2">
                   <span className="text-slate-600">Avance hacia la meta</span>
-                  <span className="text-emerald-600">{progressPercent}%</span>
+                  <span className="text-emerald-600"><AnimatedNumber value={progressPercent} duration={1.5} />%</span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
                   <div 
