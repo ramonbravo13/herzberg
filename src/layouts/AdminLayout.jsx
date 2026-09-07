@@ -8,7 +8,11 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  if (!user || user.role !== 'admin') {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== 'admin') {
     return <div className="p-8 text-center text-red-500 font-bold">Acceso Denegado. Solo administradores.</div>;
   }
 

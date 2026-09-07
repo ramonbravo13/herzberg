@@ -56,7 +56,11 @@ export default function DashboardLayout() {
     }
   };
 
-  if (!user || (user.role !== 'empresarial' && user.role !== 'corporativo' && user.role !== 'admin')) {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user.role !== 'empresarial' && user.role !== 'corporativo' && user.role !== 'admin') {
     return <div className="p-8 text-center text-red-500 font-bold">Acceso Denegado.</div>;
   }
 
