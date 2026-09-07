@@ -25,7 +25,13 @@ export default function Dashboard({ data }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
 
   const dataArray = Array.isArray(data) ? data : [data];
-  if (dataArray.length === 0 || (!dataArray[0] || !dataArray[0].respuestas)) return <div>No hay datos para mostrar.</div>;
+  
+  const hasClimaData = dataArray.some(d => d && d.respuestas);
+  const hasNomData = dataArray.some(d => d && d.nom035_respuestas);
+
+  if (dataArray.length === 0 || (!hasClimaData && !hasNomData)) {
+    return <div className="p-8 text-center text-slate-500">No hay datos válidos para mostrar.</div>;
+  }
 
   const isAggregated = true; // Siempre mostrar gráficos organizacionales, incluso si hay 1 sola respuesta
 
