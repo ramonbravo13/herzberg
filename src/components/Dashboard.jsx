@@ -53,8 +53,8 @@ export default function Dashboard({ data }) {
   const mejoras = dataArray.map(d => d.comentarios?.mejora).filter(Boolean).slice(0, 3);
 
   return (
-    <div className="p-6 bg-slate-50/50 min-h-screen">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="w-full">
+      <div className="w-full space-y-8">
         
         <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
           <h1 className="text-2xl font-bold text-slate-800 mb-2">
