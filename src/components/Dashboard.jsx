@@ -26,10 +26,10 @@ import AnimatedNumber from './ui/AnimatedNumber';
 export default function Dashboard({ data }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
 
-  const dataArray = Array.isArray(data) ? data : [data];
+  const dataArray = React.useMemo(() => (Array.isArray(data) ? data : [data]), [data]);
   
-  const hasClimaData = dataArray.some(d => d && d.respuestas);
-  const hasNomData = dataArray.some(d => d && d.nom035_respuestas);
+  const hasClimaData = React.useMemo(() => dataArray.some(d => d && d.respuestas), [dataArray]);
+  const hasNomData = React.useMemo(() => dataArray.some(d => d && d.nom035_respuestas), [dataArray]);
 
   if (dataArray.length === 0 || (!hasClimaData && !hasNomData)) {
     return <div className="p-8 text-center text-slate-500">No hay datos válidos para mostrar.</div>;
@@ -37,29 +37,30 @@ export default function Dashboard({ data }) {
 
   const isAggregated = true; // Siempre mostrar gráficos organizacionales, incluso si hay 1 sola respuesta
 
-  const chartData = INDICES_CONFIG.map((ind, idx) => {
+  const chartData = React.useMemo(() => INDICES_CONFIG.map((ind, idx) => {
     const score = calculateIndex(ind.vars, dataArray);
     return { name: ind.name, score, fill: getCategoryColor(ind.name, idx) };
-  });
+  }), [dataArray]);
 
-  const satisfaccionScore = calculateIndex(['satisfaccion_global'], dataArray);
-  const compromisoScore = calculateIndex(['compromiso'], dataArray);
-  
-  const rotacionRiesgo = 100 - calculateIndex(['permanencia'], dataArray); 
-  
+  const satisfaccionScore = React.useMemo(() => calculateIndex(['satisfaccion_global'], dataArray), [dataArray]);
+  const compromisoScore = React.useMemo(() => calculateIndex(['compromiso'], dataArray), [dataArray]);
+  const rotacionRiesgo = React.useMemo(() => 100 - calculateIndex(['permanencia'], dataArray), [dataArray]);
+
   // eNPS
-  let enpsSum = 0;
-  let enpsCount = 0;
-  dataArray.forEach(d => {
-    if (d.respuestas && d.respuestas.enps !== undefined) {
-      enpsSum += Number(d.respuestas.enps);
-      enpsCount++;
-    }
-  });
-  const enpsScore = enpsCount > 0 ? Math.round((enpsSum / enpsCount) * 10) : 0;
+  const enpsScore = React.useMemo(() => {
+    let enpsSum = 0;
+    let enpsCount = 0;
+    dataArray.forEach(d => {
+      if (d.respuestas && d.respuestas.enps !== undefined) {
+        enpsSum += Number(d.respuestas.enps);
+        enpsCount++;
+      }
+    });
+    return enpsCount > 0 ? Math.round((enpsSum / enpsCount) * 10) : 0;
+  }, [dataArray]);
 
-  const fortalezas = dataArray.map(d => d.comentarios?.fortaleza).filter(Boolean).slice(0, 3);
-  const mejoras = dataArray.map(d => d.comentarios?.mejora).filter(Boolean).slice(0, 3);
+  const fortalezas = React.useMemo(() => dataArray.map(d => d.comentarios?.fortaleza).filter(Boolean).slice(0, 3), [dataArray]);
+  const mejoras = React.useMemo(() => dataArray.map(d => d.comentarios?.mejora).filter(Boolean).slice(0, 3), [dataArray]);
 
   return (
     <div className="w-full">
@@ -187,11 +188,11 @@ export default function Dashboard({ data }) {
                     <PieChart>
                       <ChartGradients />
                       <Pie
-                        data={[
+                        data={React.useMemo(() => [
                           { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: categoryColors['Promotores'] },
                           { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: categoryColors['Pasivos'] },
                           { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: categoryColors['Detractores'] }
-                        ].filter(d => d.value > 0)}
+                        ].filter(d => d.value > 0), [dataArray])}
                         cx="50%"
                         cy="50%"
                         innerRadius={70}
@@ -203,11 +204,11 @@ export default function Dashboard({ data }) {
                         animationEasing="ease-out"
                       >
                         {
-                          [
+                          React.useMemo(() => [
                             { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: '#34d399' },
                             { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: '#fbbf24' },
                             { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: '#f87171' }
-                          ].filter(d => d.value > 0).map((entry, index) => (
+                          ].filter(d => d.value > 0), [dataArray]).map((entry, index) => (
                             <PieCell key={`cell-${index}`} fill={entry.color} className="hover:brightness-110 transition-all duration-300" />
                           ))
                         }
@@ -362,54 +363,61 @@ function ScoreCard({ title, score, subtitle, icon: Icon, onClick }) {
 function MetricModal({ metricId, dataArray, onClose }) {
   let title = '';
   let explanation = '';
-  let distribution = [0,0,0,0,0,0];
+  let distribution = Array(6).fill(0);
   let distribution10 = Array(11).fill(0);
-  
-  let totalDataPoints = 0; // The denominator for percentages
+  let totalDataPoints = 0;
 
-  const indexConfig = INDICES_CONFIG.find(i => i.name === metricId);
+  const indexConfig = React.useMemo(() => INDICES_CONFIG.find(i => i.name === metricId), [metricId]);
+
+  React.useMemo(() => {
+    if (indexConfig) {
+      dataArray.forEach(d => {
+        indexConfig.vars.forEach(v => {
+          const val = d.respuestas && d.respuestas[v];
+          if (val !== undefined) {
+            distribution[val]++;
+            totalDataPoints++;
+          }
+        });
+      });
+    } else if (metricId === 'satisfaccion') {
+      dataArray.forEach(d => {
+        const val = d.respuestas && d.respuestas['satisfaccion_global'];
+        if (val !== undefined) { distribution[val]++; totalDataPoints++; }
+      });
+    } else if (metricId === 'compromiso') {
+      dataArray.forEach(d => {
+        const val = d.respuestas && d.respuestas['compromiso'];
+        if (val !== undefined) { distribution[val]++; totalDataPoints++; }
+      });
+    } else if (metricId === 'rotacion') {
+      dataArray.forEach(d => {
+        const val = d.respuestas && d.respuestas['permanencia'];
+        if (val !== undefined) { distribution[val]++; totalDataPoints++; }
+      });
+    } else if (metricId === 'enps') {
+      dataArray.forEach(d => {
+        const val = d.respuestas && d.respuestas['enps'];
+        if (val !== undefined) { distribution10[val]++; totalDataPoints++; }
+      });
+    }
+  }, [metricId, dataArray, indexConfig]);
 
   if (indexConfig) {
     title = `Factor: ${indexConfig.name}`;
     explanation = indexConfig.explanation;
-    
-    dataArray.forEach(d => {
-      indexConfig.vars.forEach(v => {
-        const val = d.respuestas && d.respuestas[v];
-        if (val !== undefined) {
-          distribution[val]++;
-          totalDataPoints++;
-        }
-      });
-    });
   } else if (metricId === 'satisfaccion') {
     title = 'Satisfacción Global';
     explanation = 'Se obtiene de la pregunta: "En general, ¿qué tan satisfecho te sientes con tu trabajo?". Se convierte de la escala 1-5 a un porcentaje de 0 a 100. Refleja la percepción general e instantánea del colaborador sobre su empleo en la organización.';
-    dataArray.forEach(d => {
-      const val = d.respuestas && d.respuestas['satisfaccion_global'];
-      if (val !== undefined) { distribution[val]++; totalDataPoints++; }
-    });
   } else if (metricId === 'compromiso') {
     title = 'Compromiso';
     explanation = 'Mide la alineación del empleado con la empresa: "¿Qué tan comprometido te sientes con los objetivos de la organización?". Un mayor compromiso se traduce en mayor retención, productividad y disposición a dar el esfuerzo extra.';
-    dataArray.forEach(d => {
-      const val = d.respuestas && d.respuestas['compromiso'];
-      if (val !== undefined) { distribution[val]++; totalDataPoints++; }
-    });
   } else if (metricId === 'rotacion') {
     title = 'Riesgo de Rotación';
     explanation = 'Calculado a partir de la pregunta: "¿Qué tan probable es que continúes trabajando aquí durante los próximos dos años?". Entre menor sea la intención de permanencia (respuesta baja), mayor es el cálculo del riesgo de que el talento abandone la empresa.';
-    dataArray.forEach(d => {
-      const val = d.respuestas && d.respuestas['permanencia'];
-      if (val !== undefined) { distribution[val]++; totalDataPoints++; }
-    });
   } else if (metricId === 'enps') {
     title = 'eNPS Promedio';
     explanation = 'El Employee Net Promoter Score proviene de la pregunta (escala 0-10): "¿Qué tan probable es que recomiendes esta organización como un buen lugar para trabajar?". Tradicionalmente clasifica en Promotores (9-10), Pasivos (7-8) y Detractores (0-6). Aquí se muestra el puntaje promedio de la evaluación general.';
-    dataArray.forEach(d => {
-      const val = d.respuestas && d.respuestas['enps'];
-      if (val !== undefined) { distribution10[val]++; totalDataPoints++; }
-    });
   }
 
   return (
