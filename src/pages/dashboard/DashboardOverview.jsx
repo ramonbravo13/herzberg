@@ -115,22 +115,37 @@ export default function DashboardOverview() {
     const activeOrg = organizations.find(o => o.id === selectedOrgId);
     if (!activeOrg) return;
     
-    const input = prompt('Ingresa la meta de participantes esperados para este periodo:', activeOrg.expected_headcount || '');
+    const isZone = selectedZone !== 'all';
+    const currentGoal = isZone 
+      ? (activeOrg.zone_headcounts?.[selectedZone] || '')
+      : (activeOrg.expected_headcount || '');
+      
+    const promptText = isZone 
+      ? `Ingresa la meta esperada para la zona "${selectedZone}":` 
+      : 'Ingresa la meta de participantes esperados para toda la organización:';
+      
+    const input = prompt(promptText, currentGoal);
+    
     if (input !== null) {
       const num = parseInt(input, 10);
-      if (!isNaN(num) && num > 0) {
-        try {
-          const updated = await dbService.updateOrganization(activeOrg.id, { expected_headcount: num });
-          setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
-        } catch(err) {
-          alert('Error al guardar la meta de participación');
+      try {
+        let updates = {};
+        if (isZone) {
+           const zoneHeadcounts = { ...(activeOrg.zone_headcounts || {}) };
+           if (!isNaN(num) && num > 0) {
+             zoneHeadcounts[selectedZone] = num;
+           } else {
+             delete zoneHeadcounts[selectedZone];
+           }
+           updates = { zone_headcounts: zoneHeadcounts };
+        } else {
+           updates = { expected_headcount: (!isNaN(num) && num > 0) ? num : null };
         }
-      } else if (input === '') {
-        // Allow removing the goal
-        try {
-          const updated = await dbService.updateOrganization(activeOrg.id, { expected_headcount: null });
-          setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
-        } catch(err) {}
+        
+        const updated = await dbService.updateOrganization(activeOrg.id, updates);
+        setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
+      } catch(err) {
+        alert('Error al guardar la meta de participación');
       }
     }
   };
@@ -152,7 +167,9 @@ export default function DashboardOverview() {
   const activeOrg = selectedOrgId !== 'all' ? organizations.find(o => o.id === selectedOrgId) : null;
   
   const totalResponses = evaluations.length;
-  const expectedResponses = activeOrg?.expected_headcount || 0;
+  const expectedResponses = selectedZone !== 'all' 
+    ? (activeOrg?.zone_headcounts?.[selectedZone] || 0)
+    : (activeOrg?.expected_headcount || 0);
   const progressPercent = expectedResponses > 0 ? Math.min(Math.round((totalResponses / expectedResponses) * 100), 100) : 0;
 
   const handleAddZone = async (e) => {
