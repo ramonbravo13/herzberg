@@ -23,53 +23,6 @@ export default function OrganizationsManager() {
     loadOrganizations();
   }, []);
 
-  const handleSeedCeti = async () => {
-    try {
-      const org = await dbService.createOrganization('ceti');
-      
-      const deptos = ["Ventas", "IT", "Recursos Humanos", "Operaciones", "Marketing"];
-      const antiguedades = ["Menos de 1 año", "1–3 años", "4–7 años", "8–15 años", "Más de 15 años"];
-      const niveles = ["Operativo", "Técnico", "Administrativo", "Coordinación", "Directivo"];
-      const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
-      const randomScore = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-
-      for(let i = 0; i < 100; i++) {
-        const mockResult = {
-          departamento: randomItem(deptos),
-          antiguedad: randomItem(antiguedades),
-          nivel_puesto: randomItem(niveles),
-          respuestas: {
-            logro_1: randomScore(3, 5), logro_2: randomScore(3, 5), logro_3: randomScore(2, 5),
-            reconocimiento_1: randomScore(2, 4), reconocimiento_2: randomScore(3, 5), reconocimiento_3: randomScore(1, 4),
-            trabajo_1: randomScore(3, 5), trabajo_2: randomScore(4, 5), trabajo_3: randomScore(3, 5),
-            responsabilidad_1: randomScore(2, 5), responsabilidad_2: randomScore(3, 5), responsabilidad_3: randomScore(2, 4),
-            crecimiento_1: randomScore(2, 4), crecimiento_2: randomScore(3, 5), crecimiento_3: randomScore(2, 5),
-            promocion_1: randomScore(1, 3), promocion_2: randomScore(1, 4), promocion_3: randomScore(2, 4),
-            salario_1: randomScore(2, 4), salario_2: randomScore(2, 4), salario_3: randomScore(1, 4),
-            supervision_1: randomScore(3, 5), supervision_2: randomScore(3, 5), supervision_3: randomScore(3, 5),
-            politicas_1: randomScore(2, 4), politicas_2: randomScore(2, 5), politicas_3: randomScore(2, 4),
-            relaciones_1: randomScore(4, 5), relaciones_2: randomScore(4, 5), relaciones_3: randomScore(3, 5),
-            condiciones_1: randomScore(3, 5), condiciones_2: randomScore(3, 5), condiciones_3: randomScore(2, 5),
-            seguridad_1: randomScore(3, 5), seguridad_2: randomScore(3, 5), seguridad_3: randomScore(2, 5),
-            satisfaccion_global: randomScore(3, 5),
-            compromiso: randomScore(4, 5),
-            permanencia: randomScore(3, 5),
-            enps: randomScore(6, 10)
-          },
-          comentarios: {
-            fortaleza: "Buena cultura organizacional",
-            mejora: "Mejorar las herramientas de trabajo"
-          }
-        };
-        await dbService.saveEvaluation(org.id, mockResult);
-      }
-      
-      alert('Organización CETI creada y 100 respuestas precargadas con éxito!');
-      loadOrganizations();
-    } catch (err) {
-      alert('Error precargando datos: ' + err.message);
-    }
-  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -123,12 +76,7 @@ export default function OrganizationsManager() {
           <p className="text-slate-600">Gestiona las empresas registradas en la plataforma</p>
         </div>
         <div className="flex gap-3">
-          <button
-            onClick={handleSeedCeti}
-            className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-all"
-          >
-            Precargar CETI (100)
-          </button>
+
           <button
             onClick={() => setShowModal(true)}
             className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all"
