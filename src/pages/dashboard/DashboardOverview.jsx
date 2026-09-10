@@ -4,7 +4,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { dbService } from '../../services/db';
 import Dashboard from '../../components/Dashboard';
 import AnimatedNumber from '../../components/ui/AnimatedNumber';
-import { Link as LinkIcon, Check, PlusCircle, AlertTriangle, Calendar, ChevronDown, Users, Target } from 'lucide-react';
+import { Link as LinkIcon, Check, PlusCircle, AlertTriangle, Calendar, ChevronDown, Users, Target, MapPin, Plus, Trash2 } from 'lucide-react';
 
 export default function DashboardOverview() {
   const { user } = useAuth();
@@ -14,20 +14,30 @@ export default function DashboardOverview() {
   const [selectedOrgId, setSelectedOrgId] = useState(location.state?.orgId || '');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [copiedZone, setCopiedZone] = useState(null);
   
   const [selectedPeriod, setSelectedPeriod] = useState('active');
+  const [selectedZone, setSelectedZone] = useState('all');
+  const [newZoneName, setNewZoneName] = useState('');
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [isRestarting, setIsRestarting] = useState(false);
 
   useEffect(() => {
     setSelectedPeriod('active');
+    setSelectedZone('all');
   }, [selectedOrgId]);
 
-  const handleCopyLink = (token) => {
-    const link = `${window.location.origin}/evaluate/${token}`;
+  const handleCopyLink = (token, zone = null) => {
+    const baseUrl = `${window.location.origin}/evaluate/${token}`;
+    const link = zone ? `${baseUrl}?zone=${encodeURIComponent(zone)}` : baseUrl;
     navigator.clipboard.writeText(link);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (zone) {
+      setCopiedZone(zone);
+      setTimeout(() => setCopiedZone(null), 2000);
+    } else {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const loadData = async () => {
@@ -76,7 +86,12 @@ export default function DashboardOverview() {
 
       const targetPeriod = selectedPeriod === 'active' ? activeOrg.currentPeriod : selectedPeriod;
       
-      const filtered = orgEvals.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
+      let filtered = orgEvals.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
+      
+      if (selectedZone !== 'all') {
+        filtered = filtered.filter(e => e.zone === selectedZone);
+      }
+      
       setEvaluations(filtered);
     }
   };
@@ -126,7 +141,7 @@ export default function DashboardOverview() {
 
   useEffect(() => {
     loadEvaluations();
-  }, [selectedOrgId, selectedPeriod, organizations]);
+  }, [selectedOrgId, selectedPeriod, selectedZone, organizations]);
 
 
 
@@ -139,6 +154,41 @@ export default function DashboardOverview() {
   const totalResponses = evaluations.length;
   const expectedResponses = activeOrg?.expected_headcount || 0;
   const progressPercent = expectedResponses > 0 ? Math.min(Math.round((totalResponses / expectedResponses) * 100), 100) : 0;
+
+  const handleAddZone = async (e) => {
+    e.preventDefault();
+    if (!newZoneName.trim() || !activeOrg) return;
+    
+    try {
+      const currentZones = activeOrg.zones || [];
+      if (currentZones.includes(newZoneName.trim())) {
+        alert('Esta zona ya existe.');
+        return;
+      }
+      const updatedZones = [...currentZones, newZoneName.trim()];
+      const updated = await dbService.updateOrganization(activeOrg.id, { zones: updatedZones });
+      setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
+      setNewZoneName('');
+    } catch (err) {
+      alert('Error al crear zona');
+    }
+  };
+
+  const handleDeleteZone = async (zoneToDelete) => {
+    if (!activeOrg || !window.confirm(`¿Estás seguro de que deseas eliminar la zona "${zoneToDelete}"? Esto no borrará las respuestas pasadas de esta zona.`)) return;
+    
+    try {
+      const currentZones = activeOrg.zones || [];
+      const updatedZones = currentZones.filter(z => z !== zoneToDelete);
+      const updated = await dbService.updateOrganization(activeOrg.id, { zones: updatedZones });
+      setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
+      if (selectedZone === zoneToDelete) {
+        setSelectedZone('all');
+      }
+    } catch (err) {
+      alert('Error al eliminar zona');
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -179,6 +229,24 @@ export default function DashboardOverview() {
 
         {/* Lado derecho: Periodo y Acciones */}
         <div className="flex flex-wrap items-center gap-3">
+          {activeOrg && (
+            <div className="flex items-center gap-2 border-r border-slate-200 pr-4 mr-1">
+              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg shrink-0">
+                <MapPin size={18} />
+              </div>
+              <select
+                value={selectedZone}
+                onChange={(e) => setSelectedZone(e.target.value)}
+                className="bg-transparent text-sm font-semibold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-6 max-w-[150px] truncate"
+              >
+                <option value="all">Todas las zonas</option>
+                {activeOrg.zones && activeOrg.zones.map(z => (
+                  <option key={z} value={z}>{z}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {activeOrg && (
             <div className="flex items-center gap-2 border-r border-slate-200 pr-4 mr-1">
               <div className="p-2 bg-slate-50 text-slate-600 rounded-lg shrink-0">
@@ -271,6 +339,70 @@ export default function DashboardOverview() {
                     <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
                   </div>
                 </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Micrositios / Zonas Management */}
+        {activeOrg && (user.role === 'empresarial' || user.role === 'admin') && (
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                  <MapPin size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800">Micrositios (Zonificación)</h3>
+                  <p className="text-sm text-slate-500">Links personalizados por área para evitar sesgos</p>
+                </div>
+              </div>
+            </div>
+            
+            <form onSubmit={handleAddZone} className="flex gap-2 mb-6">
+              <input 
+                type="text" 
+                value={newZoneName}
+                onChange={e => setNewZoneName(e.target.value)}
+                placeholder="Nueva zona (ej. Ventas Norte)"
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none"
+              />
+              <button 
+                type="submit"
+                disabled={!newZoneName.trim()}
+                className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                <Plus size={18} /> Agregar
+              </button>
+            </form>
+
+            {(!activeOrg.zones || activeOrg.zones.length === 0) ? (
+              <div className="text-sm text-slate-500 text-center py-4 bg-slate-50 rounded-xl border border-slate-100">
+                No has creado ningún micrositio. Los resultados no podrán ser segmentados por área.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {activeOrg.zones.map(zone => (
+                  <div key={zone} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+                    <span className="font-medium text-slate-700 truncate mr-2" title={zone}>{zone}</span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button 
+                        onClick={() => handleCopyLink(activeOrg.evaluation_token, zone)}
+                        className={`p-1.5 rounded-lg transition-colors ${copiedZone === zone ? 'bg-green-100 text-green-700' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}
+                        title="Copiar link de zona"
+                      >
+                        {copiedZone === zone ? <Check size={16} /> : <LinkIcon size={16} />}
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteZone(zone)}
+                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Eliminar zona"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

@@ -56,7 +56,11 @@ export const dbService = {
       if (!org.periods) {
         org.currentPeriod = 1;
         org.periods = [{ id: 1, name: 'Periodo 1', startDate: org.createdAt, endDate: null }];
-        updated = true; // wait, map is better but save is needed only if updated
+        updated = true;
+      }
+      if (!org.zones) {
+        org.zones = [];
+        updated = true;
       }
     });
     if (updated) saveDB(db);
@@ -72,7 +76,8 @@ export const dbService = {
       createdAt: new Date().toISOString(),
       subscriptionEndDate,
       currentPeriod: 1,
-      periods: [{ id: 1, name: 'Periodo 1', startDate: new Date().toISOString(), endDate: null }]
+      periods: [{ id: 1, name: 'Periodo 1', startDate: new Date().toISOString(), endDate: null }],
+      zones: []
     };
     db.organizations.push(newOrg);
     saveDB(db);
@@ -106,6 +111,18 @@ export const dbService = {
     db.organizations = db.organizations.filter(o => o.id !== id);
     // Also delete associated evaluations
     db.evaluations = db.evaluations.filter(e => e.organization_id !== id);
+    
+    // Remove deleted organization from corporativo users' allowed_organizations
+    db.users = db.users.map(u => {
+      if (u.role === 'corporativo' && u.allowed_organizations) {
+        return {
+          ...u,
+          allowed_organizations: u.allowed_organizations.filter(orgId => orgId !== id)
+        };
+      }
+      return u;
+    });
+
     saveDB(db);
     return true;
   },
@@ -248,7 +265,7 @@ export const dbService = {
   },
 
   // --- EVALUATIONS ---
-  saveEvaluation: async (organizationId, results, participantId = null) => {
+  saveEvaluation: async (organizationId, results, participantId = null, zone = null) => {
     const db = getDB();
     const org = db.organizations.find(o => o.id === organizationId);
     const period = org ? (org.currentPeriod || 1) : 1;
@@ -269,6 +286,7 @@ export const dbService = {
       organization_id: organizationId,
       period,
       participant_id: participantId,
+      zone,
       results,
       createdAt: new Date().toISOString()
     };
@@ -292,7 +310,8 @@ export const dbService = {
     // we return the full evaluation object now because we need 'period' to filter in the UI
     return db.evaluations.filter(e => e.organization_id === organizationId).map(e => ({
       ...e.results,
-      period: e.period || 1
+      period: e.period || 1,
+      zone: e.zone || null
     }));
   },
   
@@ -301,7 +320,8 @@ export const dbService = {
     return db.evaluations.map(e => ({
       ...e.results,
       period: e.period || 1,
-      organization_id: e.organization_id // necessary for UI filtering if needed
+      organization_id: e.organization_id, // necessary for UI filtering if needed
+      zone: e.zone || null
     }));
   }
 };

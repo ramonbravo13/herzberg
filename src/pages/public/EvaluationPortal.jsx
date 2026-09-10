@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { dbService } from '../../services/db';
 import Chat from '../../components/Chat';
 import ClinicalNameForm from '../../components/ClinicalNameForm';
@@ -24,6 +24,10 @@ export default function EvaluationPortal() {
   const [completed, setCompleted] = useState(false);
   const [alreadyCompleted, setAlreadyCompleted] = useState(false);
   const [clinicalPendingResults, setClinicalPendingResults] = useState(null);
+  
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const zone = queryParams.get('zone');
 
   useEffect(() => {
     const fetchOrg = async () => {
@@ -62,7 +66,7 @@ export default function EvaluationPortal() {
       }
 
       const pid = getOrCreateParticipantId();
-      await dbService.saveEvaluation(organization.id, results, pid);
+      await dbService.saveEvaluation(organization.id, results, pid, zone);
       setCompleted(true);
     } catch (err) {
       console.error("Error guardando evaluación:", err);
@@ -78,7 +82,7 @@ export default function EvaluationPortal() {
     try {
       const resultsWithName = { ...clinicalPendingResults, nombre_clinico: name };
       const pid = getOrCreateParticipantId();
-      await dbService.saveEvaluation(organization.id, resultsWithName, pid);
+      await dbService.saveEvaluation(organization.id, resultsWithName, pid, zone);
       setClinicalPendingResults(null);
       setCompleted(true);
     } catch (err) {

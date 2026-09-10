@@ -90,7 +90,13 @@ export default function UsersManager() {
     setEmail(user.email || '');
     setRole(user.role || 'empresarial');
     setOrganizationId(user.organization_id || '');
-    setAllowedOrganizations(user.allowed_organizations || []);
+    
+    // Filter out any dangling organization IDs that no longer exist
+    const validAllowedOrgs = (user.allowed_organizations || []).filter(id => 
+      organizations.some(o => o.id === id)
+    );
+    setAllowedOrganizations(validAllowedOrgs);
+    
     setPassword('');
     setError('');
     setShowModal(true);
@@ -120,7 +126,10 @@ export default function UsersManager() {
   const getOrgName = (user) => {
     if (user.role === 'admin') return 'Todas';
     if (user.role === 'corporativo') {
-      const count = (user.allowed_organizations || []).length;
+      const validOrgs = (user.allowed_organizations || []).filter(id => 
+        organizations.some(o => o.id === id)
+      );
+      const count = validOrgs.length;
       return count > 0 ? `${count} organizaciones asignadas` : 'Ninguna (Bloqueado)';
     }
     if (!user.organization_id) return '-';
