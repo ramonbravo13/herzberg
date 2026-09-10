@@ -15,6 +15,7 @@ import RetentionMatrix from './dashboard/RetentionMatrix';
 import Nom035Dashboard from './dashboard/Nom035Dashboard';
 import DiagnosticCharts from './dashboard/DiagnosticCharts';
 import ShiftGap from './dashboard/ShiftGap';
+import CriticalAlerts from './dashboard/CriticalAlerts';
 import ChartCard from './charts/ChartCard';
 import ChartTooltip from './charts/ChartTooltip';
 import ChartGradients from './charts/ChartGradients';
@@ -96,6 +97,8 @@ export default function Dashboard({ data }) {
         </div>
 
         <TheoryContext />
+
+        <CriticalAlerts dataArray={dataArray} />
 
         {isAggregated && <TopRisks dataArray={dataArray} />}
 
