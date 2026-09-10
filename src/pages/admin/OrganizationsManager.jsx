@@ -23,6 +23,81 @@ export default function OrganizationsManager() {
     loadOrganizations();
   }, []);
 
+  const handleSeedData = async () => {
+    try {
+      const orgsToCreate = [
+        { name: 'Sabritas', zones: [{ name: 'Ventas', count: 80 }, { name: 'Gerencia', count: 20 }] },
+        { name: 'Suplementos', zones: [{ name: 'Zona Este', count: 30 }, { name: 'Ventas', count: 20 }, { name: 'Produccion', count: 40 }] },
+        { name: 'Star Up', zones: [{ name: 'Produccion', count: 20 }, { name: 'Administracion', count: 19 }] }
+      ];
+
+      const antiguedades = ["Menos de 1 año", "1–3 años", "4–7 años", "8–15 años", "Más de 15 años"];
+      const niveles = ["Operativo", "Técnico", "Administrativo", "Coordinación", "Directivo"];
+      const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+      const randomScore = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+      const randomSiNo = () => Math.random() > 0.8 ? "SI" : "NO";
+
+      for (const orgData of orgsToCreate) {
+        const org = await dbService.createOrganization(orgData.name);
+        const totalHeadcount = orgData.zones.reduce((sum, z) => sum + z.count, 0);
+        
+        const zoneNames = orgData.zones.map(z => z.name);
+        await dbService.updateOrganization(org.id, { 
+          zones: zoneNames,
+          expected_headcount: totalHeadcount 
+        });
+
+        for (const zone of orgData.zones) {
+          for (let i = 0; i < zone.count; i++) {
+            
+            const respuestas = {
+              logro_1: randomScore(3, 5), logro_2: randomScore(3, 5), logro_3: randomScore(2, 5),
+              reconocimiento_1: randomScore(2, 4), reconocimiento_2: randomScore(3, 5), reconocimiento_3: randomScore(1, 4),
+              trabajo_1: randomScore(3, 5), trabajo_2: randomScore(4, 5), trabajo_3: randomScore(3, 5),
+              responsabilidad_1: randomScore(2, 5), responsabilidad_2: randomScore(3, 5), responsabilidad_3: randomScore(2, 4),
+              crecimiento_1: randomScore(2, 4), crecimiento_2: randomScore(3, 5), crecimiento_3: randomScore(2, 5),
+              promocion_1: randomScore(1, 3), promocion_2: randomScore(1, 4), promocion_3: randomScore(2, 4),
+              salario_1: randomScore(2, 4), salario_2: randomScore(2, 4), salario_3: randomScore(1, 4),
+              supervision_1: randomScore(3, 5), supervision_2: randomScore(3, 5), supervision_3: randomScore(3, 5),
+              politicas_1: randomScore(2, 4), politicas_2: randomScore(2, 5), politicas_3: randomScore(2, 4),
+              relaciones_1: randomScore(4, 5), relaciones_2: randomScore(4, 5), relaciones_3: randomScore(3, 5),
+              condiciones_1: randomScore(3, 5), condiciones_2: randomScore(3, 5), condiciones_3: randomScore(2, 5),
+              seguridad_1: randomScore(3, 5), seguridad_2: randomScore(3, 5), seguridad_3: randomScore(2, 5),
+              satisfaccion_global: randomScore(3, 5),
+              compromiso: randomScore(4, 5),
+              permanencia: randomScore(3, 5),
+              enps: randomScore(6, 10)
+            };
+
+            const nom035 = {};
+            for(let j=1; j<=20; j++) nom035[`ats_${j}`] = randomSiNo();
+            
+            if (totalHeadcount > 15 && totalHeadcount <= 50) {
+              for(let j=1; j<=46; j++) nom035[`g2_${j}`] = randomScore(1, 5);
+            } else if (totalHeadcount > 50) {
+              for(let j=1; j<=72; j++) nom035[`g3_${j}`] = randomScore(1, 5);
+            }
+
+            const mockResult = {
+              antiguedad: randomItem(antiguedades),
+              nivel_puesto: randomItem(niveles),
+              respuestas,
+              nom035_respuestas: nom035,
+              comentarios: { fortaleza: "Buen ambiente", mejora: "Mejor salario" }
+            };
+            
+            await dbService.saveEvaluation(org.id, mockResult, null, zone.name);
+          }
+        }
+      }
+      
+      alert('¡Organizaciones, zonas y respuestas (segmentadas por NOM035) generadas con éxito!');
+      loadOrganizations();
+    } catch (err) {
+      alert('Error precargando datos: ' + err.message);
+    }
+  };
+
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -76,7 +151,12 @@ export default function OrganizationsManager() {
           <p className="text-slate-600">Gestiona las empresas registradas en la plataforma</p>
         </div>
         <div className="flex gap-3">
-
+          <button
+            onClick={handleSeedData}
+            className="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-4 py-2 rounded-xl flex items-center gap-2 font-medium transition-all"
+          >
+            Generar Datos de Prueba
+          </button>
           <button
             onClick={() => setShowModal(true)}
             className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition-all"
