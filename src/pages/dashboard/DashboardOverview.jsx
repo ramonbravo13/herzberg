@@ -256,7 +256,7 @@ export default function DashboardOverview() {
                 onChange={(e) => setSelectedZone(e.target.value)}
                 className="bg-transparent text-sm font-semibold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-6 max-w-[150px] truncate"
               >
-                <option value="all">Todas las zonas</option>
+                <option value="all">Todas las zonas (Filtro)</option>
                 {activeOrg.zones && activeOrg.zones.map(z => (
                   <option key={z} value={z}>{z}</option>
                 ))}
@@ -265,7 +265,7 @@ export default function DashboardOverview() {
           )}
 
           {activeOrg && (
-            <div className="flex items-center gap-2 border-r border-slate-200 pr-4 mr-1">
+            <div className="flex items-center gap-2">
               <div className="p-2 bg-slate-50 text-slate-600 rounded-lg shrink-0">
                 <Calendar size={18} />
               </div>
@@ -274,7 +274,7 @@ export default function DashboardOverview() {
                 onChange={(e) => setSelectedPeriod(e.target.value)}
                 className="bg-transparent text-sm font-semibold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-6"
               >
-                <option value="active">Activo (Periodo {activeOrg.currentPeriod})</option>
+                <option value="active">Periodo Activo ({activeOrg.currentPeriod})</option>
                 {activeOrg.periods && activeOrg.periods
                   .filter(p => p.id !== activeOrg.currentPeriod)
                   .sort((a, b) => b.id - a.id)
@@ -284,27 +284,6 @@ export default function DashboardOverview() {
                 }
               </select>
             </div>
-          )}
-
-          {activeOrg && (
-            <button
-              onClick={() => setShowRestartConfirm(true)}
-              className="flex items-center gap-2 px-4 h-10 text-sm font-medium text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-all active:scale-95 border border-amber-100"
-              title="Iniciar Nuevo Periodo"
-            >
-              <PlusCircle size={16} />
-              <span className="hidden sm:inline">Nuevo Periodo</span>
-            </button>
-          )}
-
-          {activeOrg?.evaluation_token && (
-            <button
-              onClick={() => handleCopyLink(activeOrg.evaluation_token)}
-              className="flex items-center gap-2 px-4 h-10 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-all active:scale-95 shadow-sm"
-            >
-              {copied ? <Check size={16} /> : <LinkIcon size={16} />}
-              <span className="hidden sm:inline">{copied ? '¡Copiado!' : 'Copiar Link del Chatbot'}</span>
-            </button>
           )}
         </div>
       </div>
@@ -361,67 +340,113 @@ export default function DashboardOverview() {
           </div>
         )}
 
-        {/* Micrositios / Zonas Management */}
+        {/* Gestión de Enlaces y Periodos */}
         {activeOrg && (user.role === 'empresarial' || user.role === 'admin') && (
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                  <MapPin size={24} />
+                <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
+                  <LinkIcon size={24} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-800">Micrositios (Zonificación)</h3>
-                  <p className="text-sm text-slate-500">Links personalizados por área para evitar sesgos</p>
+                  <h3 className="text-lg font-bold text-slate-800">Gestión de Enlaces y Periodos</h3>
+                  <p className="text-sm text-slate-500">Comparte estos enlaces para recibir evaluaciones en el periodo actual.</p>
                 </div>
+              </div>
+              
+              <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
+                <span className="text-sm font-semibold text-slate-700">Periodo Activo: {activeOrg.currentPeriod}</span>
+                <button
+                  onClick={() => setShowRestartConfirm(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                >
+                  <PlusCircle size={14} /> Iniciar Nuevo
+                </button>
               </div>
             </div>
             
-            <form onSubmit={handleAddZone} className="flex gap-2 mb-6">
-              <input 
-                type="text" 
-                value={newZoneName}
-                onChange={e => setNewZoneName(e.target.value)}
-                placeholder="Nueva zona (ej. Ventas Norte)"
-                className="flex-1 px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-              />
-              <button 
-                type="submit"
-                disabled={!newZoneName.trim()}
-                className="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
-              >
-                <Plus size={18} /> Agregar
-              </button>
-            </form>
+            <div className="mb-8">
+              <h4 className="text-sm font-bold text-slate-700 mb-2">Enlace Principal (Global)</h4>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="text" 
+                  readOnly 
+                  value={`${window.location.origin}/evaluate/${activeOrg.evaluation_token}`}
+                  className="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-600 font-mono outline-none"
+                />
+                <button 
+                  onClick={() => handleCopyLink(activeOrg.evaluation_token)}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors whitespace-nowrap"
+                >
+                  {copied ? <Check size={18} /> : <LinkIcon size={18} />} Copiar
+                </button>
+              </div>
+            </div>
 
-            {(!activeOrg.zones || activeOrg.zones.length === 0) ? (
-              <div className="text-sm text-slate-500 text-center py-4 bg-slate-50 rounded-xl border border-slate-100">
-                No has creado ningún micrositio. Los resultados no podrán ser segmentados por área.
+            <div className="border-t border-slate-100 pt-6">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-700">Enlaces por Micrositios (Zonificación)</h4>
+                  <p className="text-xs text-slate-500">Cada enlace asignará automáticamente la zona a las respuestas.</p>
+                </div>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {activeOrg.zones.map(zone => (
-                  <div key={zone} className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
-                    <span className="font-medium text-slate-700 truncate mr-2" title={zone}>{zone}</span>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button 
-                        onClick={() => handleCopyLink(activeOrg.evaluation_token, zone)}
-                        className={`p-1.5 rounded-lg transition-colors ${copiedZone === zone ? 'bg-green-100 text-green-700' : 'text-slate-400 hover:text-primary hover:bg-primary/10'}`}
-                        title="Copiar link de zona"
-                      >
-                        {copiedZone === zone ? <Check size={16} /> : <LinkIcon size={16} />}
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteZone(zone)}
-                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Eliminar zona"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+              
+              <form onSubmit={handleAddZone} className="flex gap-2 mb-6 max-w-xl">
+                <input 
+                  type="text" 
+                  value={newZoneName}
+                  onChange={e => setNewZoneName(e.target.value)}
+                  placeholder="Nombre del nuevo micrositio (ej. Operaciones)"
+                  className="flex-1 px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none text-sm"
+                />
+                <button 
+                  type="submit"
+                  disabled={!newZoneName.trim()}
+                  className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Plus size={16} /> Agregar
+                </button>
+              </form>
+
+              {(!activeOrg.zones || activeOrg.zones.length === 0) ? (
+                <div className="text-sm text-slate-500 text-center py-6 bg-slate-50 rounded-xl border border-slate-100 border-dashed">
+                  No has creado ningún micrositio.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {activeOrg.zones.map(zone => (
+                    <div key={zone} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
+                      <span className="font-semibold text-slate-700 min-w-[120px] shrink-0" title={zone}>{zone}</span>
+                      
+                      <div className="flex-1 relative">
+                        <input 
+                          type="text" 
+                          readOnly 
+                          value={`${window.location.origin}/evaluate/${activeOrg.evaluation_token}?zone=${encodeURIComponent(zone)}`}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-500 font-mono outline-none"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button 
+                          onClick={() => handleCopyLink(activeOrg.evaluation_token, zone)}
+                          className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${copiedZone === zone ? 'bg-green-100 text-green-700' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600 shadow-sm'}`}
+                        >
+                          {copiedZone === zone ? <Check size={14} /> : <LinkIcon size={14} />} Copiar
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteZone(zone)}
+                          className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100"
+                          title="Eliminar micrositio"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
