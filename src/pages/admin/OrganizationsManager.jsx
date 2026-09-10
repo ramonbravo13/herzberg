@@ -38,7 +38,13 @@ export default function OrganizationsManager() {
       const randomSiNo = () => Math.random() > 0.8 ? "SI" : "NO";
 
       for (const orgData of orgsToCreate) {
-        const org = await dbService.createOrganization(orgData.name);
+        const allOrgs = await dbService.getOrganizations();
+        let org = allOrgs.find(o => o.name.toLowerCase() === orgData.name.toLowerCase());
+        
+        if (!org) {
+          org = await dbService.createOrganization(orgData.name);
+        }
+
         const totalHeadcount = orgData.zones.reduce((sum, z) => sum + z.count, 0);
         
         const zoneNames = orgData.zones.map(z => z.name);
