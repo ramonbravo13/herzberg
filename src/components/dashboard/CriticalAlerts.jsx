@@ -43,56 +43,61 @@ export default function CriticalAlerts({ dataArray }) {
   if (totalAlerts === 0) return null; // No alerts to show
 
   return (
-    <div className="bg-red-50 border-l-4 border-red-500 rounded-r-2xl p-6 shadow-sm mb-8 mt-4 flex flex-col md:flex-row gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
-      <div className="flex items-start gap-4 md:w-1/3 border-b md:border-b-0 md:border-r border-red-200 pb-4 md:pb-0 md:pr-4">
-        <div className="bg-red-100 p-3 rounded-full text-red-600 shrink-0">
-          <AlertTriangle size={28} strokeWidth={2.5} />
+    <div className="flex flex-col gap-3 mb-8 mt-4 animate-in fade-in slide-in-from-top-4 duration-500">
+      <div className="bg-red-50 border-l-4 border-red-500 rounded-r-2xl p-6 shadow-sm flex flex-col md:flex-row gap-6">
+        <div className="flex items-start gap-4 md:w-1/3 border-b md:border-b-0 md:border-r border-red-200 pb-4 md:pb-0 md:pr-4">
+          <div className="bg-red-100 p-3 rounded-full text-red-600 shrink-0">
+            <AlertTriangle size={28} strokeWidth={2.5} />
+          </div>
+          <div>
+            <h3 className="text-lg font-black text-red-900 tracking-tight">Atención Crítica (RH)</h3>
+            <p className="text-red-700 text-sm mt-1 leading-snug font-medium">
+              Se han detectado focos rojos en la evaluación cualitativa que requieren intervención inmediata.
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-black text-red-900 tracking-tight">Atención Crítica (RH)</h3>
-          <p className="text-red-700 text-sm mt-1 leading-snug font-medium">
-            Se han detectado focos rojos en la evaluación cualitativa que requieren intervención inmediata.
-          </p>
+
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {alerts.condiciones > 0 && (
+            <div className="bg-white/60 p-4 rounded-xl border border-red-100 flex items-center gap-3">
+              <div className="bg-orange-100 p-2 rounded-lg text-orange-600">
+                <Thermometer size={20} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-800 leading-none">{alerts.condiciones}</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Quejas Físicas / Calor</p>
+              </div>
+            </div>
+          )}
+          
+          {alerts.acoso > 0 && (
+            <div className="bg-white/60 p-4 rounded-xl border border-red-100 flex items-center gap-3">
+              <div className="bg-red-100 p-2 rounded-lg text-red-600">
+                <ShieldAlert size={20} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-800 leading-none">{alerts.acoso}</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Reportes de Acoso</p>
+              </div>
+            </div>
+          )}
+
+          {alerts.liderazgo > 0 && (
+            <div className="bg-white/60 p-4 rounded-xl border border-red-100 flex items-center gap-3">
+              <div className="bg-purple-100 p-2 rounded-lg text-purple-600">
+                <Users size={20} />
+              </div>
+              <div>
+                <p className="text-2xl font-black text-slate-800 leading-none">{alerts.liderazgo}</p>
+                <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Liderazgo Tóxico</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {alerts.condiciones > 0 && (
-          <div className="bg-white/60 p-4 rounded-xl border border-red-100 flex items-center gap-3">
-            <div className="bg-orange-100 p-2 rounded-lg text-orange-600">
-              <Thermometer size={20} />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-800 leading-none">{alerts.condiciones}</p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Quejas Físicas / Calor</p>
-            </div>
-          </div>
-        )}
-        
-        {alerts.acoso > 0 && (
-          <div className="bg-white/60 p-4 rounded-xl border border-red-100 flex items-center gap-3">
-            <div className="bg-red-100 p-2 rounded-lg text-red-600">
-              <ShieldAlert size={20} />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-800 leading-none">{alerts.acoso}</p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Reportes de Acoso</p>
-            </div>
-          </div>
-        )}
-
-        {alerts.liderazgo > 0 && (
-          <div className="bg-white/60 p-4 rounded-xl border border-red-100 flex items-center gap-3">
-            <div className="bg-purple-100 p-2 rounded-lg text-purple-600">
-              <Users size={20} />
-            </div>
-            <div>
-              <p className="text-2xl font-black text-slate-800 leading-none">{alerts.liderazgo}</p>
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-wide mt-1">Liderazgo Tóxico</p>
-            </div>
-          </div>
-        )}
-      </div>
+      <p className="text-[11px] leading-relaxed text-slate-500 px-4 max-w-4xl">
+        <strong>* Nota Analítica de IA:</strong> Estas alertas cualitativas son detecciones focales y pueden coexistir matemáticamente con promedios generales altos de Liderazgo o Clima si la anomalía está concentrada en una sola área (ej. un supervisor autoritario en un departamento pequeño no derriba el 60% de aprobación corporativa). Se sugiere cruzar los datos con la Matriz de Calor.
+      </p>
     </div>
   );
 }

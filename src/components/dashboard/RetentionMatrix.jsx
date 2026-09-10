@@ -66,8 +66,8 @@ export default function RetentionMatrix({ dataArray }) {
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} opacity={0.3} />
-            <XAxis type="number" dataKey="x" name="Satisfacción" domain={[1, 5]} tickCount={5} {...chartTheme.axis} label={{ value: 'Satisfacción Global (1-5)', position: 'bottom', offset: 0, fontSize: 12, fill: '#64748b' }} />
-            <YAxis type="number" dataKey="y" name="Permanencia" domain={[1, 5]} tickCount={5} {...chartTheme.axis} label={{ value: 'Intención Permanencia (1-5)', angle: -90, position: 'left', offset: 0, fontSize: 12, fill: '#64748b' }} />
+            <XAxis type="number" dataKey="x" name="Satisfacción" domain={[1, 5]} tickCount={5} tickFormatter={(val) => Math.round(val)} {...chartTheme.axis} label={{ value: 'Satisfacción Global (1-5)', position: 'bottom', offset: 0, fontSize: 12, fill: '#64748b' }} />
+            <YAxis type="number" dataKey="y" name="Permanencia" domain={[1, 5]} tickCount={5} tickFormatter={(val) => Math.round(val)} {...chartTheme.axis} label={{ value: 'Intención Permanencia (1-5)', angle: -90, position: 'left', offset: 0, fontSize: 12, fill: '#64748b' }} />
             
             {/* Center dividers at 3.5 (since scale is 1 to 5) */}
             <ReferenceLine x={3.5} stroke="#cbd5e1" strokeDasharray="3 3" />
