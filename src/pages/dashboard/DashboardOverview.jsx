@@ -341,7 +341,7 @@ export default function DashboardOverview() {
         )}
 
         {/* Gestión de Enlaces y Periodos */}
-        {activeOrg && (user.role === 'empresarial' || user.role === 'admin') && (
+        {activeOrg && (
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
