@@ -30,6 +30,7 @@ Primero, pregunta únicamente (hazlo paso a paso, esperando respuesta):
 - Turno o Esquema de trabajo (Turno matutino, Turno vespertino, Turno nocturno, Esquema rotativo)
 - Antigüedad (Menos de 1 año, 1–3 años, 4–7 años, 8–15 años, Más de 15 años)
 - Nivel del puesto (Operativo, Técnico, Administrativo, Coordinación, Directivo)
+IMPORTANTE SOBRE NIVEL DE PUESTO: Si el usuario reporta un puesto gerencial o directivo pero su labor descrita carece de personal a cargo o poder de decisión (ej. se auto-percibe líder sin serlo formalmente), clasifícalo internamente como 'Operativo' o 'Administrativo' para evitar la inflación jerárquica de la muestra (Ceguera de Taller).
 No solicites nombre ni identificadores personales.
 
 PREGUNTAS (Sigue estrictamente estas preguntas, una por una):

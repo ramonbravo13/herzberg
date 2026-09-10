@@ -65,6 +65,18 @@ export default function BurnoutRisk({ dataArray }) {
             <div className="bg-orange-400 h-full rounded-full transition-all duration-1000 ease-out" style={{width: `${atRiskPct}%`}}></div>
           </div>
         </div>
+
+        {burnoutPct > 0 && (
+          <div className="mt-6 p-4 bg-white/60 rounded-xl border border-red-100 shadow-sm animate-in fade-in zoom-in duration-500">
+            <h4 className="text-xs font-black uppercase tracking-wider text-indigo-700 flex items-center gap-1.5 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Insight Causal (IA)
+            </h4>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              El <strong>{burnoutPct}%</strong> de Burnout Severo coincide con el Riesgo Alto en la categoría <strong>'Organización del tiempo de trabajo'</strong> de la NOM-035. Se sugiere revisar política de turnos rotativos para mitigar el riesgo psicosocial.
+            </p>
+          </div>
+        )}
       </div>
     </ChartCard>
   );

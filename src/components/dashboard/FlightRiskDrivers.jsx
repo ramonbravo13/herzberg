@@ -64,6 +64,45 @@ export default function FlightRiskDrivers({ dataArray }) {
           </div>
         ))}
       </div>
+
+      {/* ROI Simulator Widget */}
+      <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col md:flex-row gap-6 items-center">
+        <div className="md:w-1/2 flex flex-col gap-2 w-full">
+          <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Simulador de Ahorro (ROI)</label>
+          <p className="text-[11px] text-slate-400 leading-snug">Calcula el dinero ahorrado si logras reducir el riesgo de fuga actual a la mitad. Ingresa el salario promedio mensual (MXN).</p>
+          <div className="relative mt-2">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+            <input 
+              type="number" 
+              defaultValue={15000}
+              id="roi-salary"
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-7 pr-3 text-sm font-semibold text-slate-700 focus:outline-none focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100 transition-all"
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                const el = document.getElementById('roi-result');
+                if (el && val > 0) {
+                  // SHRM Standard: Replacement cost = 1.5x Annual Salary
+                  const annual = val * 12;
+                  const replaceCost = annual * 1.5;
+                  const savedPeople = Math.ceil(leaving.length / 2);
+                  const totalSaved = replaceCost * savedPeople;
+                  el.innerText = `$${totalSaved.toLocaleString('es-MX')}`;
+                  document.getElementById('roi-people').innerText = savedPeople;
+                }
+              }}
+            />
+          </div>
+        </div>
+        <div className="md:w-1/2 w-full bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-center">
+          <p className="text-[10px] uppercase font-bold text-indigo-400 tracking-widest mb-1">Ahorro Anual Estimado</p>
+          <p id="roi-result" className="text-3xl font-black text-indigo-700 tracking-tight">
+            ${(Math.ceil(leaving.length / 2) * (15000 * 12 * 1.5)).toLocaleString('es-MX')}
+          </p>
+          <p className="text-[10px] text-indigo-500/70 font-medium mt-2">
+            Al retener a <strong id="roi-people">{Math.ceil(leaving.length / 2)}</strong> colaboradores en riesgo crítico. <br/>*(Estándar SHRM: 1.5x salario anual)*
+          </p>
+        </div>
+      </div>
     </ChartCard>
   );
 }
