@@ -57,7 +57,7 @@ export default function Chat({ onComplete, onExit, organizationName, expectedHea
     setLoading(true);
 
     try {
-      const responseText = await sendMessageToBot(userText);
+      const responseText = await sendMessageToBot(userText, messages, organizationName, expectedHeadcount);
       
       // Check if response is the final JSON
       try {
