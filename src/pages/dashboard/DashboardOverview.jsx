@@ -133,13 +133,34 @@ export default function DashboardOverview() {
         if (isZone) {
            const zoneHeadcounts = { ...(activeOrg.zone_headcounts || {}) };
            if (!isNaN(num) && num > 0) {
+             if (activeOrg.expected_headcount) {
+                let otherZonesSum = 0;
+                for (const z in zoneHeadcounts) {
+                   if (z !== selectedZone) {
+                      otherZonesSum += zoneHeadcounts[z];
+                   }
+                }
+                if (otherZonesSum + num > activeOrg.expected_headcount) {
+                   alert(`Error: La suma de las zonas (${otherZonesSum + num}) superaría la meta global de la organización (${activeOrg.expected_headcount}). Modifica primero la meta global o ajusta otras zonas.`);
+                   return;
+                }
+             }
              zoneHeadcounts[selectedZone] = num;
            } else {
              delete zoneHeadcounts[selectedZone];
            }
            updates = { zone_headcounts: zoneHeadcounts };
         } else {
-           updates = { expected_headcount: (!isNaN(num) && num > 0) ? num : null };
+           if (!isNaN(num) && num > 0) {
+              const currentZonesSum = Object.values(activeOrg.zone_headcounts || {}).reduce((a, b) => a + b, 0);
+              if (num < currentZonesSum) {
+                 alert(`Error: La meta global (${num}) no puede ser menor a la suma actual de participación esperada en las zonas (${currentZonesSum}).`);
+                 return;
+              }
+              updates = { expected_headcount: num };
+           } else {
+              updates = { expected_headcount: null };
+           }
         }
         
         const updated = await dbService.updateOrganization(activeOrg.id, updates);
