@@ -154,9 +154,14 @@ export default function EvaluationPortal() {
   }
 
   if (started) {
+    let currentHeadcount = organization.expected_headcount || 1;
+    if (zone && organization.zone_headcounts && organization.zone_headcounts[zone]) {
+      currentHeadcount = organization.zone_headcounts[zone];
+    }
+
     return (
       <div className="max-w-3xl mx-auto py-8 px-4 h-screen">
-        <Chat onComplete={handleComplete} onExit={() => setStarted(false)} organizationName={organization.name} expectedHeadcount={organization.expected_headcount} />
+        <Chat onComplete={handleComplete} onExit={() => setStarted(false)} organizationName={organization.name} expectedHeadcount={currentHeadcount} />
       </div>
     );
   }
