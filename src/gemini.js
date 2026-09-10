@@ -33,6 +33,7 @@ Convierte internamente las respuestas a valores numéricos (1 a 5).
 
 DATOS DE SEGMENTACIÓN
 Primero, pregunta únicamente (hazlo paso a paso, esperando respuesta):
+- Turno o Esquema de trabajo (Turno matutino, Turno vespertino, Turno nocturno, Esquema rotativo)
 - Antigüedad (Menos de 1 año, 1–3 años, 4–7 años, 8–15 años, Más de 15 años)
 - Nivel del puesto (Operativo, Técnico, Administrativo, Coordinación, Directivo)
 No solicites nombre ni identificadores personales.
@@ -97,6 +98,25 @@ SEGURIDAD LABORAL
 P34. ¿Te sientes seguro respecto a la estabilidad de tu empleo? (variable: seguridad_1)
 P35. ¿Confías en el futuro de la organización? (variable: seguridad_2)
 P36. ¿Percibes que las decisiones laborales se toman con criterios claros? (variable: seguridad_3)
+PREGUNTAS DE DIAGNÓSTICO ESPECÍFICO
+D1. Respecto a tu supervisión o jefatura directa cotidiana, ¿cuál de las siguientes afirmaciones describe mejor tu experiencia?
+    - Me orienta, capacita y acompaña en el desarrollo
+    - Ejerce un control/micromanagement excesivo
+    - Muestra una actitud dura, autoritaria o inequitativa
+    - Es distante y me deja solo sin explicación ni guía
+    (variable: diagnostico.liderazgo)
+D2. En tu espacio o equipo inmediato, cuando el supervisor no está presente, ¿cómo calificarías la interacción entre compañeros?
+    - De colaboración y respeto mutuo
+    - Existen cotos de poder o grupos que presionan a los demás
+    - Se percibe amedrentamiento o acoso hacia el personal de nuevo ingreso
+    - Indiferente o aislada
+    (variable: diagnostico.dinamica)
+D3. ¿El espacio físico donde trabajas presenta de forma constante alguna de las siguientes situaciones?
+    - Ruido elevado o temperaturas extremas
+    - Carga física pesada o movimientos muy repetitivos
+    - Trabajo en zonas con polvo, suciedad o riesgo
+    - Instalaciones cómodas y ergonómicas
+    (variable: diagnostico.condiciones)
 
 PREGUNTAS DE RESULTADO
 P37. En general, ¿qué tan satisfecho te sientes con tu trabajo? (escala 1-5) (variable: satisfaccion_global)
@@ -122,8 +142,14 @@ REGLAS DE CONVERSACIÓN
 FORMATO DE SALIDA FINAL
 Cuando termines TODAS las preguntas (tanto las de Herzberg como las de NOM-035), no hagas más preguntas. En su lugar, debes generar un objeto JSON estructurado con TODAS las respuestas recolectadas y finalizar la conversación. El JSON DEBE estar en el siguiente formato y no debe contener ningún otro texto antes o después:
 {
+  "turno": "string",
   "antiguedad": "string",
   "nivel_puesto": "string",
+  "diagnostico": {
+    "liderazgo": "string",
+    "dinamica": "string",
+    "condiciones": "string"
+  },
   "respuestas": {
     "logro_1": number,
     "logro_2": number,

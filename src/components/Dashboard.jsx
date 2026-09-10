@@ -13,6 +13,8 @@ import EnpsRadar from './dashboard/EnpsRadar';
 import BurnoutRisk from './dashboard/BurnoutRisk';
 import RetentionMatrix from './dashboard/RetentionMatrix';
 import Nom035Dashboard from './dashboard/Nom035Dashboard';
+import DiagnosticCharts from './dashboard/DiagnosticCharts';
+import ShiftGap from './dashboard/ShiftGap';
 import ChartCard from './charts/ChartCard';
 import ChartTooltip from './charts/ChartTooltip';
 import ChartGradients from './charts/ChartGradients';
@@ -252,6 +254,7 @@ export default function Dashboard({ data }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <QuadrantMatrix dataArray={dataArray} />
               <TenureGap dataArray={dataArray} />
+              <ShiftGap dataArray={dataArray} />
             </div>
             <Heatmap dataArray={dataArray} />
             <ThematicAnalysis dataArray={dataArray} />
@@ -280,6 +283,8 @@ export default function Dashboard({ data }) {
               <HierarchyGap dataArray={dataArray} />
               <EnpsRadar dataArray={dataArray} />
             </div>
+            
+            <DiagnosticCharts dataArray={dataArray} />
           </>
         )}
 

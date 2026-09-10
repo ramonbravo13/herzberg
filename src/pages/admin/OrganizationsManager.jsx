@@ -33,6 +33,11 @@ export default function OrganizationsManager() {
 
       const antiguedades = ["Menos de 1 año", "1–3 años", "4–7 años", "8–15 años", "Más de 15 años"];
       const niveles = ["Operativo", "Técnico", "Administrativo", "Coordinación", "Directivo"];
+      const turnos = ["Turno matutino", "Turno vespertino", "Turno nocturno", "Esquema rotativo"];
+      const liderazgoOps = ["Me orienta, capacita y acompaña en el desarrollo", "Ejerce un control/micromanagement excesivo", "Muestra una actitud dura, autoritaria o inequitativa", "Es distante y me deja solo sin explicación ni guía"];
+      const dinamicaOps = ["De colaboración y respeto mutuo", "Existen cotos de poder o grupos que presionan a los demás", "Se percibe amedrentamiento o acoso hacia el personal de nuevo ingreso", "Indiferente o aislada"];
+      const condicionesOps = ["Ruido elevado o temperaturas extremas", "Carga física pesada o movimientos muy repetitivos", "Trabajo en zonas con polvo, suciedad o riesgo", "Instalaciones cómodas y ergonómicas"];
+      
       const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
       const randomScore = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
       const randomSiNo = () => Math.random() > 0.8 ? "SI" : "NO";
@@ -85,8 +90,14 @@ export default function OrganizationsManager() {
             }
 
             const mockResult = {
+              turno: randomItem(turnos),
               antiguedad: randomItem(antiguedades),
               nivel_puesto: randomItem(niveles),
+              diagnostico: {
+                liderazgo: randomItem(liderazgoOps),
+                dinamica: randomItem(dinamicaOps),
+                condiciones: randomItem(condicionesOps)
+              },
               respuestas,
               nom035_respuestas: nom035,
               comentarios: { fortaleza: "Buen ambiente", mejora: "Mejor salario" }
