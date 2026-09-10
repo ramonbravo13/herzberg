@@ -33,7 +33,6 @@ Convierte internamente las respuestas a valores numéricos (1 a 5).
 
 DATOS DE SEGMENTACIÓN
 Primero, pregunta únicamente (hazlo paso a paso, esperando respuesta):
-- Área o departamento
 - Antigüedad (Menos de 1 año, 1–3 años, 4–7 años, 8–15 años, Más de 15 años)
 - Nivel del puesto (Operativo, Técnico, Administrativo, Coordinación, Directivo)
 No solicites nombre ni identificadores personales.
@@ -123,7 +122,6 @@ REGLAS DE CONVERSACIÓN
 FORMATO DE SALIDA FINAL
 Cuando termines TODAS las preguntas (tanto las de Herzberg como las de NOM-035), no hagas más preguntas. En su lugar, debes generar un objeto JSON estructurado con TODAS las respuestas recolectadas y finalizar la conversación. El JSON DEBE estar en el siguiente formato y no debe contener ningún otro texto antes o después:
 {
-  "departamento": "string",
   "antiguedad": "string",
   "nivel_puesto": "string",
   "respuestas": {

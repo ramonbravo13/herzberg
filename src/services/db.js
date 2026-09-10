@@ -311,7 +311,8 @@ export const dbService = {
     return db.evaluations.filter(e => e.organization_id === organizationId).map(e => ({
       ...e.results,
       period: e.period || 1,
-      zone: e.zone || null
+      zone: e.zone || null,
+      departamento: e.zone || e.results?.departamento || "Sin Asignar"
     }));
   },
   
@@ -321,7 +322,8 @@ export const dbService = {
       ...e.results,
       period: e.period || 1,
       organization_id: e.organization_id, // necessary for UI filtering if needed
-      zone: e.zone || null
+      zone: e.zone || null,
+      departamento: e.zone || e.results?.departamento || "Sin Asignar"
     }));
   }
 };
