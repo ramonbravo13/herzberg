@@ -35,17 +35,20 @@ export default function ShiftGap({ dataArray }) {
 
   const chartData = turnos.map(turno => {
     const arr = turnoMap[turno];
-    let enpsSum = 0;
-    let enpsCount = 0;
+    let promotores = 0;
+    let detractores = 0;
+    let total = 0;
     arr.forEach(a => {
       if (a.respuestas && a.respuestas.enps !== undefined) {
-        enpsSum += Number(a.respuestas.enps);
-        enpsCount++;
+        const val = Number(a.respuestas.enps);
+        total++;
+        if (val >= 9) promotores++;
+        else if (val <= 6) detractores++;
       }
     });
     
-    // Scale eNPS from 0-10 to a 0-100 percentage so it can be graphed with satisfaction
-    const enpsScaled = enpsCount > 0 ? Math.round((enpsSum / enpsCount) * 10) : 0;
+    // Scale eNPS using standard NPS formula (-100 to 100)
+    const enpsScaled = total > 0 ? Math.round(((promotores - detractores) / total) * 100) : 0;
 
     return {
       name: turno,

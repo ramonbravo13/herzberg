@@ -233,6 +233,9 @@ export default function Nom035Dashboard({ dataArray }) {
               <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center shadow-sm">
                 <span className="text-5xl font-black text-slate-800 tracking-tight">{countG1 - requireClinical}</span>
                 <span className="text-sm font-medium text-emerald-600 mt-2 flex items-center gap-1"><ShieldCheck size={18}/> Sin riesgo clínico</span>
+                <p className="text-[10px] leading-tight text-slate-400 mt-3 px-2">
+                  *Nota Legal (STPS): La canalización médica aplica únicamente si el colaborador presenció el evento Y además presenta un cuadro de síntomas persistentes.
+                </p>
               </div>
               
               <button 

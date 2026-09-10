@@ -49,19 +49,36 @@ export default function Dashboard({ data }) {
 
   // eNPS
   const enpsScore = React.useMemo(() => {
-    let enpsSum = 0;
-    let enpsCount = 0;
+    let promotores = 0;
+    let detractores = 0;
+    let total = 0;
     dataArray.forEach(d => {
       if (d.respuestas && d.respuestas.enps !== undefined) {
-        enpsSum += Number(d.respuestas.enps);
-        enpsCount++;
+        const val = Number(d.respuestas.enps);
+        total++;
+        if (val >= 9) promotores++;
+        else if (val <= 6) detractores++;
       }
     });
-    return enpsCount > 0 ? Math.round((enpsSum / enpsCount) * 10) : 0;
+    return total > 0 ? Math.round(((promotores - detractores) / total) * 100) : 0;
   }, [dataArray]);
 
-  const fortalezas = React.useMemo(() => dataArray.map(d => d.comentarios?.fortaleza).filter(Boolean).slice(0, 3), [dataArray]);
-  const mejoras = React.useMemo(() => dataArray.map(d => d.comentarios?.mejora).filter(Boolean).slice(0, 3), [dataArray]);
+  const getTopComments = React.useCallback((key) => {
+    const counts = {};
+    dataArray.forEach(d => {
+      const text = d.comentarios?.[key];
+      if (text && text.trim().length > 0) {
+        counts[text] = (counts[text] || 0) + 1;
+      }
+    });
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([text, count]) => count > 1 ? `${text} (${count} menciones)` : text);
+  }, [dataArray]);
+
+  const fortalezas = React.useMemo(() => getTopComments('fortaleza'), [getTopComments]);
+  const mejoras = React.useMemo(() => getTopComments('mejora'), [getTopComments]);
 
   return (
     <div className="w-full">
