@@ -84,7 +84,7 @@ export default function DashboardOverview() {
       
       if (!activeOrg) return;
 
-      const targetPeriod = selectedPeriod === 'active' ? activeOrg.currentPeriod : selectedPeriod;
+      const targetPeriod = selectedPeriod === 'active' ? activeOrg.currentPeriod : parseInt(selectedPeriod, 10);
       
       let filtered = orgEvals.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
       
