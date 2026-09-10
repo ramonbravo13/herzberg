@@ -165,7 +165,7 @@ Cuando termines TODAS las preguntas (tanto las de Herzberg como las de NOM-035),
     "g3_1": 2
   }
 }
-\`;
+`;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -175,7 +175,7 @@ export default async function handler(req, res) {
   // Basic protection: Ensure request comes from our own app
   const referer = req.headers.referer || req.headers.origin || '';
   if (process.env.NODE_ENV === 'production' && !referer.includes(process.env.VERCEL_URL || 'herzberg')) {
-    console.warn(`Blocked unauthorized request from origin: ${referer}`);
+    console.warn("Blocked unauthorized request from origin: " + referer);
     return res.status(403).json({ error: 'Forbidden' });
   }
 

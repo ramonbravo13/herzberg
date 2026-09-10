@@ -32,13 +32,13 @@ export default async function handler(req, res) {
       // Emit JWT and set as HTTPOnly Cookie
       const token = jwt.sign({ id: user.id, role: user.role, organization_id: user.organization_id }, jwtSecret, { expiresIn: '8h' });
       const isProd = process.env.NODE_ENV === 'production';
-      res.setHeader('Set-Cookie', \`herzberg_admin_token=\${token}; HttpOnly; Path=/; Max-Age=28800; SameSite=Strict\${isProd ? '; Secure' : ''}\`);
+      res.setHeader('Set-Cookie', `herzberg_admin_token=${token}; HttpOnly; Path=/; Max-Age=28800; SameSite=Strict${isProd ? '; Secure' : ''}`);
 
       return res.status(200).json(userWithoutPassword);
     }
 
     if (action === 'logout') {
-      res.setHeader('Set-Cookie', \`herzberg_admin_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict\`);
+      res.setHeader('Set-Cookie', `herzberg_admin_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Strict`);
       return res.status(200).json({ success: true });
     }
 
@@ -160,7 +160,7 @@ export default async function handler(req, res) {
         const currentIdx = periods.findIndex(p => p.id === currentPeriodId);
         if (currentIdx > -1) periods[currentIdx].endDate = new Date().toISOString();
         const newPeriodId = currentPeriodId + 1;
-        periods.push({ id: newPeriodId, name: \`Periodo \${newPeriodId}\`, startDate: new Date().toISOString(), endDate: null });
+        periods.push({ id: newPeriodId, name: `Periodo ${newPeriodId}`, startDate: new Date().toISOString(), endDate: null });
         const { data, error } = await supabase.from('organizations').update({ current_period: newPeriodId, periods }).eq('id', orgId).select().single();
         if (error) throw error;
         return res.status(200).json({ ...data, currentPeriod: data.current_period });
