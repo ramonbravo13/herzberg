@@ -4,16 +4,6 @@ import { dbService } from '../../services/db';
 import Chat from '../../components/Chat';
 import ClinicalNameForm from '../../components/ClinicalNameForm';
 import { evaluateGuia1 } from '../../utils/nom035_metrics';
-import { v4 as uuidv4 } from 'uuid';
-
-const getOrCreateParticipantId = () => {
-  let id = localStorage.getItem('herzberg_participant_id');
-  if (!id) {
-    id = uuidv4();
-    localStorage.setItem('herzberg_participant_id', id);
-  }
-  return id;
-};
 
 export default function EvaluationPortal() {
   const { token } = useParams();
@@ -30,16 +20,20 @@ export default function EvaluationPortal() {
   const zone = queryParams.get('zone');
 
   useEffect(() => {
-    const fetchOrg = async () => {
+    const initSessionAndFetchOrg = async () => {
       try {
+        // 1. Initialize HTTPOnly Session Cookie (Zero Trust)
+        await fetch('/api/init-session', { method: 'POST' });
+
+        // 2. Fetch Organization Details
         const org = await dbService.getOrganizationByToken(token);
         if (org) {
           if (org.subscriptionEndDate && new Date(org.subscriptionEndDate) < new Date()) {
             navigate('/expired', { replace: true });
           } else {
-            const pid = getOrCreateParticipantId();
             const period = org.currentPeriod || 1;
-            const isCompleted = await dbService.checkParticipantCompletion(org.id, period, pid);
+            // The backend now reads the cookie automatically, no participantId needed
+            const isCompleted = await dbService.checkParticipantCompletion(org.id, period);
             if (isCompleted) {
               setAlreadyCompleted(true);
             } else {
@@ -50,11 +44,12 @@ export default function EvaluationPortal() {
           setError('Enlace de evaluación inválido o expirado.');
         }
       } catch (err) {
+        console.error(err);
         setError('Error al cargar la evaluación.');
       }
     };
     if (token) {
-      fetchOrg();
+      initSessionAndFetchOrg();
     }
   }, [token, navigate]);
 
@@ -65,12 +60,11 @@ export default function EvaluationPortal() {
         return; // Wait for ClinicalNameForm
       }
 
-      const pid = getOrCreateParticipantId();
-      await dbService.saveEvaluation(organization.id, results, pid, zone);
+      await dbService.saveEvaluation(organization.id, results, zone);
       setCompleted(true);
     } catch (err) {
       console.error("Error guardando evaluación:", err);
-      if (err.message?.includes('Ya has completado')) {
+      if (err.message?.includes('Ya has completado') || err.message?.includes('Sesión no inicializada')) {
         setAlreadyCompleted(true);
       } else {
         alert("Hubo un error al guardar tus respuestas. Por favor, contacta a soporte.");
@@ -81,13 +75,12 @@ export default function EvaluationPortal() {
   const handleClinicalSubmit = async (name) => {
     try {
       const resultsWithName = { ...clinicalPendingResults, nombre_clinico: name };
-      const pid = getOrCreateParticipantId();
-      await dbService.saveEvaluation(organization.id, resultsWithName, pid, zone);
+      await dbService.saveEvaluation(organization.id, resultsWithName, zone);
       setClinicalPendingResults(null);
       setCompleted(true);
     } catch (err) {
       console.error("Error guardando evaluación clínica:", err);
-      if (err.message?.includes('Ya has completado')) {
+      if (err.message?.includes('Ya has completado') || err.message?.includes('Sesión no inicializada')) {
         setAlreadyCompleted(true);
         setClinicalPendingResults(null);
       } else {

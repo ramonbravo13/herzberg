@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@google/genai": "^2.21.0",
+    "@supabase/supabase-js": "^2.116.0",
     "framer-motion": "^13.2.0",
+    "jsonwebtoken": "^9.0.3",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",

@@ -27,7 +27,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await dbService.logout();
+    } catch (e) {
+      console.error(e);
+    }
     setUser(null);
     localStorage.removeItem('herzberg_user');
   };

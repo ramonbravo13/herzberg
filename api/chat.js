@@ -172,6 +172,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
+  // Basic protection: Ensure request comes from our own app
+  const referer = req.headers.referer || req.headers.origin || '';
+  if (process.env.NODE_ENV === 'production' && !referer.includes(process.env.VERCEL_URL || 'herzberg')) {
+    console.warn(`Blocked unauthorized request from origin: ${referer}`);
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   try {
     const { message, history = [], organizationName = 'la empresa', headcount = 1 } = req.body;
 

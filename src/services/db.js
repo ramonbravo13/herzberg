@@ -1,329 +1,106 @@
-import { v4 as uuidv4 } from 'uuid';
+// Frontend DB Service Proxy
+// This replaces the old localStorage logic and now securely communicates with the Vercel backend.
+// The frontend NO LONGER has direct access to the database (Zero Trust).
 
-const DB_KEY = 'herzberg_db';
+const apiCall = async (action, payload = {}) => {
+  const response = await fetch('/api/db', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ action, payload }),
+  });
 
-// Initial DB state
-const initialDb = {
-  organizations: [],
-  users: [
-    {
-      id: uuidv4(),
-      email: 'admin@herzberg.com',
-      password: 'admin',
-      role: 'admin',
-      name: 'Super Admin'
-    }
-  ],
-  evaluations: []
-};
-
-// Initialize DB if empty
-const initDB = () => {
-  const db = localStorage.getItem(DB_KEY);
-  if (!db) {
-    localStorage.setItem(DB_KEY, JSON.stringify(initialDb));
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Error en la petición a la base de datos');
   }
-};
-
-const getDB = () => {
-  initDB();
-  return JSON.parse(localStorage.getItem(DB_KEY));
-};
-
-const saveDB = (db) => {
-  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  return data;
 };
 
 export const dbService = {
-  // --- AUTH ---
   login: async (email, password) => {
-    const db = getDB();
-    const user = db.users.find(u => u.email === email && u.password === password);
-    if (!user) {
-      throw new Error('Credenciales inválidas');
-    }
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return await apiCall('login', { email, password });
   },
 
-  // --- ORGANIZATIONS ---
+  logout: async () => {
+    return await apiCall('logout');
+  },
+
   getOrganizations: async () => {
-    const db = getDB();
-    // Inject default periods for backwards compatibility
-    let updated = false;
-    db.organizations.forEach(org => {
-      if (!org.periods) {
-        org.currentPeriod = 1;
-        org.periods = [{ id: 1, name: 'Periodo 1', startDate: org.createdAt, endDate: null }];
-        updated = true;
-      }
-      if (!org.zones) {
-        org.zones = [];
-        updated = true;
-      }
-    });
-    if (updated) saveDB(db);
-    return db.organizations;
+    return await apiCall('getOrganizations');
   },
 
   createOrganization: async (name, subscriptionEndDate = null) => {
-    const db = getDB();
-    const newOrg = {
-      id: uuidv4(),
-      name,
-      evaluation_token: uuidv4(),
-      createdAt: new Date().toISOString(),
-      subscriptionEndDate,
-      currentPeriod: 1,
-      periods: [{ id: 1, name: 'Periodo 1', startDate: new Date().toISOString(), endDate: null }],
-      zones: []
-    };
-    db.organizations.push(newOrg);
-    saveDB(db);
-    return newOrg;
+    return await apiCall('createOrganization', { name, subscriptionEndDate });
   },
 
   updateOrganization: async (id, updates) => {
-    const db = getDB();
-    const index = db.organizations.findIndex(o => o.id === id);
-    if (index > -1) {
-      if (typeof updates === 'string') {
-        // Backwards compatibility
-        db.organizations[index].name = updates;
-      } else {
-        db.organizations[index] = { ...db.organizations[index], ...updates };
-      }
-      saveDB(db);
-      return db.organizations[index];
-    }
-    throw new Error('Organización no encontrada');
+    return await apiCall('updateOrganization', { id, updates });
   },
 
   deleteOrganization: async (id) => {
-    const db = getDB();
-    // Verify if org has users
-    const hasUsers = db.users.some(u => u.organization_id === id);
-    if (hasUsers) {
-      throw new Error('No se puede eliminar la organización porque tiene usuarios asignados.');
-    }
-    
-    db.organizations = db.organizations.filter(o => o.id !== id);
-    // Also delete associated evaluations
-    db.evaluations = db.evaluations.filter(e => e.organization_id !== id);
-    
-    // Remove deleted organization from corporativo users' allowed_organizations
-    db.users = db.users.map(u => {
-      if (u.role === 'corporativo' && u.allowed_organizations) {
-        return {
-          ...u,
-          allowed_organizations: u.allowed_organizations.filter(orgId => orgId !== id)
-        };
-      }
-      return u;
-    });
-
-    saveDB(db);
-    return true;
+    return await apiCall('deleteOrganization', { id });
   },
 
   restartOrganizationPeriod: async (orgId) => {
-    const db = getDB();
-    const index = db.organizations.findIndex(o => o.id === orgId);
-    if (index > -1) {
-      let org = db.organizations[index];
-      // Backwards compatibility check
-      if (!org.periods) {
-        org.currentPeriod = 1;
-        org.periods = [{ id: 1, name: 'Periodo 1', startDate: org.createdAt, endDate: null }];
-      }
-      // close current period
-      const current = org.periods.find(p => p.id === org.currentPeriod);
-      if (current) current.endDate = new Date().toISOString();
-      
-      org.currentPeriod += 1;
-      org.periods.push({
-        id: org.currentPeriod,
-        name: `Periodo ${org.currentPeriod}`,
-        startDate: new Date().toISOString(),
-        endDate: null
-      });
-      saveDB(db);
-      return org;
-    }
-    throw new Error('Organización no encontrada');
+    return await apiCall('restartOrganizationPeriod', { orgId });
   },
 
   getOrganizationByToken: async (token) => {
-    const db = getDB();
-    return db.organizations.find(o => o.evaluation_token === token);
-  },
-  
-  getOrganizationById: async (id) => {
-    const db = getDB();
-    return db.organizations.find(o => o.id === id);
+    return await apiCall('getOrganizationByToken', { token });
   },
 
-  // --- USERS ---
+  getOrganizationById: async (id) => {
+    return await apiCall('getOrganizationById', { id });
+  },
+
   getUsers: async () => {
-    const db = getDB();
-    return db.users.map(({ password, ...user }) => user); // Hide passwords
+    return await apiCall('getUsers');
   },
 
   createUser: async (userData) => {
-    const db = getDB();
-    if (db.users.find(u => u.email === userData.email)) {
-      throw new Error('El correo ya está registrado');
-    }
-    const newUser = {
-      id: uuidv4(),
-      ...userData,
-      requiresPasswordChange: true,
-      createdAt: new Date().toISOString()
-    };
-    db.users.push(newUser);
-    saveDB(db);
-    // Return without password
-    const { password, ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
+    return await apiCall('createUser', { userData });
   },
 
   updateUser: async (id, updates) => {
-    const db = getDB();
-    const index = db.users.findIndex(u => u.id === id);
-    if (index > -1) {
-      if (updates.email && db.users.some(u => u.email === updates.email && u.id !== id)) {
-        throw new Error('El correo ya está en uso por otro usuario');
-      }
-      db.users[index] = { ...db.users[index], ...updates };
-      saveDB(db);
-      const { password, ...userWithoutPassword } = db.users[index];
-      return userWithoutPassword;
-    }
-    throw new Error('Usuario no encontrado');
+    return await apiCall('updateUser', { id, updates });
   },
 
   deleteUser: async (id) => {
-    const db = getDB();
-    if (id === 'admin-1') {
-      throw new Error('No puedes eliminar al administrador principal');
-    }
-    db.users = db.users.filter(u => u.id !== id);
-    saveDB(db);
-    return true;
+    return await apiCall('deleteUser', { id });
   },
-  
+
   updateUserPassword: async (userId, newPassword) => {
-    const db = getDB();
-    const userIndex = db.users.findIndex(u => u.id === userId);
-    if(userIndex > -1) {
-       db.users[userIndex].password = newPassword;
-       saveDB(db);
-       return true;
-    }
-    throw new Error('Usuario no encontrado');
+    return await apiCall('updateUserPassword', { userId, newPassword });
   },
 
   confirmPasswordChange: async (userId, newPassword) => {
-    const db = getDB();
-    const userIndex = db.users.findIndex(u => u.id === userId);
-    if(userIndex > -1) {
-       db.users[userIndex].password = newPassword;
-       db.users[userIndex].requiresPasswordChange = false;
-       saveDB(db);
-       const { password, ...userWithoutPassword } = db.users[userIndex];
-       return userWithoutPassword;
-    }
-    throw new Error('Usuario no encontrado');
+    return await apiCall('confirmPasswordChange', { userId, newPassword });
   },
 
   generatePasswordResetToken: async (email) => {
-    const db = getDB();
-    const userIndex = db.users.findIndex(u => u.email === email);
-    if(userIndex > -1) {
-      const token = uuidv4();
-      db.users[userIndex].resetToken = token;
-      db.users[userIndex].resetTokenExpiry = Date.now() + 3600000; // 1 hour
-      saveDB(db);
-      return token;
-    }
-    throw new Error('No existe una cuenta con ese correo electrónico');
+    throw new Error('Recuperación de contraseña no implementada en la versión segura. Contacte al administrador.');
   },
 
   resetPasswordWithToken: async (token, newPassword) => {
-    const db = getDB();
-    const userIndex = db.users.findIndex(u => u.resetToken === token && u.resetTokenExpiry > Date.now());
-    if (userIndex > -1) {
-      db.users[userIndex].password = newPassword;
-      db.users[userIndex].requiresPasswordChange = false;
-      delete db.users[userIndex].resetToken;
-      delete db.users[userIndex].resetTokenExpiry;
-      saveDB(db);
-      return true;
-    }
-    throw new Error('El enlace de recuperación es inválido o ha expirado');
+    throw new Error('No implementado');
   },
 
-  // --- EVALUATIONS ---
-  saveEvaluation: async (organizationId, results, participantId = null, zone = null) => {
-    const db = getDB();
-    const org = db.organizations.find(o => o.id === organizationId);
-    const period = org ? (org.currentPeriod || 1) : 1;
-    
-    if (participantId) {
-      const alreadyCompleted = db.evaluations.some(e => 
-        e.organization_id === organizationId && 
-        e.period === period && 
-        e.participant_id === participantId
-      );
-      if (alreadyCompleted) {
-        throw new Error('Ya has completado esta encuesta en el periodo actual.');
-      }
-    }
-
-    const evaluation = {
-      id: uuidv4(),
-      organization_id: organizationId,
-      period,
-      participant_id: participantId,
-      zone,
-      results,
-      createdAt: new Date().toISOString()
-    };
-    db.evaluations.push(evaluation);
-    saveDB(db);
-    return evaluation;
+  saveEvaluation: async (organizationId, results, zone = null) => {
+    return await apiCall('saveEvaluation', { organizationId, results, zone });
   },
 
-  checkParticipantCompletion: async (organizationId, period, participantId) => {
-    const db = getDB();
-    if (!participantId) return false;
-    return db.evaluations.some(e => 
-      e.organization_id === organizationId && 
-      e.period === period && 
-      e.participant_id === participantId
-    );
+  checkParticipantCompletion: async (organizationId, period) => {
+    const res = await apiCall('checkParticipantCompletion', { organizationId, period });
+    return res.completed;
   },
 
   getEvaluationsByOrganization: async (organizationId) => {
-    const db = getDB();
-    // we return the full evaluation object now because we need 'period' to filter in the UI
-    return db.evaluations.filter(e => e.organization_id === organizationId).map(e => ({
-      ...e.results,
-      period: e.period || 1,
-      zone: e.zone || null,
-      departamento: e.zone || e.results?.departamento || "Sin Asignar"
-    }));
+    return await apiCall('getEvaluationsByOrganization', { organizationId });
   },
-  
+
   getAllEvaluations: async () => {
-    const db = getDB();
-    return db.evaluations.map(e => ({
-      ...e.results,
-      period: e.period || 1,
-      organization_id: e.organization_id, // necessary for UI filtering if needed
-      zone: e.zone || null,
-      departamento: e.zone || e.results?.departamento || "Sin Asignar"
-    }));
+    return await apiCall('getAllEvaluations');
   }
 };
