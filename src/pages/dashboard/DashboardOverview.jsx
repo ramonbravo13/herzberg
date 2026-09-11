@@ -11,6 +11,7 @@ export default function DashboardOverview() {
   const location = useLocation();
   const [organizations, setOrganizations] = useState([]);
   const [evaluations, setEvaluations] = useState([]);
+  const [globalEvaluations, setGlobalEvaluations] = useState([]);
   const [selectedOrgId, setSelectedOrgId] = useState(location.state?.orgId || '');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -77,9 +78,12 @@ export default function DashboardOverview() {
         allEvals = allEvals.filter(e => allowed.includes(e.organization_id));
       }
 
+      setGlobalEvaluations(allEvals);
       setEvaluations(allEvals); // Vista Global shows all regardless of period, or could be filtered if needed. We show all.
     } else {
       const orgEvals = await dbService.getEvaluationsByOrganization(selectedOrgId);
+      setGlobalEvaluations(orgEvals);
+
       const activeOrg = organizations.find(o => o.id === selectedOrgId);
       
       if (!activeOrg) return;
@@ -477,7 +481,7 @@ export default function DashboardOverview() {
           </div>
         ) : (
           <div className="dashboard-wrapper">
-            <Dashboard data={evaluations} />
+            <Dashboard data={evaluations} globalData={globalEvaluations} />
           </div>
         )}
       </div>

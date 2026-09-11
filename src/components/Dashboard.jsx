@@ -17,15 +17,18 @@ import Nom035Dashboard from './dashboard/Nom035Dashboard';
 import DiagnosticCharts from './dashboard/DiagnosticCharts';
 import ShiftGap from './dashboard/ShiftGap';
 import CriticalAlerts from './dashboard/CriticalAlerts';
+import Benchmarking from './dashboard/Benchmarking';
+import PredictiveMatrix from './dashboard/PredictiveMatrix';
+import DispersionChart from './dashboard/DispersionChart';
 import ChartCard from './charts/ChartCard';
 import ChartTooltip from './charts/ChartTooltip';
 import ChartGradients from './charts/ChartGradients';
 import { chartTheme } from './charts/theme';
-import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon, Info, X } from 'lucide-react';
+import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon, Info, X, Scale, BrainCircuit } from 'lucide-react';
 import { PieChart, Pie, Cell as PieCell } from 'recharts';
 import AnimatedNumber from './ui/AnimatedNumber';
 
-export default function Dashboard({ data }) {
+export default function Dashboard({ data, globalData }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -42,8 +45,11 @@ export default function Dashboard({ data }) {
 
   const chartData = React.useMemo(() => INDICES_CONFIG.map((ind, idx) => {
     const score = calculateIndex(ind.vars, dataArray);
-    return { name: ind.name, score, fill: getCategoryColor(ind.name, idx) };
+    return { name: ind.name, score, fill: getCategoryColor(ind.name, idx), tipo: ind.tipo };
   }), [dataArray]);
+
+  const motivadoresData = React.useMemo(() => chartData.filter(d => d.tipo === 'Motivador'), [chartData]);
+  const higieneData = React.useMemo(() => chartData.filter(d => d.tipo === 'Higiene'), [chartData]);
 
   const satisfaccionScore = React.useMemo(() => calculateIndex(['satisfaccion_global'], dataArray), [dataArray]);
   const compromisoScore = React.useMemo(() => calculateIndex(['compromiso'], dataArray), [dataArray]);
@@ -135,6 +141,20 @@ export default function Dashboard({ data }) {
           >
             Talent Intelligence
           </button>
+          <button 
+            onClick={() => setActiveTab('predictivo')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'predictivo' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            Analítica Predictiva
+          </button>
+          {globalData && globalData.length > 0 && (
+            <button 
+              onClick={() => setActiveTab('benchmark')}
+              className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'benchmark' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+            >
+              Benchmarking
+            </button>
+          )}
           <button 
             onClick={() => setActiveTab('nom035')}
             className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'nom035' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
@@ -266,13 +286,13 @@ export default function Dashboard({ data }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="lg:col-span-1">
             <ChartCard 
-              title="Índices por Factor" 
-              subtitle="Métricas analizadas según factores específicos de Herzberg."
-              icon={Activity}
+              title="Factores Motivacionales" 
+              subtitle="Generan satisfacción real y compromiso a largo plazo."
+              icon={Target}
             >
-              <div className="h-[400px]">
+              <div className="h-[320px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <BarChart data={motivadoresData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <ChartGradients />
                     <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
                     <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
@@ -294,10 +314,10 @@ export default function Dashboard({ data }) {
                       animationDuration={800}
                       animationEasing="ease-out"
                     >
-                      {chartData.map((entry, index) => {
+                      {motivadoresData.map((entry, index) => {
                         const globalIdx = globalPalette.indexOf(entry.fill);
                         const gradient = globalIdx !== -1 ? `url(#gradient-${globalIdx})` : entry.fill;
-                        return <Cell key={`cell-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
+                        return <Cell key={`cell-mot-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
                       })}
                     </Bar>
                   </BarChart>
@@ -307,9 +327,53 @@ export default function Dashboard({ data }) {
           </div>
 
           <div className="lg:col-span-1">
-            {isAggregated && <QuadrantMatrix dataArray={dataArray} />}
+            <ChartCard 
+              title="Factores de Higiene" 
+              subtitle="Su deficiencia causa insatisfacción y motiva la rotación."
+              icon={Activity}
+            >
+              <div className="h-[320px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={higieneData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <ChartGradients />
+                    <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
+                    <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
+                    <YAxis dataKey="name" type="category" width={130} {...chartTheme.axis} />
+                    <Tooltip 
+                      cursor={chartTheme.tooltip.cursor}
+                      content={<ChartTooltip 
+                        formatter={(val, name, props) => (
+                          <span style={{ color: props.payload.fill }}>{val}% - {getRiskLabel(val)}</span>
+                        )}
+                        labelFormatter={() => null}
+                      />}
+                    />
+                    <Bar 
+                      dataKey="score" 
+                      radius={chartTheme.bar.horizontalRadius}
+                      cursor="pointer"
+                      onClick={(data) => setSelectedMetric(data.name)}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    >
+                      {higieneData.map((entry, index) => {
+                        const globalIdx = globalPalette.indexOf(entry.fill);
+                        const gradient = globalIdx !== -1 ? `url(#gradient-${globalIdx})` : entry.fill;
+                        return <Cell key={`cell-hig-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
+                      })}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
           </div>
         </div>
+
+        {isAggregated && (
+          <div className="w-full">
+            <QuadrantMatrix dataArray={dataArray} />
+          </div>
+        )}
 
         {isAggregated && (
           <>
@@ -445,7 +509,31 @@ export default function Dashboard({ data }) {
           </div>
         )}
 
-        {/* TAB 4: NOM-035 */}
+        {/* TAB 4: PREDICTIVO */}
+        {activeTab === 'predictivo' && isAggregated && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-slate-800">Analítica Predictiva y Dispersión</h2>
+              <p className="text-slate-500 mt-1">Modelos estadísticos para predecir retención y entender la distribución de las percepciones.</p>
+            </div>
+            
+            <PredictiveMatrix dataArray={dataArray} />
+            <DispersionChart dataArray={dataArray} />
+          </div>
+        )}
+
+        {/* TAB 5: BENCHMARKING */}
+        {activeTab === 'benchmark' && globalData && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-slate-800">Benchmarking y Segmentación</h2>
+              <p className="text-slate-500 mt-1">Comparativa directa (Cross-sectional) entre áreas y sucursales de la organización.</p>
+            </div>
+            <Benchmarking globalData={globalData} />
+          </div>
+        )}
+
+        {/* TAB 5: NOM-035 */}
         {activeTab === 'nom035' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-6">
