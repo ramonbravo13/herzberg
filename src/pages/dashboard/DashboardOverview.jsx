@@ -268,32 +268,29 @@ export default function DashboardOverview() {
         {/* Lado derecho: Periodo y Acciones */}
         <div className="flex flex-wrap items-center gap-3">
           {activeOrg && (
-            <div className="flex items-center gap-2 border-r border-slate-200 pr-4 mr-1">
-              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg shrink-0">
-                <MapPin size={18} />
-              </div>
+            <div className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-indigo-500/50">
+              <MapPin size={16} className="text-slate-500 shrink-0" />
               <select
                 value={selectedZone}
                 onChange={(e) => setSelectedZone(e.target.value)}
-                className="bg-transparent text-sm font-semibold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-6 max-w-[150px] truncate"
+                className="bg-transparent text-sm font-semibold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-2 w-full min-w-[140px] truncate appearance-none"
               >
                 <option value="all">Todas las zonas (Filtro)</option>
                 {activeOrg.zones && activeOrg.zones.map(z => (
                   <option key={z} value={z}>{z}</option>
                 ))}
               </select>
+              <ChevronDown size={14} className="text-slate-400 pointer-events-none shrink-0" />
             </div>
           )}
 
           {activeOrg && (
-            <div className="flex items-center gap-2">
-              <div className="p-2 bg-slate-50 text-slate-600 rounded-lg shrink-0">
-                <Calendar size={18} />
-              </div>
+            <div className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-indigo-500/50">
+              <Calendar size={16} className="text-slate-500 shrink-0" />
               <select
                 value={selectedPeriod}
                 onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="bg-transparent text-sm font-semibold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-6"
+                className="bg-transparent text-sm font-semibold text-slate-700 border-none outline-none cursor-pointer focus:ring-0 p-0 pr-2 min-w-[140px] truncate appearance-none"
               >
                 <option value="active">Periodo Activo ({activeOrg.currentPeriod})</option>
                 {activeOrg.periods && activeOrg.periods
@@ -304,6 +301,7 @@ export default function DashboardOverview() {
                   ))
                 }
               </select>
+              <ChevronDown size={14} className="text-slate-400 pointer-events-none shrink-0" />
             </div>
           )}
         </div>
