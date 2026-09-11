@@ -173,6 +173,7 @@ export default function Dashboard({ data }) {
             onClick={() => setSelectedMetric('enps')} 
           />
           </div>
+        </div>
         )}
 
         {/* TAB 2: CLIMA LABORAL & HERZBERG */}
@@ -264,6 +265,8 @@ export default function Dashboard({ data }) {
                 </ul>
               </div>
             </div>
+          </>
+        )}
           </div>
         )}
 
@@ -602,11 +605,5 @@ function TheoryContext() {
         </div>
       )}
     </>
-  );
-}o rotación.</p>
-          </div>
-        </div>
-      )}
-    </div>
   );
 }
