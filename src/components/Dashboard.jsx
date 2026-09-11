@@ -101,7 +101,8 @@ export default function Dashboard({ data }) {
           <h1 className="text-xl font-bold text-slate-800">
             {isAggregated ? 'Resultados Organizacionales Agregados' : 'Evaluación Individual'}
           </h1>
-          <div className="flex flex-wrap gap-2 text-xs text-slate-600 font-medium">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 font-medium">
+            <TheoryContext />
             {isAggregated ? (
               <div className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-100 flex items-center shadow-inner">
                 Muestra: {dataArray.length} Evaluaciones
@@ -194,7 +195,6 @@ export default function Dashboard({ data }) {
                 <h2 className="text-2xl font-black text-slate-800">Factores de Higiene y Motivación</h2>
                 <p className="text-slate-500 mt-1">Análisis profundo basado en la Teoría de los Dos Factores.</p>
               </div>
-              <TheoryContext />
             </div>
 
             {/* Factores Herzberg + Matriz (50/50) */}

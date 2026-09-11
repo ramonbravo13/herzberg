@@ -19,27 +19,27 @@ export default function TopRisks({ dataArray }) {
   // Take top 3
   const top3 = scores.slice(0, 3);
 
-  const riskHex = categoryColors['Riesgo de Rotación']; // Pink
+  const riskHex = categoryColors['Riesgo de Rotación'] || '#ef4444'; // Pink -> Redish
 
   return (
     <ChartCard 
-      title="Top 3 Focos de Acción Crítica"
-      subtitle="Estas son las 3 preguntas exactas con peor calificación en toda la evaluación. Representan las áreas de riesgo más críticas que requieren atención inmediata por parte del liderazgo."
+      title="Top 3 Focos de Acción Crítica (Áreas de Riesgo)"
+      subtitle="Muestra los 3 reactivos (preguntas) de la encuesta que obtuvieron la calificación general más baja. Un porcentaje menor indica mayor insatisfacción y marca dónde se debe priorizar la intervención directiva."
       icon={AlertTriangle}
       iconStyle={{ backgroundColor: getGradientColor(riskHex, 0.1), color: riskHex, borderColor: getGradientColor(riskHex, 0.2) }}
-      className="shadow-sm"
-      style={{ borderColor: getGradientColor(riskHex, 0.2) }}
+      className="shadow-sm border-l-4"
+      style={{ borderLeftColor: riskHex }}
     >
       <div className="space-y-4 mt-2">
         {top3.map((item, index) => (
           <div key={item.key} className="flex items-center p-5 rounded-2xl border transition-all hover:shadow-md" style={{ backgroundColor: getGradientColor(riskHex, 0.05), borderColor: getGradientColor(riskHex, 0.2) }}>
             <div className="text-3xl font-black mr-5 opacity-20" style={{ color: riskHex }}>#{index + 1}</div>
             <div className="flex-1">
-              <h4 className="font-bold text-slate-800 text-sm leading-relaxed">{item.text}</h4>
+              <h4 className="font-bold text-slate-800 text-sm leading-relaxed">"{item.text}"</h4>
+              <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider font-semibold">Puntaje de aprobación de los empleados</p>
             </div>
             <div className="ml-5 flex flex-col items-end justify-center">
-              <div className="text-2xl font-black tracking-tight" style={{ color: riskHex }}>{item.score}%</div>
-              <div className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: riskHex }}>Riesgo Alto</div>
+              <div className="text-3xl font-black tracking-tight" style={{ color: riskHex }}>{item.score}%</div>
             </div>
           </div>
         ))}
