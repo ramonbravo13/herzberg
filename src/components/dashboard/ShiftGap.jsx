@@ -70,7 +70,7 @@ export default function ShiftGap({ dataArray }) {
             <ChartGradients />
             <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} vertical={false} strokeOpacity={0.4} />
             <XAxis dataKey="name" {...chartTheme.axis} />
-            <YAxis domain={[0, 100]} {...chartTheme.axis} />
+            <YAxis domain={['auto', 100]} {...chartTheme.axis} />
             <Tooltip 
               cursor={chartTheme.tooltip.cursor}
               content={(props) => {
@@ -81,7 +81,7 @@ export default function ShiftGap({ dataArray }) {
                       <p className="font-bold text-slate-800 mb-2 pb-2 border-b border-slate-100">{props.label}</p>
                       <div className="space-y-1.5">
                         {props.payload.map(p => {
-                          const displayVal = p.dataKey === 'enps' ? (p.value / 10).toFixed(1) + ' / 10' : Number(p.value).toFixed(1) + '%';
+                          const displayVal = p.dataKey === 'enps' ? Number(p.value).toFixed(0) + ' (eNPS)' : Number(p.value).toFixed(1) + '%';
                           return (
                             <div key={p.dataKey} className="flex items-center justify-between gap-6 text-sm">
                               <div className="flex items-center gap-2">
