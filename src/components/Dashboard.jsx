@@ -150,23 +150,21 @@ export default function Dashboard({ data }) {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+        {/* Factores Herzberg + Matriz (50/50) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="lg:col-span-1">
             <ChartCard 
               title="Índices por Factor" 
-              subtitle="Haz clic en cualquier barra para ver los detalles de distribución."
+              subtitle="Métricas analizadas según factores específicos de Herzberg."
               icon={Activity}
             >
-              <div className="mb-4 text-center max-w-3xl mx-auto flex flex-wrap justify-center gap-6">
-                <span className="text-sm text-slate-500">Métricas analizadas según factores específicos de Herzberg</span>
-              </div>
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <ChartGradients />
                     <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
                     <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
-                    <YAxis dataKey="name" type="category" width={150} {...chartTheme.axis} />
+                    <YAxis dataKey="name" type="category" width={130} {...chartTheme.axis} />
                     <Tooltip 
                       cursor={chartTheme.tooltip.cursor}
                       content={<ChartTooltip 
@@ -197,86 +195,18 @@ export default function Dashboard({ data }) {
           </div>
 
           <div className="lg:col-span-1">
-            <ChartCard 
-              title="Distribución eNPS" 
-              subtitle="Promotores, Pasivos y Detractores"
-              icon={PieChartIcon}
-            >
-              <div className="flex flex-col items-center justify-center h-full">
-                <div className="h-[250px] w-full relative">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <ChartGradients />
-                      <Pie
-                        data={React.useMemo(() => [
-                          { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: categoryColors['Promotores'] },
-                          { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: categoryColors['Pasivos'] },
-                          { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: categoryColors['Detractores'] }
-                        ].filter(d => d.value > 0), [dataArray])}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={70}
-                        outerRadius={100}
-                        paddingAngle={2}
-                        dataKey="value"
-                        stroke="none"
-                        animationDuration={800}
-                        animationEasing="ease-out"
-                      >
-                        {
-                          React.useMemo(() => [
-                            { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: '#34d399' },
-                            { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: '#fbbf24' },
-                            { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: '#f87171' }
-                          ].filter(d => d.value > 0), [dataArray]).map((entry, index) => (
-                            <PieCell key={`cell-${index}`} fill={entry.color} className="hover:brightness-110 transition-all duration-300" />
-                          ))
-                        }
-                      </Pie>
-                      <Tooltip 
-                        content={<ChartTooltip 
-                          formatter={(val, name, props) => (
-                            <span style={{ color: props.payload.color }}>{val} Personas</span>
-                          )}
-                        />}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  {/* Central KPI */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
-                    <span className="text-4xl font-black text-slate-800 tracking-tight">
-                      <AnimatedNumber value={enpsScore} duration={2} />
-                    </span>
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">eNPS</span>
-                  </div>
-                </div>
-                {/* Legend Below Doughnut */}
-                <div className="flex justify-center gap-4 mt-6">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
-                    <span className="text-sm font-semibold text-slate-600">Promotores</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-amber-400"></div>
-                    <span className="text-sm font-semibold text-slate-600">Pasivos</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                    <span className="text-sm font-semibold text-slate-600">Detractores</span>
-                  </div>
-                </div>
-              </div>
-            </ChartCard>
+            {isAggregated && <QuadrantMatrix dataArray={dataArray} />}
           </div>
         </div>
 
         {isAggregated && (
           <>
+            {/* Brecha por Turno + Tenure Gap (50/50) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <QuadrantMatrix dataArray={dataArray} />
               <TenureGap dataArray={dataArray} />
               <ShiftGap dataArray={dataArray} />
             </div>
+
             <Heatmap dataArray={dataArray} />
             <ThematicAnalysis dataArray={dataArray} />
 
@@ -300,9 +230,85 @@ export default function Dashboard({ data }) {
               </div>
             </div>
 
+            <HierarchyGap dataArray={dataArray} />
+
+            {/* Distribución eNPS + EnpsRadar (50/50) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <HierarchyGap dataArray={dataArray} />
-              <EnpsRadar dataArray={dataArray} />
+              <div className="lg:col-span-1">
+                <ChartCard 
+                  title="Distribución eNPS" 
+                  subtitle="Promotores, Pasivos y Detractores"
+                  icon={PieChartIcon}
+                >
+                  <div className="flex flex-col items-center justify-center h-full">
+                    <div className="h-[250px] w-full relative">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <ChartGradients />
+                          <Pie
+                            data={React.useMemo(() => [
+                              { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: categoryColors['Promotores'] },
+                              { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: categoryColors['Pasivos'] },
+                              { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: categoryColors['Detractores'] }
+                            ].filter(d => d.value > 0), [dataArray])}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={70}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            stroke="none"
+                            animationDuration={800}
+                            animationEasing="ease-out"
+                          >
+                            {
+                              React.useMemo(() => [
+                                { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: '#34d399' },
+                                { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: '#fbbf24' },
+                                { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: '#f87171' }
+                              ].filter(d => d.value > 0), [dataArray]).map((entry, index) => (
+                                <PieCell key={`cell-${index}`} fill={entry.color} className="hover:brightness-110 transition-all duration-300" />
+                              ))
+                            }
+                          </Pie>
+                          <Tooltip 
+                            content={<ChartTooltip 
+                              formatter={(val, name, props) => (
+                                <span style={{ color: props.payload.color }}>{val} Personas</span>
+                              )}
+                            />}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      {/* Central KPI */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none mt-2">
+                        <span className="text-4xl font-black text-slate-800 tracking-tight">
+                          <AnimatedNumber value={enpsScore} duration={2} />
+                        </span>
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">eNPS</span>
+                      </div>
+                    </div>
+                    {/* Legend Below Doughnut */}
+                    <div className="flex justify-center gap-4 mt-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
+                        <span className="text-sm font-semibold text-slate-600">Promotores</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-amber-400"></div>
+                        <span className="text-sm font-semibold text-slate-600">Pasivos</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                        <span className="text-sm font-semibold text-slate-600">Detractores</span>
+                      </div>
+                    </div>
+                  </div>
+                </ChartCard>
+              </div>
+              <div className="lg:col-span-1">
+                <EnpsRadar dataArray={dataArray} />
+              </div>
             </div>
             
             <DiagnosticCharts dataArray={dataArray} />
