@@ -82,6 +82,16 @@ export default function Dashboard({ data }) {
   const fortalezas = React.useMemo(() => getTopComments('fortaleza'), [getTopComments]);
   const mejoras = React.useMemo(() => getTopComments('mejora'), [getTopComments]);
 
+  // eNPS Distribution Data for PieChart
+  const enpsPieData = React.useMemo(() => {
+    const data = [
+      { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: categoryColors['Promotores'] || '#34d399' },
+      { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: categoryColors['Pasivos'] || '#fbbf24' },
+      { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: categoryColors['Detractores'] || '#f87171' }
+    ];
+    return data.filter(d => d.value > 0);
+  }, [dataArray]);
+
   return (
     <div className="w-full relative">
       
@@ -311,11 +321,7 @@ export default function Dashboard({ data }) {
                         <PieChart>
                           <ChartGradients />
                           <Pie
-                            data={React.useMemo(() => [
-                              { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: categoryColors['Promotores'] },
-                              { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: categoryColors['Pasivos'] },
-                              { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: categoryColors['Detractores'] }
-                            ].filter(d => d.value > 0), [dataArray])}
+                            data={enpsPieData}
                             cx="50%"
                             cy="50%"
                             innerRadius={70}
@@ -326,15 +332,9 @@ export default function Dashboard({ data }) {
                             animationDuration={800}
                             animationEasing="ease-out"
                           >
-                            {
-                              React.useMemo(() => [
-                                { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: '#34d399' },
-                                { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: '#fbbf24' },
-                                { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: '#f87171' }
-                              ].filter(d => d.value > 0), [dataArray]).map((entry, index) => (
-                                <PieCell key={`cell-${index}`} fill={entry.color} className="hover:brightness-110 transition-all duration-300" />
-                              ))
-                            }
+                            {enpsPieData.map((entry, index) => (
+                              <PieCell key={`cell-${index}`} fill={entry.color} className="hover:brightness-110 transition-all duration-300" />
+                            ))}
                           </Pie>
                           <Tooltip 
                             content={<ChartTooltip 
