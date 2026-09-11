@@ -124,12 +124,6 @@ export default function Dashboard({ data }) {
             Resumen Ejecutivo
           </button>
           <button 
-            onClick={() => setActiveTab('teoria')}
-            className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'teoria' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
-          >
-            Teoría de Herzberg
-          </button>
-          <button 
             onClick={() => setActiveTab('clima')}
             className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'clima' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
           >
@@ -146,6 +140,12 @@ export default function Dashboard({ data }) {
             className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'nom035' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
           >
             Cumplimiento NOM-035
+          </button>
+          <button 
+            onClick={() => setActiveTab('teoria')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'teoria' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            Teoría de Herzberg
           </button>
         </div>
       </div>
@@ -229,11 +229,25 @@ export default function Dashboard({ data }) {
               </div>
             </div>
             
-            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 mt-6 shadow-sm">
-              <h4 className="text-lg font-bold text-slate-800 mb-2">¿Cómo leer estas métricas?</h4>
-              <p className="text-slate-600 leading-relaxed">
-                A través de la IA se evaluaron 36 variables estandarizadas. Las respuestas se promedian en un índice del 0 al 100. Valores por encima de 80 representan <span className="font-bold text-emerald-600">Fortalezas</span>, mientras que índices por debajo de 60 se consideran de <span className="font-bold text-orange-500">Riesgo</span> y requieren intervención directiva.
-              </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm">
+                <h4 className="text-lg font-bold text-slate-800 mb-2">Valor Estratégico para la Organización</h4>
+                <p className="text-slate-600 leading-relaxed text-justify">
+                  Entender esta diferencia previene el error directivo más común: <strong>intentar motivar al talento únicamente con dinero o prestaciones (factores de higiene)</strong>. Si se incrementa el salario sin mejorar la autonomía o el reconocimiento (factores motivacionales), la insatisfacción desaparece temporalmente, pero el desempeño excepcional y la lealtad a largo plazo no aumentan. Las empresas más rentables optimizan sus presupuestos garantizando la "higiene" para frenar la fuga de talento, y maximizando la "motivación" para impulsar la productividad real.
+                </p>
+              </div>
+              
+              <div className="bg-indigo-50/40 p-6 rounded-2xl border border-indigo-100 shadow-sm">
+                <h4 className="text-lg font-bold text-slate-800 mb-2">¿Cómo leer nuestras métricas?</h4>
+                <p className="text-slate-600 leading-relaxed text-justify">
+                  A través de la IA, evaluamos 36 variables estandarizadas mediante entrevistas conversacionales. Las respuestas se promedian en un índice del 0 al 100:
+                </p>
+                <ul className="mt-4 space-y-3 text-sm text-slate-600">
+                  <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></div> <span><strong>80 a 100%:</strong> Fortalezas sólidas. Mantener.</span></li>
+                  <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm"></div> <span><strong>60 a 79%:</strong> Áreas neutrales o estancadas. Observar.</span></li>
+                  <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></div> <span><strong>Menos de 60%:</strong> Riesgo inminente. Intervención directiva urgente requerida.</span></li>
+                </ul>
+              </div>
             </div>
           </div>
         )}
