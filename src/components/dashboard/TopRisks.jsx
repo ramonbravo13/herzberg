@@ -1,6 +1,6 @@
 import React from 'react';
 import { calculateIndex, QUESTION_MAP } from '../../utils/metrics';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info } from 'lucide-react';
 import ChartCard from '../charts/ChartCard';
 import { categoryColors, getGradientColor } from '../../utils/themeColors';
 
@@ -43,6 +43,16 @@ export default function TopRisks({ dataArray }) {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="mt-5 p-4 bg-slate-50 border border-slate-200 rounded-xl flex gap-3 text-slate-600 text-sm leading-relaxed">
+        <Info size={18} className="shrink-0 text-slate-400 mt-0.5" />
+        <p>
+          <strong>¿Cómo se interpreta este porcentaje?</strong><br/>
+          Representa el nivel de satisfacción global sobre esta pregunta específica. 
+          Un <strong>100%</strong> significaría que todos los colaboradores respondieron de forma excelente. 
+          Al estar en esta lista con puntajes bajos, significa que una gran mayoría de los empleados calificó negativamente esta área, convirtiéndola en una prioridad de mejora urgente.
+        </p>
       </div>
     </ChartCard>
   );
