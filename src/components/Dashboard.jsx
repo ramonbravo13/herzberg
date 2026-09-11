@@ -102,7 +102,6 @@ export default function Dashboard({ data }) {
             {isAggregated ? 'Resultados Organizacionales Agregados' : 'Evaluación Individual'}
           </h1>
           <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 font-medium">
-            <TheoryContext />
             {isAggregated ? (
               <div className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-100 flex items-center shadow-inner">
                 Muestra: {dataArray.length} Evaluaciones
@@ -123,6 +122,12 @@ export default function Dashboard({ data }) {
             className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
           >
             Resumen Ejecutivo
+          </button>
+          <button 
+            onClick={() => setActiveTab('teoria')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'teoria' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            Teoría de Herzberg
           </button>
           <button 
             onClick={() => setActiveTab('clima')}
@@ -185,6 +190,52 @@ export default function Dashboard({ data }) {
           />
           </div>
         </div>
+        )}
+
+        {/* TAB: TEORIA DE HERZBERG */}
+        {activeTab === 'teoria' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </div>
+                Teoría de Herzberg
+              </h2>
+              <p className="text-slate-500 mt-2 text-lg">
+                Este dashboard basa sus métricas en la Teoría de los Dos Factores de Frederick Herzberg, un estándar global en psicología organizacional. Herzberg postula que la satisfacción y la insatisfacción no son opuestos directos, sino que son generadas por dos grupos distintos de variables que deben gestionarse de forma independiente:
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                  <h4 className="text-xl font-bold text-emerald-800">1. Factores Motivacionales</h4>
+                </div>
+                <p className="text-emerald-700/90 text-justify leading-relaxed">
+                  Son intrínsecos a la naturaleza del trabajo en sí (Logro, Reconocimiento, Responsabilidad, Crecimiento Profesional). Su presencia genera verdadera satisfacción y fomenta el compromiso a largo plazo. Su carencia no genera quejas inmediatas, pero produce empleados estancados y sin iniciativa.
+                </p>
+              </div>
+              
+              <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                  <h4 className="text-xl font-bold text-amber-800">2. Factores de Higiene</h4>
+                </div>
+                <p className="text-amber-700/90 text-justify leading-relaxed">
+                  Son externos al empleado (Salario, Políticas, Relaciones, Seguridad Laboral, Supervisión). Su deficiencia causa una profunda insatisfacción y motiva la fuga de talento. Sin embargo, aunque sean excelentes, los empleados rápidamente los dan por sentado, por lo que no generan motivación real por sí solos.
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 mt-6 shadow-sm">
+              <h4 className="text-lg font-bold text-slate-800 mb-2">¿Cómo leer estas métricas?</h4>
+              <p className="text-slate-600 leading-relaxed">
+                A través de la IA se evaluaron 36 variables estandarizadas. Las respuestas se promedian en un índice del 0 al 100. Valores por encima de 80 representan <span className="font-bold text-emerald-600">Fortalezas</span>, mientras que índices por debajo de 60 se consideran de <span className="font-bold text-orange-500">Riesgo</span> y requieren intervención directiva.
+              </p>
+            </div>
+          </div>
         )}
 
         {/* TAB 2: CLIMA LABORAL & HERZBERG */}
@@ -546,64 +597,4 @@ function MetricModal({ metricId, dataArray, onClose }) {
   );
 }
 
-function TheoryContext() {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <>
-      <button 
-        onClick={() => setIsOpen(true)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 text-xs font-bold transition-colors"
-      >
-        <Info size={16} /> Ver Teoría Metodológica
-      </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
-          <div 
-            className="w-full max-w-md h-full bg-white shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
-              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                </div>
-                Teoría de Herzberg
-              </h2>
-              <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-1 bg-white rounded-full border border-slate-200">
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="p-6 text-sm text-slate-600 leading-relaxed space-y-6">
-              <p>
-                Este dashboard basa sus métricas en la Teoría de los Dos Factores de Frederick Herzberg, un estándar global en psicología organizacional. Herzberg postula que la satisfacción y la insatisfacción no son opuestos directos, sino que son generadas por dos grupos distintos de variables que deben gestionarse de forma independiente:
-              </p>
-              
-              <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                  <h4 className="font-bold text-emerald-800">1. Factores Motivacionales</h4>
-                </div>
-                <p className="text-emerald-700/90 text-justify">Son intrínsecos a la naturaleza del trabajo en sí (Logro, Reconocimiento, Responsabilidad, Crecimiento Profesional). Su presencia genera verdadera satisfacción y fomenta el compromiso a largo plazo. Su carencia no genera quejas inmediatas, pero produce empleados estancados y sin iniciativa.</p>
-              </div>
-              
-              <div className="bg-amber-50/50 p-5 rounded-xl border border-amber-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                  <h4 className="font-bold text-amber-800">2. Factores de Higiene</h4>
-                </div>
-                <p className="text-amber-700/90 text-justify">Son externos al empleado (Salario, Políticas, Relaciones, Seguridad Laboral, Supervisión). Su deficiencia causa una profunda insatisfacción y motiva la fuga de talento. Sin embargo, aunque sean excelentes, los empleados rápidamente los dan por sentado, por lo que no generan motivación real por sí solos.</p>
-              </div>
-              
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <p className="font-bold text-slate-800 mb-1">¿Cómo leer estas métricas?</p>
-                <p>A través de la IA se evaluaron 36 variables estandarizadas. Las respuestas se promedian en un índice del 0 al 100. Valores por encima de 80 representan <span className="font-bold text-emerald-600">Fortalezas</span>, mientras que índices por debajo de 60 se consideran de <span className="font-bold text-orange-500">Riesgo</span> y requieren intervención.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
-  );
-}
