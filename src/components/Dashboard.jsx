@@ -21,12 +21,13 @@ import ChartCard from './charts/ChartCard';
 import ChartTooltip from './charts/ChartTooltip';
 import ChartGradients from './charts/ChartGradients';
 import { chartTheme } from './charts/theme';
-import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
+import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon, Info, X } from 'lucide-react';
 import { PieChart, Pie, Cell as PieCell } from 'recharts';
 import AnimatedNumber from './ui/AnimatedNumber';
 
 export default function Dashboard({ data }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
 
   const dataArray = React.useMemo(() => (Array.isArray(data) ? data : [data]), [data]);
   
@@ -82,43 +83,65 @@ export default function Dashboard({ data }) {
   const mejoras = React.useMemo(() => getTopComments('mejora'), [getTopComments]);
 
   return (
-    <div className="w-full">
-      <div className="w-full space-y-8">
-        
-        <header className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-          <h1 className="text-2xl font-bold text-slate-800 mb-2">
-            {isAggregated ? 'Resultados Organizacionales Agregados' : 'Resultados de Evaluación Individual'}
+    <div className="w-full relative">
+      
+      {/* Sticky Header / Tabs */}
+      <div className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200 pb-0 pt-5 px-6 mb-8 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
+          <h1 className="text-xl font-bold text-slate-800">
+            {isAggregated ? 'Resultados Organizacionales Agregados' : 'Evaluación Individual'}
           </h1>
-          <div className="flex flex-wrap gap-4 text-sm text-slate-600">
+          <div className="flex flex-wrap gap-2 text-xs text-slate-600 font-medium">
             {isAggregated ? (
-              <div className="bg-primary/10 text-primary font-semibold px-4 py-2 rounded-full">
-                Muestra Total: {dataArray.length} Evaluaciones
+              <div className="bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-100 flex items-center shadow-inner">
+                Muestra: {dataArray.length} Evaluaciones
               </div>
             ) : (
               <>
-                <div className="bg-slate-100 px-3 py-1 rounded-full"><strong>Depto:</strong> {dataArray[0].departamento}</div>
-                <div className="bg-slate-100 px-3 py-1 rounded-full"><strong>Antigüedad:</strong> {dataArray[0].antiguedad}</div>
-                <div className="bg-slate-100 px-3 py-1 rounded-full"><strong>Nivel:</strong> {dataArray[0].nivel_puesto}</div>
+                <div className="bg-slate-100 px-3 py-1.5 rounded-full"><strong>Depto:</strong> {dataArray[0].departamento}</div>
+                <div className="bg-slate-100 px-3 py-1.5 rounded-full"><strong>Antigüedad:</strong> {dataArray[0].antiguedad}</div>
+                <div className="bg-slate-100 px-3 py-1.5 rounded-full"><strong>Nivel:</strong> {dataArray[0].nivel_puesto}</div>
               </>
             )}
           </div>
-        </header>
-
-        <div className="pt-8 pb-4 mt-8 mb-6">
-          <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3">
-            <span className="bg-indigo-600 text-white p-2 rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            </span>
-            Evaluación de Clima Laboral (Modelo Herzberg)
-          </h2>
-          <p className="text-slate-500 mt-2">Métricas de satisfacción, compromiso y riesgo de rotación basadas en factores intrínsecos y extrínsecos.</p>
         </div>
+        
+        <div className="flex space-x-8 overflow-x-auto hide-scrollbar">
+          <button 
+            onClick={() => setActiveTab('overview')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'overview' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            Resumen Ejecutivo
+          </button>
+          <button 
+            onClick={() => setActiveTab('clima')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'clima' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            Clima Laboral & Herzberg
+          </button>
+          <button 
+            onClick={() => setActiveTab('talent')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'talent' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            Talent Intelligence
+          </button>
+          <button 
+            onClick={() => setActiveTab('nom035')}
+            className={`pb-3 text-sm font-bold border-b-2 transition-colors whitespace-nowrap ${activeTab === 'nom035' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-800'}`}
+          >
+            Cumplimiento NOM-035
+          </button>
+        </div>
+      </div>
 
-        <TheoryContext />
+      <div className="w-full space-y-10">
+        
+        {/* TAB 1: RESUMEN EJECUTIVO */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <CriticalAlerts dataArray={dataArray} />
 
-        <CriticalAlerts dataArray={dataArray} />
-
-        {isAggregated && <TopRisks dataArray={dataArray} />}
+            {isAggregated && <TopRisks dataArray={dataArray} />}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <ScoreCard 
@@ -149,9 +172,21 @@ export default function Dashboard({ data }) {
             icon={Users}
             onClick={() => setSelectedMetric('enps')} 
           />
-        </div>
+          </div>
+        )}
 
-        {/* Factores Herzberg + Matriz (50/50) */}
+        {/* TAB 2: CLIMA LABORAL & HERZBERG */}
+        {activeTab === 'clima' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-black text-slate-800">Factores de Higiene y Motivación</h2>
+                <p className="text-slate-500 mt-1">Análisis profundo basado en la Teoría de los Dos Factores.</p>
+              </div>
+              <TheoryContext />
+            </div>
+
+            {/* Factores Herzberg + Matriz (50/50) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="lg:col-span-1">
             <ChartCard 
@@ -211,15 +246,33 @@ export default function Dashboard({ data }) {
             <Heatmap dataArray={dataArray} />
             <ThematicAnalysis dataArray={dataArray} />
 
-            {/* Espaciador superior para evitar colisión con barra de navegación */}
-            <div className="pt-8 pb-4 border-t-2 border-slate-200 mt-16">
-              <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
-                <span className="bg-indigo-600 text-white p-2 rounded-xl">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                </span>
-                Insights Estratégicos Avanzados
-              </h2>
-              <p className="text-slate-500 mt-2">Módulos de consultoría analítica para la toma de decisiones directivas.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 className="font-bold text-slate-800 mb-4">Lo que más valoran (Fortalezas)</h3>
+                <ul className="space-y-3">
+                  {fortalezas.map((f, i) => (
+                    <li key={i} className="text-slate-600 italic border-l-4 border-emerald-400 pl-3 py-1 bg-slate-50 rounded-r-md">"{f}"</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 className="font-bold text-slate-800 mb-4">Oportunidades de Mejora</h3>
+                <ul className="space-y-3">
+                  {mejoras.map((m, i) => (
+                    <li key={i} className="text-slate-600 italic border-l-4 border-orange-400 pl-3 py-1 bg-slate-50 rounded-r-md">"{m}"</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: TALENT INTELLIGENCE */}
+        {activeTab === 'talent' && isAggregated && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-slate-800">Talent Intelligence</h2>
+              <p className="text-slate-500 mt-1">Métricas estratégicas para Business Partners y Consultores de RH.</p>
             </div>
 
             {/* Matriz 60% | ROI 40% */}
@@ -321,39 +374,19 @@ export default function Dashboard({ data }) {
             </div>
             
             <DiagnosticCharts dataArray={dataArray} />
-          </>
+          </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="font-bold text-slate-800 mb-4">Lo que más valoran (Fortalezas)</h3>
-            <ul className="space-y-3">
-              {fortalezas.map((f, i) => (
-                <li key={i} className="text-slate-600 italic border-l-4 border-emerald-400 pl-3 py-1 bg-slate-50 rounded-r-md">"{f}"</li>
-              ))}
-            </ul>
+        {/* TAB 4: NOM-035 */}
+        {activeTab === 'nom035' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-6">
+              <h2 className="text-2xl font-black text-slate-800">Cumplimiento Normativo: NOM-035-STPS</h2>
+              <p className="text-slate-500 mt-1">Identificación, análisis y prevención de Factores de Riesgo Psicosocial.</p>
+            </div>
+            <Nom035Dashboard dataArray={dataArray} />
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-            <h3 className="font-bold text-slate-800 mb-4">Oportunidades de Mejora</h3>
-            <ul className="space-y-3">
-              {mejoras.map((m, i) => (
-                <li key={i} className="text-slate-600 italic border-l-4 border-orange-400 pl-3 py-1 bg-slate-50 rounded-r-md">"{m}"</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="pt-12 pb-4 border-t-2 border-slate-200 mt-16 mb-6">
-          <h2 className="text-3xl font-black text-slate-800 flex items-center gap-3">
-            <span className="bg-emerald-600 text-white p-2 rounded-xl">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            </span>
-            Cumplimiento Normativo: NOM-035-STPS-2018
-          </h2>
-          <p className="text-slate-500 mt-2">Identificación, análisis y prevención de Factores de Riesgo Psicosocial.</p>
-        </div>
-        
-        <Nom035Dashboard dataArray={dataArray} />
+        )}
 
       </div>
 
@@ -511,52 +544,66 @@ function MetricModal({ metricId, dataArray, onClose }) {
 }
 
 function TheoryContext() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+    <>
       <button 
-        onClick={() => setIsOpen(!isOpen)} 
-        className="w-full flex justify-between items-center text-left focus:outline-none"
+        onClick={() => setIsOpen(true)}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 text-xs font-bold transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          </div>
-          <h2 className="text-lg font-bold text-slate-800">Contexto Metodológico: Teoría de Herzberg</h2>
-        </div>
-        <div className="text-slate-400 bg-slate-50 p-2 rounded-full hover:bg-slate-100 transition-colors">
-          {isOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m18 15-6-6-6 6"/></svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          )}
-        </div>
+        <Info size={16} /> Ver Teoría Metodológica
       </button>
-      
+
       {isOpen && (
-        <div className="mt-5 pt-5 border-t border-slate-100 text-sm text-slate-600 leading-relaxed space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-          <p>
-            Este dashboard basa sus métricas en la Teoría de los Dos Factores de Frederick Herzberg, un estándar global en psicología organizacional. Herzberg postula que la satisfacción y la insatisfacción no son opuestos directos, sino que son generadas por dos grupos distintos de variables que deben gestionarse de forma independiente:
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <h4 className="font-bold text-emerald-800">1. Factores Motivacionales</h4>
-              </div>
-              <p className="text-emerald-700/90 text-justify">Son intrínsecos a la naturaleza del trabajo en sí (Logro, Reconocimiento, Responsabilidad, Crecimiento Profesional). Su presencia genera verdadera satisfacción y fomenta el compromiso a largo plazo. Su carencia no genera quejas inmediatas, pero produce empleados estancados y sin iniciativa.</p>
+        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+          <div 
+            className="w-full max-w-md h-full bg-white shadow-2xl overflow-y-auto animate-in slide-in-from-right duration-300"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </div>
+                Teoría de Herzberg
+              </h2>
+              <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors p-1 bg-white rounded-full border border-slate-200">
+                <X size={20} />
+              </button>
             </div>
-            <div className="bg-amber-50/50 p-5 rounded-xl border border-amber-100">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 rounded-full bg-amber-500"></div>
-                <h4 className="font-bold text-amber-800">2. Factores de Higiene</h4>
+            
+            <div className="p-6 text-sm text-slate-600 leading-relaxed space-y-6">
+              <p>
+                Este dashboard basa sus métricas en la Teoría de los Dos Factores de Frederick Herzberg, un estándar global en psicología organizacional. Herzberg postula que la satisfacción y la insatisfacción no son opuestos directos, sino que son generadas por dos grupos distintos de variables que deben gestionarse de forma independiente:
+              </p>
+              
+              <div className="bg-emerald-50/50 p-5 rounded-xl border border-emerald-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                  <h4 className="font-bold text-emerald-800">1. Factores Motivacionales</h4>
+                </div>
+                <p className="text-emerald-700/90 text-justify">Son intrínsecos a la naturaleza del trabajo en sí (Logro, Reconocimiento, Responsabilidad, Crecimiento Profesional). Su presencia genera verdadera satisfacción y fomenta el compromiso a largo plazo. Su carencia no genera quejas inmediatas, pero produce empleados estancados y sin iniciativa.</p>
               </div>
-              <p className="text-amber-700/90 text-justify">Son externos al empleado (Salario, Políticas, Relaciones, Seguridad Laboral, Supervisión). Su deficiencia causa una profunda insatisfacción y motiva la fuga de talento. Sin embargo, aunque sean excelentes, los empleados rápidamente los dan por sentado, por lo que no generan motivación real por sí solos.</p>
+              
+              <div className="bg-amber-50/50 p-5 rounded-xl border border-amber-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                  <h4 className="font-bold text-amber-800">2. Factores de Higiene</h4>
+                </div>
+                <p className="text-amber-700/90 text-justify">Son externos al empleado (Salario, Políticas, Relaciones, Seguridad Laboral, Supervisión). Su deficiencia causa una profunda insatisfacción y motiva la fuga de talento. Sin embargo, aunque sean excelentes, los empleados rápidamente los dan por sentado, por lo que no generan motivación real por sí solos.</p>
+              </div>
+              
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                <p className="font-bold text-slate-800 mb-1">¿Cómo leer estas métricas?</p>
+                <p>A través de la IA se evaluaron 36 variables estandarizadas. Las respuestas se promedian en un índice del 0 al 100. Valores por encima de 80 representan <span className="font-bold text-emerald-600">Fortalezas</span>, mientras que índices por debajo de 60 se consideran de <span className="font-bold text-orange-500">Riesgo</span> y requieren intervención.</p>
+              </div>
             </div>
           </div>
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 mt-2">
-            <p className="font-semibold text-slate-800 mb-1">¿Cómo leer estas métricas?</p>
-            <p>A través de la IA se evaluaron 36 variables estandarizadas. Las respuestas se promedian en un índice del 0 al 100. Valores por encima de 80 representan <span className="font-semibold text-emerald-600">Fortalezas</span>, mientras que índices por debajo de 60 se consideran de <span className="font-semibold text-orange-500">Riesgo</span> y requieren intervención para evitar pérdida de productividad o rotación.</p>
+        </div>
+      )}
+    </>
+  );
+}o rotación.</p>
           </div>
         </div>
       )}

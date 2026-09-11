@@ -275,56 +275,63 @@ export default function Nom035Dashboard({ dataArray }) {
         </ChartCard>
       )}
 
-      {/* Modal de Casos Clínicos */}
+      {/* Slide-over de Casos Clínicos */}
       {showClinicalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2"><Stethoscope className="text-red-500"/> Expedientes de Valoración Clínica (ATS)</h2>
+        <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm" onClick={() => setShowClinicalModal(false)}>
+          <div 
+            className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50 sticky top-0 z-20 shrink-0">
+              <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2"><Stethoscope className="text-red-500"/> Expedientes (ATS)</h2>
               <button onClick={() => setShowClinicalModal(false)} className="text-slate-400 hover:text-slate-600 font-bold text-2xl leading-none">&times;</button>
             </div>
             
-            <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl text-sm text-orange-800 mb-6 flex gap-3">
-              <AlertTriangle className="shrink-0 text-orange-600" size={20} />
-              <p>
-                <strong>Estrictamente Confidencial:</strong> Esta información es exclusiva para el seguimiento médico-laboral de Recursos Humanos. De acuerdo al numeral 5.5 de la NOM-035, el patrón debe canalizar a estos trabajadores a la institución de seguridad social o médico privado.
-              </p>
-            </div>
+            <div className="p-6 flex-1 overflow-y-auto flex flex-col">
+              <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl text-sm text-orange-800 mb-6 flex gap-3 shrink-0">
+                <AlertTriangle className="shrink-0 text-orange-600" size={20} />
+                <p>
+                  <strong>Estrictamente Confidencial:</strong> Esta información es exclusiva para el seguimiento médico-laboral. De acuerdo al numeral 5.5 de la NOM-035, el patrón debe canalizar a estos trabajadores a la institución de seguridad social.
+                </p>
+              </div>
 
-            <div className="overflow-y-auto flex-1 border border-slate-200 rounded-xl bg-slate-50">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-100 sticky top-0 border-b border-slate-200 shadow-sm z-10">
-                  <tr>
-                    <th className="p-4 font-semibold text-slate-700">Nombre del Colaborador</th>
-                    <th className="p-4 font-semibold text-slate-700">Área / Nivel</th>
-                    <th className="p-4 font-semibold text-slate-700">Eventos Reportados</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200 bg-white">
-                  {clinicalCases.map((c, idx) => {
-                    const nr = c.nom035_respuestas || {};
-                    const events = [];
-                    if (nr.ats_1 === 'SI') events.push('Accidentes graves');
-                    if (nr.ats_2 === 'SI') events.push('Asaltos');
-                    if (nr.ats_3 === 'SI') events.push('Actos violentos');
-                    if (nr.ats_4 === 'SI') events.push('Secuestro');
-                    if (nr.ats_5 === 'SI') events.push('Amenazas');
-                    if (nr.ats_6 === 'SI') events.push('Otros riesgos vitales');
-                    
-                    return (
-                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                        <td className="p-4 font-bold text-slate-800">{c.nombre_clinico || <span className="text-slate-400 italic font-normal">Anónimo (No proporcionó nombre)</span>}</td>
-                        <td className="p-4 text-slate-600">{c.departamento} <br/><span className="text-xs opacity-70 uppercase tracking-wider">{c.nivel_puesto}</span></td>
-                        <td className="p-4">
-                          <div className="flex flex-wrap gap-1.5">
-                            {events.map((ev, eIdx) => <span key={eIdx} className="bg-red-100 text-red-700 text-xs px-2.5 py-1 rounded-md font-medium whitespace-nowrap border border-red-200">{ev}</span>)}
-                          </div>
-                        </td>
+              <div className="flex-1 border border-slate-200 rounded-xl bg-slate-50 overflow-hidden flex flex-col">
+                <div className="overflow-y-auto flex-1">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-100 sticky top-0 border-b border-slate-200 shadow-sm z-10">
+                      <tr>
+                        <th className="p-4 font-semibold text-slate-700">Nombre del Colaborador</th>
+                        <th className="p-4 font-semibold text-slate-700">Área / Nivel</th>
+                        <th className="p-4 font-semibold text-slate-700">Eventos Reportados</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 bg-white">
+                      {clinicalCases.map((c, idx) => {
+                        const nr = c.nom035_respuestas || {};
+                        const events = [];
+                        if (nr.ats_1 === 'SI') events.push('Accidentes graves');
+                        if (nr.ats_2 === 'SI') events.push('Asaltos');
+                        if (nr.ats_3 === 'SI') events.push('Actos violentos');
+                        if (nr.ats_4 === 'SI') events.push('Secuestro');
+                        if (nr.ats_5 === 'SI') events.push('Amenazas');
+                        if (nr.ats_6 === 'SI') events.push('Otros riesgos vitales');
+                        
+                        return (
+                          <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                            <td className="p-4 font-bold text-slate-800">{c.nombre_clinico || <span className="text-slate-400 italic font-normal">Anónimo</span>}</td>
+                            <td className="p-4 text-slate-600">{c.departamento} <br/><span className="text-xs opacity-70 uppercase tracking-wider">{c.nivel_puesto}</span></td>
+                            <td className="p-4">
+                              <div className="flex flex-wrap gap-1.5">
+                                {events.map((ev, eIdx) => <span key={eIdx} className="bg-red-100 text-red-700 text-[11px] px-2 py-0.5 rounded-md font-semibold whitespace-nowrap border border-red-200">{ev}</span>)}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </div>
