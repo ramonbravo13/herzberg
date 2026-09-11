@@ -43,26 +43,7 @@ export default function RetentionMatrix({ dataArray }) {
       title="Matriz de Retención y Cultura"
       subtitle="Cruza la Satisfacción Global contra la Intención de Permanencia de cada colaborador. Entender en qué cuadrante se encuentra tu talento es vital para tu estrategia de recursos humanos:"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="p-4 rounded-xl text-xs border" style={{ backgroundColor: getGradientColor(quadColors['Apóstoles'], 0.1), borderColor: getGradientColor(quadColors['Apóstoles'], 0.2) }}>
-          <strong className="block mb-1.5 uppercase tracking-widest font-bold text-[10px]" style={{ color: quadColors['Apóstoles'] }}>Apóstoles</strong>
-          <span className="font-medium" style={{ color: quadColors['Apóstoles'] }}>Alta satisfacción y alta permanencia. Son el talento ideal, embajadores naturales de tu marca empleadora.</span>
-        </div>
-        <div className="p-4 rounded-xl text-xs border" style={{ backgroundColor: getGradientColor(quadColors['Mercenarios'], 0.1), borderColor: getGradientColor(quadColors['Mercenarios'], 0.2) }}>
-          <strong className="block mb-1.5 uppercase tracking-widest font-bold text-[10px]" style={{ color: quadColors['Mercenarios'] }}>Mercenarios</strong>
-          <span className="font-medium" style={{ color: quadColors['Mercenarios'] }}>Alta satisfacción, baja permanencia. Están cómodos pero tienen alto riesgo de fuga si llega una mejor oferta.</span>
-        </div>
-        <div className="p-4 rounded-xl text-xs border" style={{ backgroundColor: getGradientColor(quadColors['Rehenes'], 0.1), borderColor: getGradientColor(quadColors['Rehenes'], 0.2) }}>
-          <strong className="block mb-1.5 uppercase tracking-widest font-bold text-[10px]" style={{ color: quadColors['Rehenes'] }}>Rehenes</strong>
-          <span className="font-medium" style={{ color: quadColors['Rehenes'] }}>Baja satisfacción, alta permanencia. No renuncian por comodidad o miedo, pero merman la productividad y el clima.</span>
-        </div>
-        <div className="p-4 rounded-xl text-xs border" style={{ backgroundColor: getGradientColor(quadColors['Saboteadores'], 0.1), borderColor: getGradientColor(quadColors['Saboteadores'], 0.2) }}>
-          <strong className="block mb-1.5 uppercase tracking-widest font-bold text-[10px]" style={{ color: quadColors['Saboteadores'] }}>Saboteadores</strong>
-          <span className="font-medium" style={{ color: quadColors['Saboteadores'] }}>Baja satisfacción, baja permanencia. Desgaste total, listos para renunciar y potencialmente conflictivos.</span>
-        </div>
-      </div>
-
-      <div className="h-[400px] relative mt-4">
+      <div className="h-[320px] relative mt-2 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} opacity={0.3} />
@@ -97,10 +78,26 @@ export default function RetentionMatrix({ dataArray }) {
           </ScatterChart>
         </ResponsiveContainer>
 
-        <div className="absolute top-4 right-6 text-slate-300/80 font-black text-lg pointer-events-none uppercase tracking-widest">Apóstoles</div>
-        <div className="absolute bottom-10 left-16 text-slate-300/80 font-black text-lg pointer-events-none uppercase tracking-widest">Saboteadores</div>
-        <div className="absolute bottom-10 right-6 text-slate-300/80 font-black text-lg pointer-events-none uppercase tracking-widest text-right">Mercenarios <span className="block text-xs normal-case font-medium opacity-80 tracking-normal">(Riesgo Fuga)</span></div>
-        <div className="absolute top-4 left-16 text-slate-300/80 font-black text-lg pointer-events-none uppercase tracking-widest">Rehenes <span className="block text-xs normal-case font-medium opacity-80 tracking-normal">(Riesgo Tóxico)</span></div>
+        {/* Quadrant Legends (Watermarks) */}
+        <div className="absolute top-6 right-8 text-right pointer-events-none z-0">
+          <div className="text-emerald-500/70 font-black text-xl uppercase tracking-widest drop-shadow-sm">Apóstoles</div>
+          <div className="text-emerald-600/70 text-[10px] font-bold leading-tight max-w-[130px] mt-1 bg-emerald-50/50 backdrop-blur-md px-2 py-1 rounded ml-auto border border-emerald-100/50">Alta satisfacción y retención natural.</div>
+        </div>
+        
+        <div className="absolute bottom-16 left-20 pointer-events-none z-0">
+          <div className="text-red-500/70 font-black text-xl uppercase tracking-widest drop-shadow-sm">Saboteadores</div>
+          <div className="text-red-600/70 text-[10px] font-bold leading-tight max-w-[130px] mt-1 bg-red-50/50 backdrop-blur-md px-2 py-1 rounded border border-red-100/50">Baja satisfacción, baja permanencia.</div>
+        </div>
+        
+        <div className="absolute bottom-16 right-8 text-right pointer-events-none z-0">
+          <div className="text-amber-500/70 font-black text-xl uppercase tracking-widest drop-shadow-sm">Mercenarios</div>
+          <div className="text-amber-600/70 text-[10px] font-bold leading-tight max-w-[140px] mt-1 bg-amber-50/50 backdrop-blur-md px-2 py-1 rounded ml-auto border border-amber-100/50">Satisfechos pero con riesgo de fuga.</div>
+        </div>
+        
+        <div className="absolute top-6 left-20 pointer-events-none z-0">
+          <div className="text-orange-500/70 font-black text-xl uppercase tracking-widest drop-shadow-sm">Rehenes</div>
+          <div className="text-orange-600/70 text-[10px] font-bold leading-tight max-w-[130px] mt-1 bg-orange-50/50 backdrop-blur-md px-2 py-1 rounded border border-orange-100/50">No renuncian pero merman el clima.</div>
+        </div>
       </div>
     </ChartCard>
   );

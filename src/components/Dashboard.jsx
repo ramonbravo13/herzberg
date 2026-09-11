@@ -12,6 +12,7 @@ import FlightRiskDrivers from './dashboard/FlightRiskDrivers';
 import EnpsRadar from './dashboard/EnpsRadar';
 import BurnoutRisk from './dashboard/BurnoutRisk';
 import RetentionMatrix from './dashboard/RetentionMatrix';
+import RoiSimulator from './dashboard/RoiSimulator';
 import Nom035Dashboard from './dashboard/Nom035Dashboard';
 import DiagnosticCharts from './dashboard/DiagnosticCharts';
 import ShiftGap from './dashboard/ShiftGap';
@@ -210,7 +211,8 @@ export default function Dashboard({ data }) {
             <Heatmap dataArray={dataArray} />
             <ThematicAnalysis dataArray={dataArray} />
 
-            <div className="pt-8 pb-4 border-t-2 border-slate-200 mt-12">
+            {/* Espaciador superior para evitar colisión con barra de navegación */}
+            <div className="pt-8 pb-4 border-t-2 border-slate-200 mt-16">
               <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
                 <span className="bg-indigo-600 text-white p-2 rounded-xl">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -220,17 +222,24 @@ export default function Dashboard({ data }) {
               <p className="text-slate-500 mt-2">Módulos de consultoría analítica para la toma de decisiones directivas.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
+            {/* Matriz 60% | ROI 40% */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              <div className="lg:col-span-3">
                 <RetentionMatrix dataArray={dataArray} />
               </div>
-              <div className="lg:col-span-1 flex flex-col gap-6">
-                <BurnoutRisk dataArray={dataArray} />
-                <FlightRiskDrivers dataArray={dataArray} />
+              <div className="lg:col-span-2">
+                <RoiSimulator dataArray={dataArray} />
               </div>
             </div>
 
+            {/* Drivers Fuga (Ancho completo) */}
+            <FlightRiskDrivers dataArray={dataArray} />
+
+            {/* Brecha Jerárquica (Ancho completo) */}
             <HierarchyGap dataArray={dataArray} />
+
+            {/* Burnout Risk */}
+            <BurnoutRisk dataArray={dataArray} />
 
             {/* Distribución eNPS + EnpsRadar (50/50) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
