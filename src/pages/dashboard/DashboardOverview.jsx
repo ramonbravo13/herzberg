@@ -89,7 +89,7 @@ export default function DashboardOverview() {
       let filtered = orgEvals.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
       
       if (selectedZone !== 'all') {
-        filtered = filtered.filter(e => e.zone === selectedZone);
+        filtered = filtered.filter(e => e.zone === selectedZone || e.departamento === selectedZone);
       }
       
       setEvaluations(filtered);

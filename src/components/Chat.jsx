@@ -65,7 +65,7 @@ export default function Chat({ onComplete, onExit, organizationName, expectedHea
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.respuestas && parsed.departamento !== undefined) {
+          if (parsed.respuestas) {
              onComplete(parsed);
              return; // Stop rendering chat if completed
           }
