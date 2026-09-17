@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function FinalCTA({ onDemoClick }) {
+export default function FinalCTA({ onDemoClick, onLoginClick }) {
   return (
     <section className="py-24 bg-white relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 to-teal-50 opacity-50"></div>
@@ -21,7 +21,7 @@ export default function FinalCTA({ onDemoClick }) {
             Solicitar una demostración
           </button>
           <button 
-            onClick={onDemoClick}
+            onClick={onLoginClick}
             className="px-8 py-4 bg-white text-slate-800 border border-slate-200 rounded-full font-bold text-lg hover:bg-slate-50 transition-colors shadow-sm"
           >
             Comenzar ahora

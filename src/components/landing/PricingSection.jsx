@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function PricingSection() {
+export default function PricingSection({ onDemoClick }) {
   return (
     <section id="precios" className="py-24 bg-slate-50 border-t border-slate-200">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,7 +57,7 @@ export default function PricingSection() {
           <div className="bg-slate-50 p-6 text-center border-t border-slate-100">
             <p className="text-sm text-slate-600 mb-2 font-medium">Todos los precios están expresados en MXN y no incluyen IVA.</p>
             <p className="text-xs text-slate-500 mb-6 italic">La contratación anual incluye 12 meses de servicio pagando el equivalente a 10 mensualidades.</p>
-            <button className="px-6 py-2.5 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800 transition-colors shadow-md">
+            <button onClick={onDemoClick} className="px-6 py-2.5 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800 transition-colors shadow-md">
               Solicitar Cotización
             </button>
           </div>

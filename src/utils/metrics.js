@@ -19,8 +19,9 @@ export const calculateIndex = (vars, dataArray) => {
   let count = 0;
   dataArray.forEach(data => {
     vars.forEach(v => {
-      if (data.respuestas && data.respuestas[v] !== undefined) {
-        sum += Number(data.respuestas[v]);
+      const val = data.respuestas ? data.respuestas[v] : data[v];
+      if (val !== undefined && val !== null) {
+        sum += Number(val);
         count++;
       }
     });

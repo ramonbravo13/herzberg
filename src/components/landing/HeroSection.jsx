@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function HeroSection({ onDemoClick }) {
+export default function HeroSection({ onDemoClick, onLoginClick }) {
   return (
     <section className="pt-32 pb-16 sm:pt-40 sm:pb-24 lg:pb-32 overflow-hidden bg-slate-50 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -35,10 +35,7 @@ export default function HeroSection({ onDemoClick }) {
                 Solicitar una demostración
               </button>
               <button
-                onClick={() => {
-                  const el = document.getElementById('como-funciona');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={onLoginClick}
                 className="px-8 py-4 rounded-full bg-white border border-slate-200 text-slate-700 font-bold text-lg shadow-sm hover:bg-slate-50 transition-all text-center"
               >
                 Conocer la plataforma

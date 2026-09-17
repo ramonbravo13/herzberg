@@ -38,7 +38,7 @@ export default function LandingPage() {
       <Navbar onLoginClick={handleLoginClick} user={user} />
       
       <main>
-        <HeroSection onDemoClick={() => setIsDemoModalOpen(true)} />
+        <HeroSection onDemoClick={() => setIsDemoModalOpen(true)} onLoginClick={handleLoginClick} />
         <ValueProposition />
         <HowItWorks />
         <ZoningFeature />
@@ -47,8 +47,8 @@ export default function LandingPage() {
         <Nom035Feature />
         <PrivacySection />
         <FeaturesGrid />
-        <PricingSection />
-        <FinalCTA onDemoClick={() => setIsDemoModalOpen(true)} />
+        <PricingSection onDemoClick={() => setIsDemoModalOpen(true)} />
+        <FinalCTA onDemoClick={() => setIsDemoModalOpen(true)} onLoginClick={handleLoginClick} />
         <FAQSection />
       </main>
 
