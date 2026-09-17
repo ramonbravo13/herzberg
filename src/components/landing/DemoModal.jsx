@@ -1,24 +1,34 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { dbService } from '../../services/db';
 
 export default function DemoModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({ name: '', email: '', company: '' });
   const [submitted, setSubmitted] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate API call
-    setTimeout(() => {
+    setLoading(true);
+    setError(null);
+    try {
+      await dbService.saveDemoRequest(formData);
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
         setFormData({ name: '', email: '', company: '' });
         onClose();
       }, 3000);
-    }, 1000);
+    } catch (err) {
+      setError('Hubo un error al enviar la solicitud. Inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -89,11 +99,17 @@ export default function DemoModal({ isOpen, onClose }) {
                       />
                     </div>
                     
+                    {error && (
+                      <div className="p-3 bg-red-50 text-red-600 text-sm rounded-lg border border-red-100">
+                        {error}
+                      </div>
+                    )}
                     <button 
                       type="submit"
-                      className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all"
+                      disabled={loading}
+                      className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50"
                     >
-                      Enviar solicitud
+                      {loading ? 'Enviando...' : 'Enviar solicitud'}
                     </button>
                   </form>
                 </>

@@ -17,6 +17,7 @@ const ForceChangePassword = React.lazy(() => import('./pages/auth/ForceChangePas
 const AdminLayout = React.lazy(() => import('./layouts/AdminLayout'));
 const OrganizationsManager = React.lazy(() => import('./pages/admin/OrganizationsManager'));
 const UsersManager = React.lazy(() => import('./pages/admin/UsersManager'));
+const DemoRequestsManager = React.lazy(() => import('./pages/admin/DemoRequestsManager'));
 
 // Dashboard (Lazy - heaviest)
 const DashboardLayout = React.lazy(() => import('./layouts/DashboardLayout'));
@@ -55,6 +56,7 @@ function App() {
               <Route index element={<Navigate to="/admin/organizations" replace />} />
               <Route path="organizations" element={<OrganizationsManager />} />
               <Route path="users" element={<UsersManager />} />
+              <Route path="demo-requests" element={<DemoRequestsManager />} />
             </Route>
             
             {/* 404 */}

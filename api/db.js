@@ -84,6 +84,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ completed: data && data.length > 0 });
     }
 
+    if (action === 'saveDemoRequest') {
+      const { requestData } = payload;
+      const { data, error } = await supabase.from('demo_requests').insert([requestData]).select().single();
+      if (error) {
+        console.error('Error saving demo request:', error);
+        return res.status(500).json({ error: 'No se pudo procesar la solicitud' });
+      }
+      return res.status(200).json(data);
+    }
+
 
     // ----- RUTAS PROTEGIDAS (Requieren JWT) -----
     const cookieHeader = req.headers.cookie || '';
@@ -243,6 +253,13 @@ export default async function handler(req, res) {
         if (error) throw error;
         const mapped = data.map(e => ({ ...e.results, period: e.period || 1, organization_id: e.organization_id, zone: e.zone || null, departamento: e.zone || e.results?.departamento || "Sin Asignar" }));
         return res.status(200).json(mapped);
+      }
+
+      case 'getDemoRequests': {
+        requireAdmin();
+        const { data, error } = await supabase.from('demo_requests').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        return res.status(200).json(data);
       }
 
       default:

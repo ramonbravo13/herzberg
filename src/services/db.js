@@ -102,5 +102,13 @@ export const dbService = {
 
   getAllEvaluations: async () => {
     return await apiCall('getAllEvaluations');
+  },
+
+  saveDemoRequest: async (requestData) => {
+    return await apiCall('saveDemoRequest', { requestData });
+  },
+
+  getDemoRequests: async () => {
+    return await apiCall('getDemoRequests');
   }
 };
