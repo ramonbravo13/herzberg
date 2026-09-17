@@ -11,8 +11,8 @@ export default function RetentionMatrix({ dataArray }) {
   const data = dataArray.map((d, index) => {
     return {
       id: index,
-      x: d.respuestas ? d.respuestas.satisfaccion_global : 0, // 1 to 5
-      y: d.respuestas ? d.respuestas.permanencia : 0, // 1 to 5
+      x: Number(d.respuestas ? d.respuestas.satisfaccion_global : d.satisfaccion_global) || 0,
+      y: Number(d.respuestas ? d.respuestas.permanencia : d.permanencia) || 0,
       depto: d.departamento
     };
   }).filter(d => d.x > 0 && d.y > 0);

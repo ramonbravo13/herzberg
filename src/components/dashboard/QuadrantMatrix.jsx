@@ -37,7 +37,7 @@ export default function QuadrantMatrix({ dataArray }) {
       title="Matriz de Higiene vs. Motivación"
       subtitle={<>Clasifica a los departamentos en 4 cuadrantes. <strong>Eje X:</strong> Factores de Higiene (Salario, Condiciones). <strong>Eje Y:</strong> Factores Motivacionales (Logro, Reconocimiento). <br/><em>Objetivo: Mover todos los puntos hacia el cuadrante superior derecho (Alta Higiene + Alta Motivación).</em></>}
     >
-      <div className="w-full flex-1 min-h-[400px] relative mt-4">
+      <div className="w-full flex-1 h-[400px] relative mt-4">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
             <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} opacity={0.3} />
