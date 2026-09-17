@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -17,10 +17,12 @@ import PricingSection from '../../components/landing/PricingSection';
 import FinalCTA from '../../components/landing/FinalCTA';
 import FAQSection from '../../components/landing/FAQSection';
 import Footer from '../../components/landing/Footer';
+import DemoModal from '../../components/landing/DemoModal';
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   const handleLoginClick = () => {
     if (user) {
@@ -36,7 +38,7 @@ export default function LandingPage() {
       <Navbar onLoginClick={handleLoginClick} user={user} />
       
       <main>
-        <HeroSection onDemoClick={handleLoginClick} />
+        <HeroSection onDemoClick={() => setIsDemoModalOpen(true)} />
         <ValueProposition />
         <HowItWorks />
         <ZoningFeature />
@@ -46,11 +48,12 @@ export default function LandingPage() {
         <PrivacySection />
         <FeaturesGrid />
         <PricingSection />
-        <FinalCTA onDemoClick={handleLoginClick} />
+        <FinalCTA onDemoClick={() => setIsDemoModalOpen(true)} />
         <FAQSection />
       </main>
 
       <Footer />
+      <DemoModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
     </div>
   );
 }

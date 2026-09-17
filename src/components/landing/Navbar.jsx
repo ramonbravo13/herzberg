@@ -33,7 +33,7 @@ export default function Navbar({ onLoginClick, user }) {
               onClick={onLoginClick}
               className="group relative px-6 py-2.5 font-semibold text-white rounded-full bg-slate-900 hover:bg-slate-800 transition-all shadow-md hover:shadow-xl flex items-center gap-2 overflow-hidden"
             >
-              <span className="relative z-10">{user ? 'Ir al Dashboard' : 'Solicitar una demo'}</span>
+              <span className="relative z-10">{user ? 'Ir al Dashboard' : 'Ingresar'}</span>
               <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
