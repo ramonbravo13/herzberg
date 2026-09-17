@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
@@ -43,6 +43,7 @@ export default function QuadrantMatrix({ dataArray }) {
             <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} opacity={0.3} />
             <XAxis type="number" dataKey="x" name="Higiene" domain={[0, 100]} {...chartTheme.axis} label={{ value: 'Índice Higiene (0-100)', position: 'bottom', offset: 0, fontSize: 12, fill: '#64748b' }} />
             <YAxis type="number" dataKey="y" name="Motivación" domain={[0, 100]} {...chartTheme.axis} label={{ value: 'Índice Motivacional (0-100)', angle: -90, position: 'left', offset: 0, fontSize: 12, fill: '#64748b' }} />
+            <ZAxis type="number" dataKey="size" range={[200, 1000]} name="Muestra" />
             
             {/* Quadrant lines at 60 */}
             <ReferenceLine x={60} stroke="#cbd5e1" strokeDasharray="3 3" />
