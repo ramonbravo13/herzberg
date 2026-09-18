@@ -3,6 +3,22 @@ import ReactMarkdown from 'react-markdown';
 import { Send, Loader2, Bot, LogOut } from 'lucide-react';
 import { startInterviewChat, sendMessageToBot } from '../gemini';
 
+const MANDATORY_VARS = [
+  "logro_1", "logro_2", "logro_3", 
+  "reconocimiento_1", "reconocimiento_2", "reconocimiento_3",
+  "trabajo_1", "trabajo_2", "trabajo_3",
+  "responsabilidad_1", "responsabilidad_2", "responsabilidad_3",
+  "crecimiento_1", "crecimiento_2", "crecimiento_3",
+  "promocion_1", "promocion_2", "promocion_3",
+  "salario_1", "salario_2", "salario_3",
+  "supervision_1", "supervision_2", "supervision_3",
+  "politicas_1", "politicas_2", "politicas_3",
+  "relaciones_1", "relaciones_2", "relaciones_3",
+  "condiciones_1", "condiciones_2", "condiciones_3",
+  "seguridad_1", "seguridad_2", "seguridad_3",
+  "satisfaccion_global", "compromiso", "permanencia", "enps"
+];
+
 export default function Chat({ onComplete, onExit, organizationName, expectedHeadcount = 1 }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -55,32 +71,67 @@ export default function Chat({ onComplete, onExit, organizationName, expectedHea
     setMessages(prev => [...prev, { role: 'user', text: userText }]);
     setInput('');
     setLoading(true);
+    setError(null);
 
-    try {
-      const responseText = await sendMessageToBot(userText, messages, organizationName, expectedHeadcount);
-      
-      // Check if response is the final JSON
+    let currentMessages = [...messages, { role: 'user', text: userText }];
+    let retryCount = 0;
+    const maxRetries = 2;
+    let lastUserText = userText;
+
+    while (retryCount <= maxRetries) {
       try {
-        // Find if there's a JSON block
-        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (parsed.respuestas) {
-             onComplete(parsed);
-             return; // Stop rendering chat if completed
+        const responseText = await sendMessageToBot(lastUserText, currentMessages.slice(0, -1), organizationName, expectedHeadcount);
+        
+        // Check if response might be a JSON
+        if (responseText.includes('{') && responseText.includes('}')) {
+          try {
+            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              const parsed = JSON.parse(jsonMatch[0]);
+              
+              if (parsed.respuestas || parsed.diagnostico) {
+                // It's trying to be the final JSON. Validate schema.
+                const missingVars = MANDATORY_VARS.filter(v => parsed.respuestas && parsed.respuestas[v] === undefined);
+                
+                if (missingVars.length === 0 && parsed.diagnostico) {
+                  onComplete(parsed);
+                  return; // Success!
+                } else {
+                  // Incomplete JSON
+                  if (retryCount < maxRetries) {
+                     console.warn(`JSON incompleto detectado. Reintentando (${retryCount + 1}/${maxRetries}). Faltan:`, missingVars);
+                     lastUserText = `SISTEMA INTERNO: Error de formato. El JSON generado está incompleto. Faltan las siguientes variables en 'respuestas': ${missingVars.join(', ')}. Vuelve a generar ÚNICAMENTE el objeto JSON en crudo con TODAS las variables obligatorias y con el formato estricto solicitado.`;
+                     currentMessages = [...currentMessages, { role: 'model', text: responseText }, { role: 'user', text: lastUserText }];
+                     retryCount++;
+                     continue;
+                  }
+                }
+              }
+            }
+          } catch (e) {
+             // Invalid JSON format
+             if (retryCount < maxRetries && (responseText.includes('"logro_1"') || responseText.includes('"diagnostico"'))) {
+                console.warn(`JSON inválido detectado. Reintentando (${retryCount + 1}/${maxRetries}). Error:`, e.message);
+                lastUserText = `SISTEMA INTERNO: Error de formato. El JSON generado es inválido (Error de parseo). Genera de nuevo ÚNICAMENTE el objeto JSON en crudo, sin texto adicional ni bloques markdown de código.`;
+                currentMessages = [...currentMessages, { role: 'model', text: responseText }, { role: 'user', text: lastUserText }];
+                retryCount++;
+                continue;
+             }
           }
         }
-      } catch (e) {
-        // Not a JSON or invalid JSON, continue normal flow
-      }
 
-      setMessages(prev => [...prev, { role: 'model', text: responseText }]);
-    } catch (err) {
-      console.error(err);
-      setError("Hubo un problema de conexión con la IA.");
-    } finally {
-      setLoading(false);
+        // If it's a normal conversational message, show it and exit loop
+        setMessages(prev => [...prev, { role: 'model', text: responseText }]);
+        break;
+
+      } catch (err) {
+        console.error(err);
+        setError("Hubo un problema de conexión con la IA. Por favor, intenta de nuevo.");
+        break; // Stop retries on network error
+      }
     }
+    
+    setLoading(false);
   };
 
   return (

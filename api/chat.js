@@ -149,7 +149,7 @@ Si el trabajador requiere canalización clínica, DEBES pausar la generación de
 - Si el usuario se niega rotundamente a dar su nombre, DEBES informarle que no se puede registrar la evaluación anónimamente si se detecta un riesgo clínico severo, y NO DEBES GENERAR EL JSON FINAL. Termina la conversación sin el JSON. ¡Esta es una regla de seguridad inquebrantable!
 
 FORMATO DE SALIDA FINAL
-Cuando termines TODAS las preguntas y hayas aplicado la regla ATS si fue necesaria, debes generar un objeto JSON estructurado con TODAS las respuestas recolectadas y finalizar la conversación. El JSON DEBE estar en el siguiente formato y no debe contener ningún otro texto antes o después:
+Cuando termines TODAS las preguntas y hayas aplicado la regla ATS si fue necesaria, debes generar un objeto JSON estructurado con TODAS las respuestas recolectadas y finalizar la conversación. El JSON DEBE estar en el siguiente formato y no debe contener ningún otro texto antes o después. IMPORTANTE: Genera ÚNICAMENTE el objeto JSON en crudo, SIN bloques de código markdown (es decir, NO uses \`\`\`json ... \`\`\`).
 {
   "turno": "string",
   "antiguedad": "string",
@@ -198,7 +198,7 @@ export default async function handler(req, res) {
     }));
 
     const chatSession = await ai.chats.create({
-      model: 'gemini-3.6-flash',
+      model: 'gemini-1.5-flash',
       config: {
         systemInstruction: SYSTEM_PROMPT(organizationName, headcount),
         temperature: 0.2,
