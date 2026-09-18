@@ -291,7 +291,7 @@ export default function Dashboard({ data, globalData }) {
           <div className="lg:col-span-1">
             <ChartCard 
               title="Factores Motivacionales" 
-              subtitle="Generan satisfacción real y compromiso a largo plazo."
+              subtitle={<>Generan satisfacción real y compromiso a largo plazo. Según la teoría de Herzberg, estos factores (logro, reconocimiento, autonomía) son los únicos que verdaderamente impulsan el rendimiento excepcional.<br/><br/><strong>Interpretación:</strong> La línea vertical punteada marca la meta de excelencia (80%). Barras por debajo de esta línea indican áreas donde el talento no se siente suficientemente retado o valorado, estancando la productividad.</>}
               icon={Target}
             >
               <div className="h-[320px]">
@@ -334,7 +334,7 @@ export default function Dashboard({ data, globalData }) {
           <div className="lg:col-span-1">
             <ChartCard 
               title="Factores de Higiene" 
-              subtitle="Su deficiencia causa insatisfacción y motiva la rotación."
+              subtitle={<>Su deficiencia causa insatisfacción profunda y es el detonante #1 de las renuncias. Estos factores (salario, liderazgo, equipo) no motivan por sí solos, pero si fallan, destruyen el clima laboral.<br/><br/><strong>Interpretación:</strong> La línea punteada marca la meta de retención (80%). Si hay barras por debajo de la línea, estás ante un riesgo inminente de fuga de talento por inconformidad básica.</>}
               icon={Activity}
             >
               <div className="h-[320px]">
