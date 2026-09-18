@@ -12,6 +12,15 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('expired') === 'true') {
+      setError('Tu sesión ha expirado por seguridad. Por favor, inicia sesión nuevamente.');
+      // Remove query param without reloading
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');

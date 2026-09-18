@@ -13,6 +13,9 @@ const apiCall = async (action, payload = {}) => {
 
   const data = await response.json();
   if (!response.ok) {
+    if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent('session_expired'));
+    }
     throw new Error(data.error || 'Error en la petición a la base de datos');
   }
   return data;

@@ -23,6 +23,15 @@ export const AuthProvider = ({ children }) => {
       }
     }
     setLoading(false);
+
+    const handleSessionExpired = () => {
+      setUser(null);
+      localStorage.removeItem('herzberg_user');
+      window.location.href = '/login?expired=true';
+    };
+
+    window.addEventListener('session_expired', handleSessionExpired);
+    return () => window.removeEventListener('session_expired', handleSessionExpired);
   }, []);
 
   const login = async (email, password) => {
