@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
-import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
+import { calculateIndex, INDICES_CONFIG, getQuadrantInsight } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import { chartTheme } from '../charts/theme';
@@ -22,11 +22,14 @@ export default function QuadrantMatrix({ dataArray }) {
 
   const data = Object.keys(deptoMap).map(depto => {
     const arr = deptoMap[depto];
+    const xVal = calculateIndex(higieneVars, arr); // Higiene on X
+    const yVal = calculateIndex(motivacionalVars, arr); // Motivacion on Y
     return {
       name: depto,
-      x: calculateIndex(higieneVars, arr), // Higiene on X
-      y: calculateIndex(motivacionalVars, arr), // Motivacion on Y
-      size: arr.length
+      x: xVal,
+      y: yVal,
+      size: arr.length,
+      rulesEngine: getQuadrantInsight(xVal, yVal)
     };
   });
 
@@ -35,7 +38,14 @@ export default function QuadrantMatrix({ dataArray }) {
   return (
     <ChartCard 
       title="Matriz de Higiene vs. Motivación"
-      subtitle={<>Clasifica a los departamentos en 4 cuadrantes. <strong>Eje X:</strong> Factores de Higiene (Salario, Condiciones). <strong>Eje Y:</strong> Factores Motivacionales (Logro, Reconocimiento). <br/><em>Objetivo: Mover todos los puntos hacia el cuadrante superior derecho (Alta Higiene + Alta Motivación).</em></>}
+      subtitle={<>Cruza las dos variables clave de la empresa para clasificar a cada departamento en 4 realidades operativas. Tu objetivo directivo es empujar todos los puntos hacia la esquina superior derecha.<br/><br/>
+        <ul className="grid grid-cols-2 gap-2 text-xs mt-2 opacity-90">
+          <li>✨ <strong>Ideal:</strong> Alta Higiene + Alta Motivación.</li>
+          <li>🥱 <strong>Cómodos:</strong> Alta Higiene + Baja Motivación.</li>
+          <li>🔥 <strong>Quemados:</strong> Baja Higiene + Alta Motivación.</li>
+          <li>🚨 <strong>Riesgo Fuga:</strong> Baja Higiene + Baja Motivación.</li>
+        </ul>
+      </>}
     >
       <div className="w-full h-[400px] relative mt-4">
         <ResponsiveContainer width="100%" height="100%">
@@ -59,6 +69,15 @@ export default function QuadrantMatrix({ dataArray }) {
                       <p className="font-bold text-slate-800 mb-2 pb-2 border-b border-slate-100">{data.name}</p>
                       <p className="text-sm text-slate-600">Higiene: <span className="font-bold text-slate-800">{Number(data.x).toFixed(1)}%</span></p>
                       <p className="text-sm text-slate-600 mt-1">Motivación: <span className="font-bold text-slate-800">{Number(data.y).toFixed(1)}%</span></p>
+                      
+                      {data.rulesEngine && (
+                        <div className="mt-3 pt-3 border-t border-slate-200/60 max-w-[250px] whitespace-normal">
+                          <p className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 mb-1">{data.rulesEngine.status}</p>
+                          <p className="text-sm font-semibold text-slate-800 leading-tight mb-1">{data.rulesEngine.insight}</p>
+                          <p className="text-xs text-slate-600 leading-snug"><strong>Acción Sugerida:</strong> {data.rulesEngine.action}</p>
+                        </div>
+                      )}
+                      
                       <p className="text-xs text-slate-400 mt-3 font-medium uppercase tracking-wider">Muestra: {data.size} personas</p>
                     </div>
                   );

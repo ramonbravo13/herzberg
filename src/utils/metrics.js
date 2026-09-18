@@ -114,6 +114,35 @@ export const getActionableInsight = (metricName, score) => {
   };
 };
 
+export const getQuadrantInsight = (x, y) => {
+  // x = Higiene, y = Motivación. Threshold = 60
+  if (x >= 60 && y >= 60) {
+    return {
+      status: 'Ideal',
+      insight: 'Equipo de Alto Rendimiento.',
+      action: 'Utilizar a los líderes de este departamento como mentores para el resto de la organización.'
+    };
+  } else if (x >= 60 && y < 60) {
+    return {
+      status: 'Cómodos',
+      insight: 'Estancamiento productivo.',
+      action: 'Asignar proyectos desafiantes y establecer OKRs agresivos para sacar al equipo de su zona de confort.'
+    };
+  } else if (x < 60 && y >= 60) {
+    return {
+      status: 'Riesgo Burnout',
+      insight: 'Alta fricción operativa.',
+      action: 'Ajustar tabuladores salariales y mejorar herramientas de trabajo de inmediato antes de perder talento clave.'
+    };
+  } else {
+    return {
+      status: 'Riesgo Fuga',
+      insight: 'Intervención Urgente.',
+      action: 'Ejecutar auditoría de clima laboral y evaluar reemplazo de jefaturas directas.'
+    };
+  }
+};
+
 export const QUESTION_MAP = {
   logro_1: 'P1. Satisfacción personal al alcanzar objetivos',
   logro_2: 'P2. Permite conseguir resultados importantes',
