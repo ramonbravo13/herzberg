@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, ReferenceLine } from 'recharts';
 import { calculateIndex, getRiskLabel, INDICES_CONFIG } from '../utils/metrics';
 import { categoryColors, getCategoryColor, getGradientColor, globalPalette } from '../utils/themeColors';
 import TopRisks from './dashboard/TopRisks';
@@ -301,6 +301,7 @@ export default function Dashboard({ data, globalData }) {
                     <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
                     <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
                     <YAxis dataKey="name" type="category" width={130} {...chartTheme.axis} />
+                    <ReferenceLine x={80} stroke="#94a3b8" strokeDasharray="3 3" strokeOpacity={0.7} label={{ value: "Meta (80%)", position: "insideBottomRight", fill: "#94a3b8", fontSize: 11, offset: 5 }} />
                     <Tooltip 
                       cursor={chartTheme.tooltip.cursor}
                       content={<ChartTooltip 
@@ -343,6 +344,7 @@ export default function Dashboard({ data, globalData }) {
                     <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
                     <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
                     <YAxis dataKey="name" type="category" width={130} {...chartTheme.axis} />
+                    <ReferenceLine x={80} stroke="#94a3b8" strokeDasharray="3 3" strokeOpacity={0.7} label={{ value: "Meta (80%)", position: "insideBottomRight", fill: "#94a3b8", fontSize: 11, offset: 5 }} />
                     <Tooltip 
                       cursor={chartTheme.tooltip.cursor}
                       content={<ChartTooltip 
