@@ -30,7 +30,12 @@ export default async function handler(req, res) {
       const { password_hash, ...userWithoutPassword } = user;
       
       // Emit JWT and set as HTTPOnly Cookie
-      const token = jwt.sign({ id: user.id, role: user.role, organization_id: user.organization_id }, jwtSecret, { expiresIn: '8h' });
+      const token = jwt.sign({ 
+        id: user.id, 
+        role: user.role, 
+        organization_id: user.organization_id,
+        allowed_organizations: user.allowed_organizations || []
+      }, jwtSecret, { expiresIn: '8h' });
       const isProd = process.env.NODE_ENV === 'production';
       res.setHeader('Set-Cookie', `herzberg_admin_token=${token}; HttpOnly; Path=/; Max-Age=28800; SameSite=Strict${isProd ? '; Secure' : ''}`);
 
@@ -118,7 +123,17 @@ export default async function handler(req, res) {
 
     switch (action) {
       case 'getOrganizations': {
-        const { data, error } = await supabase.from('organizations').select('*').order('created_at', { ascending: false });
+        let query = supabase.from('organizations').select('*').order('created_at', { ascending: false });
+        
+        if (decodedAdmin.role === 'empresarial') {
+           query = query.eq('id', decodedAdmin.organization_id);
+        } else if (decodedAdmin.role === 'corporativo') {
+           const allowed = decodedAdmin.allowed_organizations || [];
+           if (allowed.length === 0) return res.status(200).json([]);
+           query = query.in('id', allowed);
+        }
+        
+        const { data, error } = await query;
         if (error) throw error;
         const mapped = data.map(org => ({
           ...org, subscriptionEndDate: org.subscription_end_date, currentPeriod: org.current_period, expected_headcount: org.expected_headcount, createdAt: org.created_at
@@ -141,7 +156,10 @@ export default async function handler(req, res) {
         
         // Custom RBAC for updateOrganization
         if (decodedAdmin.role !== 'admin') {
-          if ((decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id === id) || decodedAdmin.role === 'corporativo') {
+          const isEmpresarialOwner = decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id === id;
+          const isCorporativoAllowed = decodedAdmin.role === 'corporativo' && (decodedAdmin.allowed_organizations || []).includes(id);
+          
+          if (isEmpresarialOwner || isCorporativoAllowed) {
             const allowedKeys = ['zones', 'expected_headcount', 'zone_headcounts'];
             const updateKeys = Object.keys(updates);
             if (!updateKeys.every(k => allowedKeys.includes(k))) {
@@ -176,8 +194,11 @@ export default async function handler(req, res) {
 
       case 'restartOrganizationPeriod': {
         const { orgId } = payload;
-        if (decodedAdmin.role !== 'admin' && decodedAdmin.role !== 'corporativo') {
-           if (decodedAdmin.role !== 'empresarial' || decodedAdmin.organization_id !== orgId) {
+        if (decodedAdmin.role !== 'admin') {
+           const isEmpresarialOwner = decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id === orgId;
+           const isCorporativoAllowed = decodedAdmin.role === 'corporativo' && (decodedAdmin.allowed_organizations || []).includes(orgId);
+           
+           if (!isEmpresarialOwner && !isCorporativoAllowed) {
              throw new Error('Acceso denegado. No tienes permiso para reiniciar esta organización.');
            }
         }
@@ -195,6 +216,13 @@ export default async function handler(req, res) {
 
       case 'getOrganizationById': {
         const { id } = payload;
+        if (decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id !== id) {
+           throw new Error('Acceso denegado');
+        }
+        if (decodedAdmin.role === 'corporativo' && !(decodedAdmin.allowed_organizations || []).includes(id)) {
+           throw new Error('Acceso denegado');
+        }
+        
         const { data, error } = await supabase.from('organizations').select('*').eq('id', id).single();
         if (error) return res.status(404).json({ error: 'No encontrado' });
         return res.status(200).json({ ...data, expected_headcount: data.expected_headcount, zone_headcounts: data.zone_headcounts, currentPeriod: data.current_period });
@@ -260,6 +288,13 @@ export default async function handler(req, res) {
 
       case 'getEvaluationsByOrganization': {
         const { organizationId } = payload;
+        if (decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id !== organizationId) {
+           throw new Error('Acceso denegado');
+        }
+        if (decodedAdmin.role === 'corporativo' && !(decodedAdmin.allowed_organizations || []).includes(organizationId)) {
+           throw new Error('Acceso denegado');
+        }
+        
         const { data, error } = await supabase.from('evaluations').select('*').eq('organization_id', organizationId);
         if (error) throw error;
         const mapped = data.map(e => ({ ...e.results, period: e.period || 1, zone: e.zone || null, departamento: e.zone || e.results?.departamento || "Sin Asignar" }));
