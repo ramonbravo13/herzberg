@@ -27,6 +27,7 @@ import { chartTheme } from './charts/theme';
 import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon, Info, X, Scale, BrainCircuit } from 'lucide-react';
 import { PieChart, Pie, Cell as PieCell } from 'recharts';
 import AnimatedNumber from './ui/AnimatedNumber';
+import ErrorBoundary from './ui/ErrorBoundary';
 
 export default function Dashboard({ data, globalData }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
@@ -175,9 +176,9 @@ export default function Dashboard({ data, globalData }) {
         {/* TAB 1: RESUMEN EJECUTIVO */}
         {activeTab === 'overview' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <CriticalAlerts dataArray={dataArray} />
+            <ErrorBoundary><CriticalAlerts dataArray={dataArray} /></ErrorBoundary>
 
-            {isAggregated && <TopRisks dataArray={dataArray} />}
+            {isAggregated && <ErrorBoundary><TopRisks dataArray={dataArray} /></ErrorBoundary>}
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <ScoreCard 
@@ -371,7 +372,7 @@ export default function Dashboard({ data, globalData }) {
 
         {isAggregated && (
           <div className="w-full">
-            <QuadrantMatrix dataArray={dataArray} />
+            <ErrorBoundary><QuadrantMatrix dataArray={dataArray} /></ErrorBoundary>
           </div>
         )}
 
@@ -379,12 +380,12 @@ export default function Dashboard({ data, globalData }) {
           <>
             {/* Brecha por Turno + Tenure Gap (50/50) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <TenureGap dataArray={dataArray} />
-              <ShiftGap dataArray={dataArray} />
+              <ErrorBoundary><TenureGap dataArray={dataArray} /></ErrorBoundary>
+              <ErrorBoundary><ShiftGap dataArray={dataArray} /></ErrorBoundary>
             </div>
 
-            <Heatmap dataArray={dataArray} />
-            <ThematicAnalysis dataArray={dataArray} />
+            <ErrorBoundary><Heatmap dataArray={dataArray} /></ErrorBoundary>
+            <ErrorBoundary><ThematicAnalysis dataArray={dataArray} /></ErrorBoundary>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
@@ -420,21 +421,21 @@ export default function Dashboard({ data, globalData }) {
             {/* Matriz 60% | ROI 40% */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
               <div className="lg:col-span-3">
-                <RetentionMatrix dataArray={dataArray} />
+                <ErrorBoundary><RetentionMatrix dataArray={dataArray} /></ErrorBoundary>
               </div>
               <div className="lg:col-span-2">
-                <RoiSimulator dataArray={dataArray} />
+                <ErrorBoundary><RoiSimulator dataArray={dataArray} /></ErrorBoundary>
               </div>
             </div>
 
             {/* Drivers Fuga (Ancho completo) */}
-            <FlightRiskDrivers dataArray={dataArray} />
+            <ErrorBoundary><FlightRiskDrivers dataArray={dataArray} /></ErrorBoundary>
 
             {/* Brecha Jerárquica (Ancho completo) */}
-            <HierarchyGap dataArray={dataArray} />
+            <ErrorBoundary><HierarchyGap dataArray={dataArray} /></ErrorBoundary>
 
             {/* Burnout Risk */}
-            <BurnoutRisk dataArray={dataArray} />
+            <ErrorBoundary><BurnoutRisk dataArray={dataArray} /></ErrorBoundary>
 
             {/* Distribución eNPS + EnpsRadar (50/50) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -501,11 +502,11 @@ export default function Dashboard({ data, globalData }) {
                 </ChartCard>
               </div>
               <div className="lg:col-span-1">
-                <EnpsRadar dataArray={dataArray} />
+                <ErrorBoundary><EnpsRadar dataArray={dataArray} /></ErrorBoundary>
               </div>
             </div>
             
-            <DiagnosticCharts dataArray={dataArray} />
+            <ErrorBoundary><DiagnosticCharts dataArray={dataArray} /></ErrorBoundary>
           </div>
         )}
 
@@ -517,8 +518,8 @@ export default function Dashboard({ data, globalData }) {
               <p className="text-slate-500 mt-1">Modelos estadísticos para predecir retención y entender la distribución de las percepciones.</p>
             </div>
             
-            <PredictiveMatrix dataArray={dataArray} />
-            <DispersionChart dataArray={dataArray} />
+            <ErrorBoundary><PredictiveMatrix dataArray={dataArray} /></ErrorBoundary>
+            <ErrorBoundary><DispersionChart dataArray={dataArray} /></ErrorBoundary>
           </div>
         )}
 
@@ -529,7 +530,7 @@ export default function Dashboard({ data, globalData }) {
               <h2 className="text-2xl font-black text-slate-800">Benchmarking y Segmentación</h2>
               <p className="text-slate-500 mt-1">Comparativa directa (Cross-sectional) entre áreas y sucursales de la organización.</p>
             </div>
-            <Benchmarking globalData={globalData} />
+            <ErrorBoundary><Benchmarking globalData={globalData} /></ErrorBoundary>
           </div>
         )}
 
@@ -540,7 +541,7 @@ export default function Dashboard({ data, globalData }) {
               <h2 className="text-2xl font-black text-slate-800">Cumplimiento Normativo: NOM-035-STPS</h2>
               <p className="text-slate-500 mt-1">Identificación, análisis y prevención de Factores de Riesgo Psicosocial.</p>
             </div>
-            <Nom035Dashboard dataArray={dataArray} />
+            <ErrorBoundary><Nom035Dashboard dataArray={dataArray} /></ErrorBoundary>
           </div>
         )}
 
