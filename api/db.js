@@ -137,8 +137,21 @@ export default async function handler(req, res) {
       }
 
       case 'updateOrganization': {
-        requireAdmin();
         const { id, updates } = payload;
+        
+        // Custom RBAC for updateOrganization
+        if (decodedAdmin.role !== 'admin') {
+          if (decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id === id) {
+            const allowedKeys = ['zones', 'expected_headcount', 'zone_headcounts'];
+            const updateKeys = Object.keys(updates);
+            if (!updateKeys.every(k => allowedKeys.includes(k))) {
+               throw new Error('Acceso denegado. Solo puedes modificar zonas y metas.');
+            }
+          } else {
+             throw new Error('Acceso denegado. Se requiere rol de administrador.');
+          }
+        }
+
         const mappedUpdates = { ...updates };
         if (updates.subscriptionEndDate !== undefined) mappedUpdates.subscription_end_date = updates.subscriptionEndDate;
         if (updates.currentPeriod !== undefined) mappedUpdates.current_period = updates.currentPeriod;

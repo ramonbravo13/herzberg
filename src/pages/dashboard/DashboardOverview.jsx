@@ -4,7 +4,12 @@ import { useAuth } from '../../contexts/AuthContext';
 import { dbService } from '../../services/db';
 import Dashboard from '../../components/Dashboard';
 import AnimatedNumber from '../../components/ui/AnimatedNumber';
-import { Link as LinkIcon, Check, PlusCircle, AlertTriangle, Calendar, ChevronDown, Users, Target, MapPin, Plus, Trash2 } from 'lucide-react';
+import { Link as LinkIcon, Check, PlusCircle, AlertTriangle, Calendar, ChevronDown, Users, Target, MapPin, Plus, Trash2, Edit2, X } from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
 
 export default function DashboardOverview() {
   const { user } = useAuth();
@@ -20,6 +25,8 @@ export default function DashboardOverview() {
   const [selectedPeriod, setSelectedPeriod] = useState('active');
   const [selectedZone, setSelectedZone] = useState('all');
   const [newZoneName, setNewZoneName] = useState('');
+  const [editingZone, setEditingZone] = useState(null);
+  const [editZoneValue, setEditZoneValue] = useState('');
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
   const [isRestarting, setIsRestarting] = useState(false);
 
@@ -169,15 +176,53 @@ export default function DashboardOverview() {
         
         const updated = await dbService.updateOrganization(activeOrg.id, updates);
         setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
-      } catch(err) {
-        alert('Error al guardar la meta de participación');
+      } catch (err) {
+        alert('Error al actualizar la meta de la zona: ' + err.message);
+        console.error(err);
       }
     }
   };
 
   useEffect(() => {
     loadData();
-  }, [user, selectedOrgId]); // Keep loadData stable or disable exhaustive deps warning, but actually we don't need loadData to be a dep if it's declared here. Wait, better to just put it above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  useEffect(() => {
+    if (!supabase || !selectedOrgId || selectedOrgId === 'all') return;
+
+    const channel = supabase
+      .channel('public:evaluations')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'evaluations',
+        filter: `organization_id=eq.${selectedOrgId}`
+      }, (payload) => {
+        const newEval = payload.new;
+        const transformedEval = {
+          ...newEval.results,
+          period: newEval.period || 1,
+          zone: newEval.zone || null,
+          departamento: newEval.zone || newEval.results?.departamento || "Sin Asignar",
+          organization_id: newEval.organization_id
+        };
+
+        setGlobalEvaluations(prev => [...prev, transformedEval]);
+        setEvaluations(prev => {
+           const activeOrg = organizations.find(o => o.id === selectedOrgId);
+           const targetPeriod = selectedPeriod === 'active' ? activeOrg?.currentPeriod : parseInt(selectedPeriod, 10);
+           if (transformedEval.period !== targetPeriod && (transformedEval.period || targetPeriod !== 1)) return prev;
+           if (selectedZone !== 'all' && transformedEval.zone !== selectedZone && transformedEval.departamento !== selectedZone) return prev;
+           return [...prev, transformedEval];
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [selectedOrgId, selectedPeriod, selectedZone, organizations]);
 
   useEffect(() => {
     loadEvaluations();
@@ -212,7 +257,47 @@ export default function DashboardOverview() {
       setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
       setNewZoneName('');
     } catch (err) {
-      alert('Error al crear zona');
+      alert('Error al crear zona: ' + err.message);
+      console.error(err);
+    }
+  };
+
+  const handleEditZoneSubmit = async (e, oldZone) => {
+    e.preventDefault();
+    if (!editZoneValue.trim() || !activeOrg) return;
+    const newZone = editZoneValue.trim();
+    if (newZone === oldZone) {
+      setEditingZone(null);
+      return;
+    }
+    
+    try {
+      const currentZones = activeOrg.zones || [];
+      if (currentZones.includes(newZone)) {
+        alert('Esta zona ya existe.');
+        return;
+      }
+      
+      const updatedZones = currentZones.map(z => z === oldZone ? newZone : z);
+      const updatedHeadcounts = { ...activeOrg.zone_headcounts };
+      if (updatedHeadcounts[oldZone] !== undefined) {
+         updatedHeadcounts[newZone] = updatedHeadcounts[oldZone];
+         delete updatedHeadcounts[oldZone];
+      }
+      
+      const updated = await dbService.updateOrganization(activeOrg.id, { 
+         zones: updatedZones,
+         zone_headcounts: updatedHeadcounts 
+      });
+      
+      setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
+      if (selectedZone === oldZone) {
+        setSelectedZone(newZone);
+      }
+      setEditingZone(null);
+    } catch (err) {
+      alert('Error al renombrar zona: ' + err.message);
+      console.error(err);
     }
   };
 
@@ -439,7 +524,21 @@ export default function DashboardOverview() {
                 <div className="space-y-3">
                   {activeOrg.zones.map(zone => (
                     <div key={zone} className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl hover:border-slate-300 transition-colors">
-                      <span className="font-semibold text-slate-700 min-w-[120px] shrink-0" title={zone}>{zone}</span>
+                      {editingZone === zone ? (
+                        <form onSubmit={(e) => handleEditZoneSubmit(e, zone)} className="flex items-center gap-1 min-w-[150px] shrink-0">
+                          <input
+                            type="text"
+                            value={editZoneValue}
+                            onChange={(e) => setEditZoneValue(e.target.value)}
+                            autoFocus
+                            className="w-full px-2 py-1.5 border border-slate-300 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary outline-none text-sm"
+                          />
+                          <button type="submit" className="text-green-600 p-1.5 hover:bg-green-100 rounded-lg transition-colors"><Check size={16}/></button>
+                          <button type="button" onClick={() => setEditingZone(null)} className="text-slate-400 p-1.5 hover:bg-slate-200 rounded-lg transition-colors"><X size={16}/></button>
+                        </form>
+                      ) : (
+                        <span className="font-semibold text-slate-700 min-w-[120px] shrink-0" title={zone}>{zone}</span>
+                      )}
                       
                       <div className="flex-1 relative">
                         <input 
@@ -456,6 +555,16 @@ export default function DashboardOverview() {
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${copiedZone === zone ? 'bg-green-100 text-green-700' : 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600 shadow-sm'}`}
                         >
                           {copiedZone === zone ? <Check size={14} /> : <LinkIcon size={14} />} Copiar
+                        </button>
+                        <button 
+                          onClick={() => {
+                             setEditingZone(zone);
+                             setEditZoneValue(zone);
+                          }}
+                          className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
+                          title="Editar micrositio"
+                        >
+                          <Edit2 size={16} />
                         </button>
                         <button 
                           onClick={() => handleDeleteZone(zone)}
