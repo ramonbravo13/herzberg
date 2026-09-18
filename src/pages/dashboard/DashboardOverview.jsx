@@ -15,6 +15,7 @@ export default function DashboardOverview() {
   const { user } = useAuth();
   const location = useLocation();
   const [organizations, setOrganizations] = useState([]);
+  const [rawEvaluations, setRawEvaluations] = useState([]);
   const [evaluations, setEvaluations] = useState([]);
   const [globalEvaluations, setGlobalEvaluations] = useState([]);
   const [selectedOrgId, setSelectedOrgId] = useState(location.state?.orgId || '');
@@ -74,18 +75,39 @@ export default function DashboardOverview() {
     setLoading(false);
   };
 
-  const loadEvaluations = async () => {
+  const fetchEvaluations = async () => {
     if (!selectedOrgId) return;
-    
-    if (selectedOrgId === 'all') {
-      let allEvals = await dbService.getAllEvaluations();
-      
-      if (user.role === 'corporativo') {
-        const allowed = user.allowed_organizations || [];
-        allEvals = allEvals.filter(e => allowed.includes(e.organization_id));
+    setLoading(true);
+    try {
+      if (selectedOrgId === 'all') {
+        let allEvals = await dbService.getAllEvaluations();
+        if (user.role === 'corporativo') {
+          const allowed = user.allowed_organizations || [];
+          allEvals = allEvals.filter(e => allowed.includes(e.organization_id));
+        }
+        setRawEvaluations(allEvals);
+      } else {
+        const orgEvals = await dbService.getEvaluationsByOrganization(selectedOrgId);
+        setRawEvaluations(orgEvals);
       }
+    } catch (err) {
+      console.error("Error fetching evaluations:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      const mappedAll = allEvals.map(e => ({
+  useEffect(() => {
+    if (!selectedOrgId || rawEvaluations.length === 0) {
+      if (rawEvaluations.length === 0) {
+        setEvaluations([]);
+        setGlobalEvaluations([]);
+      }
+      return;
+    }
+
+    if (selectedOrgId === 'all') {
+      const mappedAll = rawEvaluations.map(e => ({
         ...e.results,
         id: e.id,
         organization_id: e.organization_id,
@@ -93,20 +115,15 @@ export default function DashboardOverview() {
         departamento: e.zone,
         zone: e.zone
       }));
-
       setGlobalEvaluations(mappedAll);
-      setEvaluations(mappedAll); // Vista Global shows all regardless of period, or could be filtered if needed. We show all.
+      setEvaluations(mappedAll);
     } else {
-      const orgEvals = await dbService.getEvaluationsByOrganization(selectedOrgId);
-      setGlobalEvaluations(orgEvals);
-
       const activeOrg = organizations.find(o => o.id === selectedOrgId);
-      
       if (!activeOrg) return;
 
       const targetPeriod = selectedPeriod === 'active' ? activeOrg.currentPeriod : parseInt(selectedPeriod, 10);
       
-      let filtered = orgEvals.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
+      let filtered = rawEvaluations.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
       
       if (selectedZone !== 'all') {
         filtered = filtered.filter(e => e.zone === selectedZone || (e.results && e.results.departamento === selectedZone));
@@ -121,7 +138,7 @@ export default function DashboardOverview() {
         zone: e.zone
       }));
       
-      const mappedGlobal = orgEvals.map(e => ({
+      const mappedGlobal = rawEvaluations.map(e => ({
         ...e.results,
         id: e.id,
         organization_id: e.organization_id,
@@ -133,7 +150,7 @@ export default function DashboardOverview() {
       setGlobalEvaluations(mappedGlobal);
       setEvaluations(mappedFiltered);
     }
-  };
+  }, [rawEvaluations, selectedOrgId, selectedPeriod, selectedZone, organizations]);
 
   const handleRestartPeriod = async () => {
     setIsRestarting(true);
@@ -142,7 +159,7 @@ export default function DashboardOverview() {
       setOrganizations(prev => prev.map(o => o.id === selectedOrgId ? updatedOrg : o));
       setSelectedPeriod('active');
       setShowRestartConfirm(false);
-      await loadEvaluations();
+      await fetchEvaluations();
     } catch (err) {
       alert(err.message || 'Error al reiniciar el ciclo');
     } finally {
@@ -236,14 +253,7 @@ export default function DashboardOverview() {
           organization_id: newEval.organization_id
         };
 
-        setGlobalEvaluations(prev => [...prev, transformedEval]);
-        setEvaluations(prev => {
-           const activeOrg = organizations.find(o => o.id === selectedOrgId);
-           const targetPeriod = selectedPeriod === 'active' ? activeOrg?.currentPeriod : parseInt(selectedPeriod, 10);
-           if (transformedEval.period !== targetPeriod && (transformedEval.period || targetPeriod !== 1)) return prev;
-           if (selectedZone !== 'all' && transformedEval.zone !== selectedZone && transformedEval.departamento !== selectedZone) return prev;
-           return [...prev, transformedEval];
-        });
+        setRawEvaluations(prev => [...prev, newEval]);
       })
       .subscribe();
 
@@ -253,8 +263,8 @@ export default function DashboardOverview() {
   }, [selectedOrgId, selectedPeriod, selectedZone, organizations]);
 
   useEffect(() => {
-    loadEvaluations();
-  }, [selectedOrgId, selectedPeriod, selectedZone, organizations]);
+    fetchEvaluations();
+  }, [selectedOrgId]);
 
 
 
