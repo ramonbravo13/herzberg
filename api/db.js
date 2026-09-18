@@ -141,14 +141,14 @@ export default async function handler(req, res) {
         
         // Custom RBAC for updateOrganization
         if (decodedAdmin.role !== 'admin') {
-          if (decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id === id) {
+          if ((decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id === id) || decodedAdmin.role === 'corporativo') {
             const allowedKeys = ['zones', 'expected_headcount', 'zone_headcounts'];
             const updateKeys = Object.keys(updates);
             if (!updateKeys.every(k => allowedKeys.includes(k))) {
                throw new Error('Acceso denegado. Solo puedes modificar zonas y metas.');
             }
           } else {
-             throw new Error('Acceso denegado. Se requiere rol de administrador.');
+             throw new Error('Acceso denegado. Se requiere permisos sobre esta organización.');
           }
         }
 
@@ -175,8 +175,12 @@ export default async function handler(req, res) {
       }
 
       case 'restartOrganizationPeriod': {
-        requireAdmin();
         const { orgId } = payload;
+        if (decodedAdmin.role !== 'admin' && decodedAdmin.role !== 'corporativo') {
+           if (decodedAdmin.role !== 'empresarial' || decodedAdmin.organization_id !== orgId) {
+             throw new Error('Acceso denegado. No tienes permiso para reiniciar esta organización.');
+           }
+        }
         const { data: org } = await supabase.from('organizations').select('*').eq('id', orgId).single();
         let periods = org.periods || [];
         const currentPeriodId = org.current_period || 1;
@@ -217,8 +221,10 @@ export default async function handler(req, res) {
       }
 
       case 'updateUser': {
-        requireAdmin();
         const { id, updates } = payload;
+        if (decodedAdmin.role !== 'admin' && decodedAdmin.id !== id) {
+           throw new Error('Acceso denegado. Se requiere rol de administrador o ser el propietario del perfil.');
+        }
         const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single();
         if (error) throw error;
         const { password_hash, ...userWithoutPassword } = data;
