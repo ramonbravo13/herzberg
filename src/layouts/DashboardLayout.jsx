@@ -61,7 +61,7 @@ export default function DashboardLayout() {
   }
 
   if (user.role !== 'empresarial' && user.role !== 'corporativo' && user.role !== 'admin') {
-    return <div className="p-8 text-center text-red-500 font-bold">Acceso Denegado.</div>;
+    return <div className="p-8 text-center text-red-500 font-bold">Acceso Denegado. Tu rol actual es: {user.role || 'nulo/indefinido'}. Contacta a soporte.</div>;
   }
 
   if (user.requiresPasswordChange) {
