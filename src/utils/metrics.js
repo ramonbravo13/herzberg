@@ -42,6 +42,78 @@ export const getRiskLabel = (score) => {
   return 'Riesgo Alto';
 };
 
+export const getActionableInsight = (metricName, score) => {
+  const isHealthy = score >= 80;
+  const status = score >= 80 ? 'Bueno' : (score >= 60 ? 'Advertencia' : 'Crítico');
+  
+  if (isHealthy) {
+    return {
+      status,
+      insight: 'Desempeño óptimo sostenido.',
+      action: 'Mantener y documentar las buenas prácticas actuales.'
+    };
+  }
+
+  // Rules Engine Dictionary
+  const rules = {
+    'Reconocimiento': {
+      insight: 'Talento se siente invisible.',
+      action: 'Implementar un programa de feedback 1:1 semanal enfocado en logros recientes y visibilidad con líderes.'
+    },
+    'Logro y Metas': {
+      insight: 'Falta de retos o metas irreales.',
+      action: 'Redefinir Objetivos (OKRs) para asegurar que sean alcanzables y estén alineados a la estrategia general.'
+    },
+    'Autonomía': {
+      insight: 'Exceso de micromanagement.',
+      action: 'Reducir procesos de aprobación y delegar propiedad de proyectos clave.'
+    },
+    'Desarrollo Prof.': {
+      insight: 'Estancamiento profesional percibido.',
+      action: 'Crear planes de carrera horizontales y mapear competencias de crecimiento interno.'
+    },
+    'Sentido del Trabajo': {
+      insight: 'Desconexión con el propósito.',
+      action: 'Comunicar el impacto real de las tareas del equipo en los clientes directos de la empresa.'
+    },
+    'Salario y Compensación': {
+      insight: 'Percepción de inequidad salarial.',
+      action: 'Auditar la equidad salarial interna respecto al mercado para mitigar insatisfacción inmediata.'
+    },
+    'Liderazgo': {
+      insight: 'Fricción directa con jefaturas.',
+      action: 'Capacitar a los mandos medios en habilidades blandas, comunicación empática y gestión de personas.'
+    },
+    'Políticas Internas': {
+      insight: 'Procesos burocráticos excesivos.',
+      action: 'Simplificar burocracia en trámites frecuentes (permisos, gastos, solicitudes).'
+    },
+    'Condiciones Trabajo': {
+      insight: 'Herramientas/entorno deficiente.',
+      action: 'Atender solicitudes de herramientas (tecnología, instalaciones) priorizando cuellos de botella.'
+    },
+    'Relaciones Laborales': {
+      insight: 'Fricción entre compañeros.',
+      action: 'Fomentar dinámicas de integración y establecer canales seguros de mediación de conflictos.'
+    },
+    'Seguridad Laboral': {
+      insight: 'Incertidumbre sobre el futuro.',
+      action: 'Comunicar con transparencia el rumbo de la empresa y asegurar a los talentos clave.'
+    }
+  };
+
+  const match = rules[metricName];
+  if (match) {
+    return { status, insight: match.insight, action: match.action };
+  }
+
+  return {
+    status,
+    insight: 'Área de oportunidad detectada.',
+    action: 'Realizar un focus group para indagar las causas raíz de la insatisfacción.'
+  };
+};
+
 export const QUESTION_MAP = {
   logro_1: 'P1. Satisfacción personal al alcanzar objetivos',
   logro_2: 'P2. Permite conseguir resultados importantes',

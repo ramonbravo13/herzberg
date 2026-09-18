@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, ReferenceLine } from 'recharts';
-import { calculateIndex, getRiskLabel, INDICES_CONFIG } from '../utils/metrics';
+import { calculateIndex, getRiskLabel, INDICES_CONFIG, getActionableInsight } from '../utils/metrics';
 import { categoryColors, getCategoryColor, getGradientColor, globalPalette } from '../utils/themeColors';
 import TopRisks from './dashboard/TopRisks';
 import QuadrantMatrix from './dashboard/QuadrantMatrix';
@@ -46,7 +46,8 @@ export default function Dashboard({ data, globalData }) {
 
   const chartData = React.useMemo(() => INDICES_CONFIG.map((ind, idx) => {
     const score = calculateIndex(ind.vars, dataArray);
-    return { name: ind.name, score, fill: getCategoryColor(ind.name, idx), tipo: ind.tipo };
+    const rulesEnginePayload = getActionableInsight(ind.name, score);
+    return { name: ind.name, score, fill: getCategoryColor(ind.name, idx), tipo: ind.tipo, rulesEngine: rulesEnginePayload };
   }), [dataArray]);
 
   const motivadoresData = React.useMemo(() => chartData.filter(d => d.tipo === 'Motivador'), [chartData]);
@@ -305,9 +306,22 @@ export default function Dashboard({ data, globalData }) {
                     <Tooltip 
                       cursor={chartTheme.tooltip.cursor}
                       content={<ChartTooltip 
-                        formatter={(val, name, props) => (
-                          <span style={{ color: props.payload.fill }}>{val}% - {getRiskLabel(val)}</span>
-                        )}
+                        formatter={(val, name, props) => {
+                          const payload = props.payload;
+                          const rules = payload.rulesEngine;
+                          return (
+                            <div className="flex flex-col gap-2 max-w-xs whitespace-normal">
+                              <span style={{ color: props.payload.fill }} className="font-bold">{val}% - {getRiskLabel(val)}</span>
+                              {rules && rules.status !== 'Bueno' && (
+                                <div className="mt-1 pt-2 border-t border-slate-200/60">
+                                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">{rules.status}</p>
+                                  <p className="text-sm font-semibold text-slate-800 leading-tight mb-1">{rules.insight}</p>
+                                  <p className="text-xs text-slate-600 leading-snug"><strong>Acción Sugerida:</strong> {rules.action}</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }}
                         labelFormatter={() => null}
                       />}
                     />
@@ -348,9 +362,22 @@ export default function Dashboard({ data, globalData }) {
                     <Tooltip 
                       cursor={chartTheme.tooltip.cursor}
                       content={<ChartTooltip 
-                        formatter={(val, name, props) => (
-                          <span style={{ color: props.payload.fill }}>{val}% - {getRiskLabel(val)}</span>
-                        )}
+                        formatter={(val, name, props) => {
+                          const payload = props.payload;
+                          const rules = payload.rulesEngine;
+                          return (
+                            <div className="flex flex-col gap-2 max-w-xs whitespace-normal">
+                              <span style={{ color: props.payload.fill }} className="font-bold">{val}% - {getRiskLabel(val)}</span>
+                              {rules && rules.status !== 'Bueno' && (
+                                <div className="mt-1 pt-2 border-t border-slate-200/60">
+                                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">{rules.status}</p>
+                                  <p className="text-sm font-semibold text-slate-800 leading-tight mb-1">{rules.insight}</p>
+                                  <p className="text-xs text-slate-600 leading-snug"><strong>Acción Sugerida:</strong> {rules.action}</p>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        }}
                         labelFormatter={() => null}
                       />}
                     />
