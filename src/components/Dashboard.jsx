@@ -64,12 +64,15 @@ export default function Dashboard({ data, globalData }) {
     dataArray.forEach(d => {
       if (d.respuestas && d.respuestas.enps !== undefined) {
         const val = Number(d.respuestas.enps);
-        total++;
-        if (val >= 9) promotores++;
-        else if (val <= 6) detractores++;
+        if (!isNaN(val)) {
+          total++;
+          if (val >= 9) promotores++;
+          else if (val <= 6) detractores++;
+        }
       }
     });
-    return total > 0 ? Math.round(((promotores - detractores) / total) * 100) : 0;
+    const score = total > 0 ? Math.round(((promotores - detractores) / total) * 100) : 0;
+    return Math.max(-100, Math.min(100, score)); // eNPS ranges from -100 to +100
   }, [dataArray]);
 
   const getTopComments = React.useCallback((key) => {
@@ -92,9 +95,9 @@ export default function Dashboard({ data, globalData }) {
   // eNPS Distribution Data for PieChart
   const enpsPieData = React.useMemo(() => {
     const data = [
-      { name: 'Promotores', value: dataArray.filter(d => d.respuestas?.enps >= 9).length, color: categoryColors['Promotores'] || '#34d399' },
-      { name: 'Pasivos', value: dataArray.filter(d => d.respuestas?.enps >= 7 && d.respuestas?.enps <= 8).length, color: categoryColors['Pasivos'] || '#fbbf24' },
-      { name: 'Detractores', value: dataArray.filter(d => d.respuestas?.enps <= 6 && d.respuestas?.enps !== undefined).length, color: categoryColors['Detractores'] || '#f87171' }
+      { name: 'Promotores', value: dataArray.filter(d => !isNaN(Number(d.respuestas?.enps)) && Number(d.respuestas?.enps) >= 9).length, color: categoryColors['Promotores'] || '#34d399' },
+      { name: 'Pasivos', value: dataArray.filter(d => !isNaN(Number(d.respuestas?.enps)) && Number(d.respuestas?.enps) >= 7 && Number(d.respuestas?.enps) <= 8).length, color: categoryColors['Pasivos'] || '#fbbf24' },
+      { name: 'Detractores', value: dataArray.filter(d => !isNaN(Number(d.respuestas?.enps)) && d.respuestas?.enps !== undefined && Number(d.respuestas?.enps) <= 6).length, color: categoryColors['Detractores'] || '#f87171' }
     ];
     return data.filter(d => d.value > 0);
   }, [dataArray]);

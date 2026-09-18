@@ -21,14 +21,18 @@ export const calculateIndex = (vars, dataArray) => {
     vars.forEach(v => {
       const val = data.respuestas ? data.respuestas[v] : data[v];
       if (val !== undefined && val !== null) {
-        sum += Number(val);
-        count++;
+        const numVal = Number(val);
+        if (!isNaN(numVal)) {
+          sum += numVal;
+          count++;
+        }
       }
     });
   });
   if (count === 0) return 0;
   const avg = sum / count;
-  return Math.round(((avg - 1) / 4) * 100);
+  const score = Math.round(((avg - 1) / 4) * 100);
+  return Math.max(0, Math.min(100, score));
 };
 
 export const getRiskLabel = (score) => {

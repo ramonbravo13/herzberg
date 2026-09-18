@@ -36,13 +36,19 @@ export default function PredictiveMatrix({ dataArray }) {
           let count = 0;
           ind.vars.forEach(v => {
             if (d.respuestas[v] !== undefined) {
-              sum += Number(d.respuestas[v]);
-              count++;
+              const numVal = Number(d.respuestas[v]);
+              if (!isNaN(numVal)) {
+                sum += numVal;
+                count++;
+              }
             }
           });
           if (count > 0) {
-            xVals.push(sum / count); // 1-5 scale
-            yVals.push(Number(d.respuestas.permanencia)); // 1-5 scale
+            const permVal = Number(d.respuestas.permanencia);
+            if (!isNaN(permVal)) {
+              xVals.push(sum / count); // 1-5 scale
+              yVals.push(permVal); // 1-5 scale
+            }
           }
         }
       });

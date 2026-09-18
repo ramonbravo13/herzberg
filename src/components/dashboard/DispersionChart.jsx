@@ -19,10 +19,12 @@ export default function DispersionChart({ dataArray }) {
         ind.vars.forEach(v => {
           if (d.respuestas && d.respuestas[v] !== undefined) {
             const val = Number(d.respuestas[v]);
-            if (val <= 2) neg++;
-            else if (val === 3) neu++;
-            else if (val >= 4) pos++;
-            total++;
+            if (!isNaN(val)) {
+              if (val <= 2) neg++;
+              else if (val === 3) neu++;
+              else if (val >= 4) pos++;
+              total++;
+            }
           }
         });
       });
