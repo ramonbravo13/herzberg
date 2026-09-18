@@ -11,7 +11,16 @@ export const AuthProvider = ({ children }) => {
     // Check if user is in localStorage from previous session
     const storedUser = localStorage.getItem('herzberg_user');
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && parsedUser.role) {
+          setUser(parsedUser);
+        } else {
+          localStorage.removeItem('herzberg_user');
+        }
+      } catch (e) {
+        localStorage.removeItem('herzberg_user');
+      }
     }
     setLoading(false);
   }, []);

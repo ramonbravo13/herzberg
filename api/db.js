@@ -261,7 +261,9 @@ export default async function handler(req, res) {
       }
 
       case 'getAllEvaluations': {
-        requireAdmin();
+        if (decodedAdmin.role !== 'admin' && decodedAdmin.role !== 'corporativo') {
+           throw new Error('Acceso denegado. Se requiere rol de administrador o corporativo.');
+        }
         const { data, error } = await supabase.from('evaluations').select('*');
         if (error) throw error;
         const mapped = data.map(e => ({ ...e.results, period: e.period || 1, organization_id: e.organization_id, zone: e.zone || null, departamento: e.zone || e.results?.departamento || "Sin Asignar" }));
