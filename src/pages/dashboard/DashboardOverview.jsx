@@ -38,7 +38,7 @@ export default function DashboardOverview() {
 
   const handleCopyLink = (token, zone = null) => {
     const baseUrl = `${window.location.origin}/evaluate/${token}`;
-    const link = zone ? `${baseUrl}?zone=${encodeURIComponent(zone)}` : baseUrl;
+    const link = zone ? `${baseUrl}?zone=${encodeURIComponent(btoa(encodeURIComponent(zone)))}` : baseUrl;
     navigator.clipboard.writeText(link);
     if (zone) {
       setCopiedZone(zone);
@@ -582,7 +582,7 @@ export default function DashboardOverview() {
                         <input 
                           type="text" 
                           readOnly 
-                          value={`${window.location.origin}/evaluate/${activeOrg.evaluation_token}?zone=${encodeURIComponent(zone)}`}
+                          value={`${window.location.origin}/evaluate/${activeOrg.evaluation_token}?zone=${encodeURIComponent(btoa(encodeURIComponent(zone)))}`}
                           className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-500 font-mono outline-none"
                         />
                       </div>

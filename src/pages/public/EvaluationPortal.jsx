@@ -17,7 +17,16 @@ export default function EvaluationPortal() {
   
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const zone = queryParams.get('zone');
+  const rawZone = queryParams.get('zone');
+  
+  let zone = null;
+  if (rawZone) {
+    try {
+      zone = decodeURIComponent(atob(rawZone));
+    } catch(e) {
+      zone = rawZone; // Fallback in case there are old links with plaintext
+    }
+  }
 
   useEffect(() => {
     const initSessionAndFetchOrg = async () => {
