@@ -26,7 +26,7 @@ export default function LandingPage() {
 
   const handleLoginClick = () => {
     if (user) {
-      if (user.role === 'admin' || user.role === 'corporativo') navigate('/admin');
+      if (user.role === 'admin') navigate('/admin');
       else navigate('/dashboard');
     } else {
       navigate('/login');
