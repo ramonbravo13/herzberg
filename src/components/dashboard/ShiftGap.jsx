@@ -70,7 +70,7 @@ export default function ShiftGap({ dataArray }) {
             <ChartGradients />
             <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} vertical={false} strokeOpacity={0.4} />
             <XAxis dataKey="name" {...chartTheme.axis} />
-            <YAxis domain={['auto', 100]} {...chartTheme.axis} />
+            <YAxis domain={[-100, 100]} {...chartTheme.axis} />
             <Tooltip 
               cursor={chartTheme.tooltip.cursor}
               content={(props) => {

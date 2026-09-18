@@ -14,8 +14,10 @@ function calculatePearsonCorrelation(x, y) {
   const sumXY = x.reduce((a, b, i) => a + b * y[i], 0);
 
   const num = (n * sumXY) - (sumX * sumY);
-  const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-  if (den === 0) return 0;
+  const varianceProduct = (n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY);
+  if (varianceProduct <= 0) return 0;
+  
+  const den = Math.sqrt(varianceProduct);
   return num / den;
 }
 
@@ -55,7 +57,7 @@ export default function PredictiveMatrix({ dataArray }) {
       return {
         name: ind.name,
         score: avgScore, // 0-100
-        impact: Math.max(0, Math.round(correlation * 100)), // Convert to 0-100 scale of "Impact"
+        impact: isNaN(correlation) ? 0 : Math.max(0, Math.round(correlation * 100)), // Convert to 0-100 scale of "Impact"
         tipo: ind.tipo
       };
     });

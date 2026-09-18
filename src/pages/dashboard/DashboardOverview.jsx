@@ -85,8 +85,17 @@ export default function DashboardOverview() {
         allEvals = allEvals.filter(e => allowed.includes(e.organization_id));
       }
 
-      setGlobalEvaluations(allEvals);
-      setEvaluations(allEvals); // Vista Global shows all regardless of period, or could be filtered if needed. We show all.
+      const mappedAll = allEvals.map(e => ({
+        ...e.results,
+        id: e.id,
+        organization_id: e.organization_id,
+        period: e.period,
+        departamento: e.zone,
+        zone: e.zone
+      }));
+
+      setGlobalEvaluations(mappedAll);
+      setEvaluations(mappedAll); // Vista Global shows all regardless of period, or could be filtered if needed. We show all.
     } else {
       const orgEvals = await dbService.getEvaluationsByOrganization(selectedOrgId);
       setGlobalEvaluations(orgEvals);
@@ -100,10 +109,29 @@ export default function DashboardOverview() {
       let filtered = orgEvals.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
       
       if (selectedZone !== 'all') {
-        filtered = filtered.filter(e => e.zone === selectedZone || e.departamento === selectedZone);
+        filtered = filtered.filter(e => e.zone === selectedZone || (e.results && e.results.departamento === selectedZone));
       }
+
+      const mappedFiltered = filtered.map(e => ({
+        ...e.results,
+        id: e.id,
+        organization_id: e.organization_id,
+        period: e.period,
+        departamento: e.zone,
+        zone: e.zone
+      }));
       
-      setEvaluations(filtered);
+      const mappedGlobal = orgEvals.map(e => ({
+        ...e.results,
+        id: e.id,
+        organization_id: e.organization_id,
+        period: e.period,
+        departamento: e.zone,
+        zone: e.zone
+      }));
+      
+      setGlobalEvaluations(mappedGlobal);
+      setEvaluations(mappedFiltered);
     }
   };
 
