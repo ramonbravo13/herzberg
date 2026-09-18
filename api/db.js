@@ -297,8 +297,7 @@ export default async function handler(req, res) {
         
         const { data, error } = await supabase.from('evaluations').select('*').eq('organization_id', organizationId);
         if (error) throw error;
-        const mapped = data.map(e => ({ ...e.results, period: e.period || 1, zone: e.zone || null, departamento: e.zone || e.results?.departamento || "Sin Asignar" }));
-        return res.status(200).json(mapped);
+        return res.status(200).json(data);
       }
 
       case 'getAllEvaluations': {
@@ -307,8 +306,7 @@ export default async function handler(req, res) {
         }
         const { data, error } = await supabase.from('evaluations').select('*');
         if (error) throw error;
-        const mapped = data.map(e => ({ ...e.results, period: e.period || 1, organization_id: e.organization_id, zone: e.zone || null, departamento: e.zone || e.results?.departamento || "Sin Asignar" }));
-        return res.status(200).json(mapped);
+        return res.status(200).json(data);
       }
 
       case 'getDemoRequests': {
