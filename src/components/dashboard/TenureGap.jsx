@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, ReferenceLine } from 'recharts';
 import { calculateIndex } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
@@ -42,7 +42,7 @@ export default function TenureGap({ dataArray }) {
   return (
     <ChartCard 
       title="Brecha por Antigüedad (Tenure Gap)"
-      subtitle={<>Analiza cómo evoluciona la <strong>Satisfacción Global</strong> frente al <strong>Riesgo de Rotación</strong> a lo largo del ciclo de vida del colaborador en la organización.</>}
+      subtitle={<>Compara la <strong>Satisfacción Global</strong> frente al <strong>Riesgo de Rotación</strong> según la antigüedad. <br/><br/><strong>Interpretación:</strong> Observa en qué etapa del ciclo de vida tus empleados se sienten más vulnerables o insatisfechos. La línea roja punteada marca el límite de riesgo (60%); si las barras rojas lo cruzan, hay una alta probabilidad estadística de renuncias en ese grupo.</>}
     >
       <div className="h-[350px] mt-4">
         <ResponsiveContainer width="100%" height="100%">
@@ -51,6 +51,7 @@ export default function TenureGap({ dataArray }) {
             <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} vertical={false} strokeOpacity={0.4} />
             <XAxis dataKey="name" {...chartTheme.axis} />
             <YAxis domain={[0, 100]} {...chartTheme.axis} />
+            <ReferenceLine y={60} stroke="#ef4444" strokeDasharray="3 3" strokeOpacity={0.7} label={{ value: "Límite de Riesgo (60%)", position: "insideTopLeft", fill: "#ef4444", fontSize: 11, offset: 5 }} />
             <Tooltip 
               cursor={chartTheme.tooltip.cursor}
               content={(props) => {

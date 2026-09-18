@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, ReferenceLine } from 'recharts';
 import { calculateIndex } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
@@ -61,7 +61,7 @@ export default function ShiftGap({ dataArray }) {
   return (
     <ChartCard 
       title="Brecha por Turno de Trabajo"
-      subtitle="Compara la Satisfacción Global y el nivel de recomendación (eNPS) entre los diferentes turnos laborales."
+      subtitle={<>Compara la Satisfacción Global y el nivel de recomendación (eNPS) entre turnos.<br/><br/><strong>Interpretación:</strong> La línea roja horizontal marca el punto crítico de lealtad (eNPS = 0). Si la barra de eNPS cae por debajo del 0, significa que hay más detractores que promotores en ese turno, lo que requiere intervención urgente.</>}
       icon={Clock}
     >
       <div className="h-[350px] mt-4">
@@ -71,6 +71,7 @@ export default function ShiftGap({ dataArray }) {
             <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} vertical={false} strokeOpacity={0.4} />
             <XAxis dataKey="name" {...chartTheme.axis} />
             <YAxis domain={[-100, 100]} {...chartTheme.axis} />
+            <ReferenceLine y={0} stroke="#ef4444" strokeDasharray="3 3" strokeOpacity={0.7} label={{ value: "Punto Crítico eNPS (0)", position: "insideBottomLeft", fill: "#ef4444", fontSize: 11, offset: 5 }} />
             <Tooltip 
               cursor={chartTheme.tooltip.cursor}
               content={(props) => {
