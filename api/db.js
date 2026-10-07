@@ -25,7 +25,14 @@ export default async function handler(req, res) {
         .eq('password_hash', password)
         .single();
 
-      if (error || !user) return res.status(401).json({ error: 'Credenciales inválidas' });
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return res.status(401).json({ error: 'Credenciales inválidas' });
+        }
+        console.error('Error de base de datos en login:', error);
+        return res.status(500).json({ error: 'Error de conexión con la base de datos. Verifica que el proyecto de Supabase esté activo.' });
+      }
+      if (!user) return res.status(401).json({ error: 'Credenciales inválidas' });
       
       const { password_hash, ...userWithoutPassword } = user;
       

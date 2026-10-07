@@ -12,6 +12,7 @@ import FlightRiskDrivers from './dashboard/FlightRiskDrivers';
 import EnpsRadar from './dashboard/EnpsRadar';
 import BurnoutRisk from './dashboard/BurnoutRisk';
 import RetentionMatrix from './dashboard/RetentionMatrix';
+import RetentionProfiles from './dashboard/RetentionProfiles';
 import RoiSimulator from './dashboard/RoiSimulator';
 import Nom035Dashboard from './dashboard/Nom035Dashboard';
 import DiagnosticCharts from './dashboard/DiagnosticCharts';
@@ -449,6 +450,8 @@ export default function Dashboard({ data, globalData }) {
               <h2 className="text-2xl font-black text-slate-800">Talent Intelligence</h2>
               <p className="text-slate-500 mt-1">Métricas estratégicas para Business Partners y Consultores de RH.</p>
             </div>
+
+            <ErrorBoundary><RetentionProfiles dataArray={dataArray} /></ErrorBoundary>
 
             {/* Matriz 60% | ROI 40% */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
