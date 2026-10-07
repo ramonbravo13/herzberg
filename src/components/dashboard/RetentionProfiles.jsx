@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { calculateIndex } from '../../utils/metrics';
+import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
 import { Users, AlertTriangle, ShieldCheck, TrendingUp, TrendingDown, Target, BrainCircuit } from 'lucide-react';
 import AnimatedNumber from '../ui/AnimatedNumber';
 
@@ -44,21 +44,28 @@ export default function RetentionProfiles({ dataArray }) {
       const domAntiguedad = getDominantTrait(groupArray, 'antiguedad');
       const domNivel = getDominantTrait(groupArray, 'nivel_puesto');
 
-      // Calcular motivadores e higiene promedios para el grupo
-      const motivadoresVars = ['logro', 'reconocimiento', 'trabajo_en_si', 'responsabilidad', 'crecimiento'];
-      const higieneVars = ['politicas', 'supervision', 'relaciones_jefe', 'condiciones_trabajo', 'salario', 'relaciones_pares', 'vida_personal'];
+      // Calcular motivadores e higiene promedios usando INDICES_CONFIG
+      const motivadores = INDICES_CONFIG.filter(i => i.tipo === 'Motivador');
+      const higiene = INDICES_CONFIG.filter(i => i.tipo === 'Higiene');
+
+      const motivadoresVars = motivadores.flatMap(m => m.vars);
+      const higieneVars = higiene.flatMap(h => h.vars);
 
       const scoreMotivadores = calculateIndex(motivadoresVars, groupArray);
       const scoreHigiene = calculateIndex(higieneVars, groupArray);
       
-      // Determinar el Top driver (qué es lo más alto o más bajo)
-      let topDriver = { name: '', score: 0 };
-      let worstDriver = { name: '', score: 100 };
+      // Determinar el Top driver (Mejor Motivador) y Worst Driver (Peor Higiene)
+      let topDriver = { name: 'N/D', score: -1 };
+      let worstDriver = { name: 'N/D', score: 101 };
       
-      [...motivadoresVars, ...higieneVars].forEach(v => {
-         const score = calculateIndex([v], groupArray);
-         if(score > topDriver.score) topDriver = { name: v, score };
-         if(score < worstDriver.score) worstDriver = { name: v, score };
+      motivadores.forEach(m => {
+         const score = calculateIndex(m.vars, groupArray);
+         if(score > topDriver.score) topDriver = { name: m.name, score };
+      });
+
+      higiene.forEach(h => {
+         const score = calculateIndex(h.vars, groupArray);
+         if(score < worstDriver.score) worstDriver = { name: h.name, score };
       });
 
       return {
@@ -111,7 +118,7 @@ export default function RetentionProfiles({ dataArray }) {
                 <ShieldCheck size={20} />
               </div>
               <div>
-                <h4 className="font-bold text-emerald-900">Talento que se Queda (Loyal Persona)</h4>
+                <h4 className="font-bold text-emerald-900">Talento que se Queda (Persona Leal)</h4>
                 <p className="text-xs text-emerald-700 font-medium">Alta intención de permanencia</p>
               </div>
             </div>
