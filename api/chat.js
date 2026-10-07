@@ -198,7 +198,7 @@ export default async function handler(req, res) {
     }));
 
     const chatSession = await ai.chats.create({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       config: {
         systemInstruction: SYSTEM_PROMPT(organizationName, headcount),
         temperature: 0.2,
