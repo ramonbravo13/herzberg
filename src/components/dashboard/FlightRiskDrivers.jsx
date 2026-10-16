@@ -30,7 +30,7 @@ export default function FlightRiskDrivers({ dataArray }) {
   // Helper for demographics
   const getCounts = (arr, key) => {
     return arr.reduce((acc, curr) => {
-      const val = curr[key] || 'No especificado';
+      const val = curr[key] || (key === 'departamento' ? (curr.zone || 'General') : null) || 'No especificado';
       acc[val] = (acc[val] || 0) + 1;
       return acc;
     }, {});

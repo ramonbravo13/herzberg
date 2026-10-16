@@ -120,7 +120,7 @@ export default function Dashboard({ data, globalData }) {
               </div>
             ) : (
               <>
-                <div className="bg-slate-100 px-3 py-1.5 rounded-full"><strong>Depto:</strong> {dataArray[0].departamento}</div>
+                <div className="bg-slate-100 px-3 py-1.5 rounded-full"><strong>Depto:</strong> {dataArray[0].departamento || dataArray[0].zone || 'General'}</div>
                 <div className="bg-slate-100 px-3 py-1.5 rounded-full"><strong>Antigüedad:</strong> {dataArray[0].antiguedad}</div>
                 <div className="bg-slate-100 px-3 py-1.5 rounded-full"><strong>Nivel:</strong> {dataArray[0].nivel_puesto}</div>
               </>

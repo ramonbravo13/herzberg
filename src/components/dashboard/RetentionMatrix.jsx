@@ -13,7 +13,7 @@ export default function RetentionMatrix({ dataArray }) {
       id: index,
       x: Number(d.respuestas ? d.respuestas.satisfaccion_global : d.satisfaccion_global) || 0,
       y: Number(d.respuestas ? d.respuestas.permanencia : d.permanencia) || 0,
-      depto: d.departamento
+      depto: d.departamento || d.zone || 'General'
     };
   }).filter(d => d.x > 0 && d.y > 0);
 

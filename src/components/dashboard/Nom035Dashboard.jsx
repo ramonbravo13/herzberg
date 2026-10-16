@@ -319,7 +319,7 @@ export default function Nom035Dashboard({ dataArray }) {
                         return (
                           <tr key={idx} className="hover:bg-slate-50 transition-colors">
                             <td className="p-4 font-bold text-slate-800">{c.nombre_clinico || <span className="text-slate-400 italic font-normal">Anónimo</span>}</td>
-                            <td className="p-4 text-slate-600">{c.departamento} <br/><span className="text-xs opacity-70 uppercase tracking-wider">{c.nivel_puesto}</span></td>
+                            <td className="p-4 text-slate-600">{c.departamento || c.zone || 'General'} <br/><span className="text-xs opacity-70 uppercase tracking-wider">{c.nivel_puesto}</span></td>
                             <td className="p-4">
                               <div className="flex flex-wrap gap-1.5">
                                 {events.map((ev, eIdx) => <span key={eIdx} className="bg-red-100 text-red-700 text-[11px] px-2 py-0.5 rounded-md font-semibold whitespace-nowrap border border-red-200">{ev}</span>)}

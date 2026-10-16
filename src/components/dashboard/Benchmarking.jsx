@@ -20,15 +20,19 @@ export default function Benchmarking({ globalData }) {
     return Array.from(zones).sort();
   }, [globalData]);
 
-  // Set defaults if possible
+  // Set defaults and ensure selected zones are valid members of availableZones
   React.useEffect(() => {
-    if (availableZones.length >= 2 && !zoneA && !zoneB) {
-      setZoneA(availableZones[0]);
-      setZoneB(availableZones[1]);
-    } else if (availableZones.length === 1 && !zoneA) {
-      setZoneA(availableZones[0]);
+    if (availableZones.length >= 2) {
+      if (!availableZones.includes(zoneA)) setZoneA(availableZones[0]);
+      if (!availableZones.includes(zoneB)) setZoneB(availableZones[1] || availableZones[0]);
+    } else if (availableZones.length === 1) {
+      if (!availableZones.includes(zoneA)) setZoneA(availableZones[0]);
+      setZoneB('');
+    } else {
+      setZoneA('');
+      setZoneB('');
     }
-  }, [availableZones]);
+  }, [availableZones, zoneA, zoneB]);
 
   const dataA = useMemo(() => globalData?.filter(d => d.departamento === zoneA || d.zone === zoneA) || [], [globalData, zoneA]);
   const dataB = useMemo(() => globalData?.filter(d => d.departamento === zoneB || d.zone === zoneB) || [], [globalData, zoneB]);

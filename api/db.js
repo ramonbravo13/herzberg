@@ -68,12 +68,46 @@ export default async function handler(req, res) {
       const participantId = match ? match[1] : null;
 
       if (!participantId) return res.status(401).json({ error: 'Sesión no inicializada. Por favor, recarga la página.' });
+      if (!organizationId) return res.status(400).json({ error: 'ID de organización no proporcionado.' });
 
-      const { data: org } = await supabase.from('organizations').select('current_period').eq('id', organizationId).single();
-      const period = org ? (org.current_period || 1) : 1;
+      const { data: org, error: orgErr } = await supabase
+        .from('organizations')
+        .select('current_period, periods, subscription_end_date')
+        .eq('id', organizationId)
+        .single();
+
+      if (orgErr || !org) return res.status(404).json({ error: 'Organización no encontrada.' });
+
+      // Zero-Trust check: Prevent submissions to expired organizations
+      if (org.subscription_end_date && new Date(org.subscription_end_date) < new Date()) {
+        return res.status(403).json({ error: 'El periodo de suscripción de esta organización ha finalizado.' });
+      }
+
+      const period = org.current_period || 1;
+
+      // Clean zone and resolve zone alias if applicable (case-insensitive lookup)
+      let effectiveZone = zone ? String(zone).trim().replace(/\s+/g, ' ') : null;
+      if (effectiveZone && org?.periods) {
+        const periodObj = org.periods.find(p => p.id === period) || org.periods[0];
+        if (periodObj?.zone_aliases) {
+          const lowerZone = effectiveZone.toLowerCase();
+          for (const [aliasKey, targetZone] of Object.entries(periodObj.zone_aliases)) {
+            if (aliasKey.toLowerCase() === lowerZone) {
+              effectiveZone = targetZone;
+              break;
+            }
+          }
+        }
+      }
+
+      // Ensure results.departamento matches effectiveZone if defined
+      const updatedResults = results ? { ...results } : {};
+      if (effectiveZone) {
+        updatedResults.departamento = effectiveZone;
+      }
 
       const { data, error } = await supabase.from('evaluations').insert([{
-        organization_id: organizationId, period, participant_id: participantId, zone, results
+        organization_id: organizationId, period, participant_id: participantId, zone: effectiveZone, results: updatedResults
       }]).select().single();
 
       if (error) {
@@ -194,6 +228,10 @@ export default async function handler(req, res) {
         const { id } = payload;
         const { data: users } = await supabase.from('profiles').select('id').eq('organization_id', id);
         if (users && users.length > 0) return res.status(400).json({ error: 'No se puede eliminar la organización porque tiene usuarios asignados.' });
+
+        // Cleanly delete all associated evaluations first to prevent orphaned records in corporate analytics
+        await supabase.from('evaluations').delete().eq('organization_id', id);
+
         const { error } = await supabase.from('organizations').delete().eq('id', id);
         if (error) throw error;
         return res.status(200).json({ success: true });
@@ -219,6 +257,185 @@ export default async function handler(req, res) {
         const { data, error } = await supabase.from('organizations').update({ current_period: newPeriodId, periods }).eq('id', orgId).select().single();
         if (error) throw error;
         return res.status(200).json({ ...data, currentPeriod: data.current_period });
+      }
+
+      case 'renameZone': {
+        const { organizationId, oldZone, newZone } = payload;
+        if (!organizationId || !oldZone || !newZone) {
+          return res.status(400).json({ error: 'Faltan parámetros requeridos: organizationId, oldZone y newZone son obligatorios.' });
+        }
+
+        const trimmedOld = String(oldZone).trim().replace(/\s+/g, ' ');
+        const trimmedNew = String(newZone).trim().replace(/\s+/g, ' ');
+
+        if (!trimmedOld || !trimmedNew) {
+          return res.status(400).json({ error: 'El nombre de la zona no puede estar vacío.' });
+        }
+
+        const RESERVED_NAMES = ['all', 'todas', 'todos', 'general', 'sin asignar'];
+        if (RESERVED_NAMES.includes(trimmedNew.toLowerCase())) {
+          return res.status(400).json({ error: `El nombre "${trimmedNew}" está reservado por el sistema. Por favor utiliza otro nombre.` });
+        }
+
+        if (trimmedOld.toLowerCase() === trimmedNew.toLowerCase()) {
+          const { data: currentOrg } = await supabase.from('organizations').select('*').eq('id', organizationId).single();
+          return res.status(200).json({
+            ...currentOrg,
+            subscriptionEndDate: currentOrg.subscription_end_date,
+            currentPeriod: currentOrg.current_period
+          });
+        }
+
+        // RBAC check
+        if (decodedAdmin.role !== 'admin') {
+          const isEmpresarialOwner = decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id === organizationId;
+          const isCorporativoAllowed = decodedAdmin.role === 'corporativo' && (decodedAdmin.allowed_organizations || []).includes(organizationId);
+
+          if (!isEmpresarialOwner && !isCorporativoAllowed) {
+            throw new Error('Acceso denegado. No tienes permiso para editar esta organización.');
+          }
+        }
+
+        // 1. Fetch current organization
+        const { data: org, error: fetchOrgErr } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('id', organizationId)
+          .single();
+
+        if (fetchOrgErr || !org) {
+          return res.status(404).json({ error: 'Organización no encontrada.' });
+        }
+
+        const currentZones = org.zones || [];
+        const isDuplicate = currentZones.some(
+          z => z.toLowerCase() === trimmedNew.toLowerCase() && z.toLowerCase() !== trimmedOld.toLowerCase()
+        );
+        if (isDuplicate) {
+          return res.status(400).json({ error: `La zona "${trimmedNew}" ya existe (no se permite duplicar nombres aún con distintas mayúsculas o minúsculas).` });
+        }
+
+        // 2. Update zones array
+        const updatedZones = currentZones.map(z => z === trimmedOld ? trimmedNew : z);
+
+        // 3. Update zone_headcounts
+        const updatedHeadcounts = { ...(org.zone_headcounts || {}) };
+        if (updatedHeadcounts[trimmedOld] !== undefined) {
+          updatedHeadcounts[trimmedNew] = updatedHeadcounts[trimmedOld];
+          delete updatedHeadcounts[trimmedOld];
+        }
+
+        // 4. Update zone_aliases in periods array so old shared links resolve to newZone
+        let periods = org.periods || [];
+        const currentPeriodId = org.current_period || 1;
+        const currentIdx = periods.findIndex(p => p.id === currentPeriodId);
+        if (currentIdx > -1) {
+          const periodObj = periods[currentIdx];
+          const aliases = { ...(periodObj.zone_aliases || {}) };
+          aliases[trimmedOld] = trimmedNew;
+          for (const key in aliases) {
+            if (aliases[key] === trimmedOld) {
+              aliases[key] = trimmedNew;
+            }
+          }
+          periods[currentIdx] = { ...periodObj, zone_aliases: aliases };
+        }
+
+        // 5. Update organization in DB
+        const { data: updatedOrg, error: orgUpdateErr } = await supabase
+          .from('organizations')
+          .update({
+            zones: updatedZones,
+            zone_headcounts: updatedHeadcounts,
+            periods: periods
+          })
+          .eq('id', organizationId)
+          .select()
+          .single();
+
+        if (orgUpdateErr) throw orgUpdateErr;
+
+        // 6. Update evaluations table:
+        // Update zone column
+        const { data: updatedEvals, error: evalsErr } = await supabase
+          .from('evaluations')
+          .update({ zone: trimmedNew })
+          .eq('organization_id', organizationId)
+          .eq('zone', trimmedOld)
+          .select('id, results');
+
+        if (evalsErr) {
+          console.error('Error actualizando zone en evaluations:', evalsErr);
+        }
+
+        // Also ensure results.departamento is updated if it was storing the old zone
+        if (updatedEvals && updatedEvals.length > 0) {
+          for (const ev of updatedEvals) {
+            if (ev.results && ev.results.departamento === trimmedOld) {
+              await supabase
+                .from('evaluations')
+                .update({ results: { ...ev.results, departamento: trimmedNew } })
+                .eq('id', ev.id);
+            }
+          }
+        }
+
+        return res.status(200).json({
+          ...updatedOrg,
+          subscriptionEndDate: updatedOrg.subscription_end_date,
+          currentPeriod: updatedOrg.current_period
+        });
+      }
+
+      case 'deleteZone': {
+        const { organizationId, zone } = payload;
+        if (!organizationId || !zone) {
+          return res.status(400).json({ error: 'Faltan parámetros requeridos: organizationId y zone son obligatorios.' });
+        }
+
+        // RBAC check
+        if (decodedAdmin.role !== 'admin') {
+          const isEmpresarialOwner = decodedAdmin.role === 'empresarial' && decodedAdmin.organization_id === organizationId;
+          const isCorporativoAllowed = decodedAdmin.role === 'corporativo' && (decodedAdmin.allowed_organizations || []).includes(organizationId);
+
+          if (!isEmpresarialOwner && !isCorporativoAllowed) {
+            throw new Error('Acceso denegado. No tienes permiso para editar esta organización.');
+          }
+        }
+
+        const { data: org, error: fetchOrgErr } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('id', organizationId)
+          .single();
+
+        if (fetchOrgErr || !org) {
+          return res.status(404).json({ error: 'Organización no encontrada.' });
+        }
+
+        const updatedZones = (org.zones || []).filter(z => z !== zone);
+        const updatedHeadcounts = { ...(org.zone_headcounts || {}) };
+        if (updatedHeadcounts[zone] !== undefined) {
+          delete updatedHeadcounts[zone];
+        }
+
+        const { data: updatedOrg, error: orgUpdateErr } = await supabase
+          .from('organizations')
+          .update({
+            zones: updatedZones,
+            zone_headcounts: updatedHeadcounts
+          })
+          .eq('id', organizationId)
+          .select()
+          .single();
+
+        if (orgUpdateErr) throw orgUpdateErr;
+
+        return res.status(200).json({
+          ...updatedOrg,
+          subscriptionEndDate: updatedOrg.subscription_end_date,
+          currentPeriod: updatedOrg.current_period
+        });
       }
 
       case 'getOrganizationById': {

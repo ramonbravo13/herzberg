@@ -6,12 +6,12 @@ import ChartCard from '../charts/ChartCard';
 export default function Heatmap({ dataArray }) {
   if (!dataArray || dataArray.length < 2) return null;
 
-  // Group by department
+  // Group by department or zone
   const deptoMap = {};
   dataArray.forEach(d => {
-    if (!d.departamento) return;
-    if (!deptoMap[d.departamento]) deptoMap[d.departamento] = [];
-    deptoMap[d.departamento].push(d);
+    const depto = d.departamento || d.zone || 'General';
+    if (!deptoMap[depto]) deptoMap[depto] = [];
+    deptoMap[depto].push(d);
   });
 
   const deptos = Object.keys(deptoMap).sort();

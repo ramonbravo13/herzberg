@@ -62,6 +62,16 @@ export default function EvaluationPortal() {
     }
   }, [token, navigate]);
 
+  // Resolve zone alias if applicable (in case an employee answered using a link before the microsite was renamed)
+  let effectiveZone = zone;
+  if (zone && organization?.periods) {
+    const period = organization.currentPeriod || 1;
+    const periodObj = organization.periods.find(p => p.id === period) || organization.periods[0];
+    if (periodObj?.zone_aliases?.[zone]) {
+      effectiveZone = periodObj.zone_aliases[zone];
+    }
+  }
+
   const handleComplete = async (results) => {
     try {
       if (results.nom035_respuestas && evaluateGuia1(results.nom035_respuestas)) {
@@ -69,7 +79,7 @@ export default function EvaluationPortal() {
         return; // Wait for ClinicalNameForm
       }
 
-      await dbService.saveEvaluation(organization.id, results, zone);
+      await dbService.saveEvaluation(organization.id, results, effectiveZone);
       setCompleted(true);
     } catch (err) {
       console.error("Error guardando evaluación:", err);
@@ -84,7 +94,7 @@ export default function EvaluationPortal() {
   const handleClinicalSubmit = async (name) => {
     try {
       const resultsWithName = { ...clinicalPendingResults, nombre_clinico: name };
-      await dbService.saveEvaluation(organization.id, resultsWithName, zone);
+      await dbService.saveEvaluation(organization.id, resultsWithName, effectiveZone);
       setClinicalPendingResults(null);
       setCompleted(true);
     } catch (err) {

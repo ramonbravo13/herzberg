@@ -112,8 +112,8 @@ export default function DashboardOverview() {
         id: e.id,
         organization_id: e.organization_id,
         period: e.period,
-        departamento: e.zone,
-        zone: e.zone
+        departamento: e.zone || e.results?.departamento || "General",
+        zone: e.zone || e.results?.departamento || "General"
       }));
       setGlobalEvaluations(mappedAll);
       setEvaluations(mappedAll);
@@ -123,10 +123,16 @@ export default function DashboardOverview() {
 
       const targetPeriod = selectedPeriod === 'active' ? activeOrg.currentPeriod : parseInt(selectedPeriod, 10);
       
-      let filtered = rawEvaluations.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
+      const periodEvaluations = rawEvaluations.filter(e => e.period === targetPeriod || (!e.period && targetPeriod === 1));
       
+      let filtered = periodEvaluations;
       if (selectedZone !== 'all') {
-        filtered = filtered.filter(e => e.zone === selectedZone || (e.results && e.results.departamento === selectedZone));
+        const normSelected = selectedZone.trim().toLowerCase();
+        filtered = filtered.filter(e => {
+          const zoneNorm = (e.zone || '').trim().toLowerCase();
+          const deptoNorm = (e.results?.departamento || '').trim().toLowerCase();
+          return zoneNorm === normSelected || deptoNorm === normSelected;
+        });
       }
 
       const mappedFiltered = filtered.map(e => ({
@@ -134,17 +140,18 @@ export default function DashboardOverview() {
         id: e.id,
         organization_id: e.organization_id,
         period: e.period,
-        departamento: e.zone,
-        zone: e.zone
+        departamento: e.zone || e.results?.departamento || "General",
+        zone: e.zone || e.results?.departamento || "General"
       }));
       
-      const mappedGlobal = rawEvaluations.map(e => ({
+      // Global data for the active organization should reflect the chosen period across all its zones (Benchmarking isolation)
+      const mappedGlobal = periodEvaluations.map(e => ({
         ...e.results,
         id: e.id,
         organization_id: e.organization_id,
         period: e.period,
-        departamento: e.zone,
-        zone: e.zone
+        departamento: e.zone || e.results?.departamento || "General",
+        zone: e.zone || e.results?.departamento || "General"
       }));
       
       setGlobalEvaluations(mappedGlobal);
@@ -186,14 +193,16 @@ export default function DashboardOverview() {
       const num = parseInt(input, 10);
       try {
         let updates = {};
+        const activeZones = activeOrg.zones || [];
+
         if (isZone) {
            const zoneHeadcounts = { ...(activeOrg.zone_headcounts || {}) };
            if (!isNaN(num) && num > 0) {
              if (activeOrg.expected_headcount) {
                 let otherZonesSum = 0;
-                for (const z in zoneHeadcounts) {
+                for (const z of activeZones) {
                    if (z !== selectedZone) {
-                      otherZonesSum += zoneHeadcounts[z];
+                      otherZonesSum += (zoneHeadcounts[z] || 0);
                    }
                 }
                 if (otherZonesSum + num > activeOrg.expected_headcount) {
@@ -208,9 +217,9 @@ export default function DashboardOverview() {
            updates = { zone_headcounts: zoneHeadcounts };
         } else {
            if (!isNaN(num) && num > 0) {
-              const currentZonesSum = Object.values(activeOrg.zone_headcounts || {}).reduce((a, b) => a + b, 0);
+              const currentZonesSum = activeZones.reduce((acc, z) => acc + (activeOrg.zone_headcounts?.[z] || 0), 0);
               if (num < currentZonesSum) {
-                 alert(`Error: La meta global (${num}) no puede ser menor a la suma actual de participación esperada en las zonas (${currentZonesSum}).`);
+                 alert(`Error: La meta global (${num}) no puede ser menor a la suma actual de participación esperada en las zonas activas (${currentZonesSum}).`);
                  return;
               }
               updates = { expected_headcount: num };
@@ -282,15 +291,23 @@ export default function DashboardOverview() {
 
   const handleAddZone = async (e) => {
     e.preventDefault();
-    if (!newZoneName.trim() || !activeOrg) return;
+    const trimmedName = newZoneName.trim().replace(/\s+/g, ' ');
+    if (!trimmedName || !activeOrg) return;
+
+    const RESERVED_NAMES = ['all', 'todas', 'todos', 'general', 'sin asignar'];
+    if (RESERVED_NAMES.includes(trimmedName.toLowerCase())) {
+      alert(`El nombre "${trimmedName}" está reservado por el sistema. Por favor utiliza otro nombre.`);
+      return;
+    }
     
     try {
       const currentZones = activeOrg.zones || [];
-      if (currentZones.includes(newZoneName.trim())) {
-        alert('Esta zona ya existe.');
+      const exists = currentZones.some(z => z.toLowerCase() === trimmedName.toLowerCase());
+      if (exists) {
+        alert('Esta zona ya existe (las mayúsculas y minúsculas no deben repetirse).');
         return;
       }
-      const updatedZones = [...currentZones, newZoneName.trim()];
+      const updatedZones = [...currentZones, trimmedName];
       const updated = await dbService.updateOrganization(activeOrg.id, { zones: updatedZones });
       setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
       setNewZoneName('');
@@ -302,37 +319,51 @@ export default function DashboardOverview() {
 
   const handleEditZoneSubmit = async (e, oldZone) => {
     e.preventDefault();
-    if (!editZoneValue.trim() || !activeOrg) return;
-    const newZone = editZoneValue.trim();
+    const newZone = editZoneValue.trim().replace(/\s+/g, ' ');
+    if (!newZone || !activeOrg) return;
     if (newZone === oldZone) {
       setEditingZone(null);
+      return;
+    }
+
+    const RESERVED_NAMES = ['all', 'todas', 'todos', 'general', 'sin asignar'];
+    if (RESERVED_NAMES.includes(newZone.toLowerCase())) {
+      alert(`El nombre "${newZone}" está reservado por el sistema. Por favor utiliza otro nombre.`);
       return;
     }
     
     try {
       const currentZones = activeOrg.zones || [];
-      if (currentZones.includes(newZone)) {
-        alert('Esta zona ya existe.');
+      const exists = currentZones.some(z => z.toLowerCase() === newZone.toLowerCase() && z.toLowerCase() !== oldZone.toLowerCase());
+      if (exists) {
+        alert('Esta zona ya existe (las mayúsculas y minúsculas no deben repetirse).');
         return;
       }
       
-      const updatedZones = currentZones.map(z => z === oldZone ? newZone : z);
-      const updatedHeadcounts = { ...activeOrg.zone_headcounts };
-      if (updatedHeadcounts[oldZone] !== undefined) {
-         updatedHeadcounts[newZone] = updatedHeadcounts[oldZone];
-         delete updatedHeadcounts[oldZone];
-      }
-      
-      const updated = await dbService.updateOrganization(activeOrg.id, { 
-         zones: updatedZones,
-         zone_headcounts: updatedHeadcounts 
-      });
+      const updated = await dbService.renameZone(activeOrg.id, oldZone, newZone);
       
       setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
+
+      // Update evaluations in local state immediately so that charts and responses stay visible seamlessly
+      setRawEvaluations(prev => prev.map(ev => {
+        if (ev.organization_id === activeOrg.id && ev.zone === oldZone) {
+          return {
+            ...ev,
+            zone: newZone,
+            departamento: newZone,
+            results: ev.results ? { ...ev.results, departamento: newZone } : ev.results
+          };
+        }
+        return ev;
+      }));
+
       if (selectedZone === oldZone) {
         setSelectedZone(newZone);
       }
       setEditingZone(null);
+
+      // Re-fetch in background to ensure complete sync
+      fetchEvaluations();
     } catch (err) {
       alert('Error al renombrar zona: ' + err.message);
       console.error(err);
@@ -343,15 +374,13 @@ export default function DashboardOverview() {
     if (!activeOrg || !window.confirm(`¿Estás seguro de que deseas eliminar la zona "${zoneToDelete}"? Esto no borrará las respuestas pasadas de esta zona.`)) return;
     
     try {
-      const currentZones = activeOrg.zones || [];
-      const updatedZones = currentZones.filter(z => z !== zoneToDelete);
-      const updated = await dbService.updateOrganization(activeOrg.id, { zones: updatedZones });
+      const updated = await dbService.deleteZone(activeOrg.id, zoneToDelete);
       setOrganizations(prev => prev.map(o => o.id === activeOrg.id ? updated : o));
       if (selectedZone === zoneToDelete) {
         setSelectedZone('all');
       }
     } catch (err) {
-      alert('Error al eliminar zona');
+      alert('Error al eliminar zona: ' + err.message);
     }
   };
 

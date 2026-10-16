@@ -50,6 +50,14 @@ export const dbService = {
     return await apiCall('restartOrganizationPeriod', { orgId });
   },
 
+  renameZone: async (organizationId, oldZone, newZone) => {
+    return await apiCall('renameZone', { organizationId, oldZone, newZone });
+  },
+
+  deleteZone: async (organizationId, zone) => {
+    return await apiCall('deleteZone', { organizationId, zone });
+  },
+
   getOrganizationByToken: async (token) => {
     return await apiCall('getOrganizationByToken', { token });
   },
