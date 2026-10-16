@@ -1,27 +1,13 @@
 import React from 'react';
 import ChartCard from '../charts/ChartCard';
+import { calculateBurnout } from '../../utils/metrics';
 
 export default function BurnoutRisk({ dataArray }) {
-  if (!dataArray || dataArray.length < 2) return null;
+  if (!Array.isArray(dataArray) || dataArray.length < 2) return null;
 
-  let burnoutCount = 0;
-  let atRiskCount = 0;
+  const { burnoutCount, atRiskCount, totalValidos, burnoutPct, atRiskPct } = calculateBurnout(dataArray);
 
-  dataArray.forEach(d => {
-    if (!d.respuestas) return;
-    const carga = d.respuestas.condiciones_3; // Carga laboral razonable
-    const apoyo = d.respuestas.supervision_2; // Apoyo ante dificultades
-    
-    if (carga <= 2 && apoyo <= 2) {
-      burnoutCount++;
-    } else if (carga <= 2 || apoyo <= 2) {
-      atRiskCount++;
-    }
-  });
-
-  const total = dataArray.length;
-  const burnoutPct = Math.round((burnoutCount / total) * 100);
-  const atRiskPct = Math.round((atRiskCount / total) * 100);
+  if (totalValidos === 0) return null;
 
   let statusClass = "bg-emerald-50 border-emerald-200";
   let textColor = "text-emerald-600";

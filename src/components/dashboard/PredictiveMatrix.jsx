@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
-import { INDICES_CONFIG, calculateIndex } from '../../utils/metrics';
+import { INDICES_CONFIG, calculateIndex, sanitizeLikert } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import { BrainCircuit } from 'lucide-react';
 
@@ -30,26 +30,23 @@ export default function PredictiveMatrix({ dataArray }) {
       const yVals = [];
 
       dataArray.forEach(d => {
-        if (d.respuestas && d.respuestas.permanencia !== undefined) {
-          // Calculate this user's score for this index
-          let sum = 0;
-          let count = 0;
-          ind.vars.forEach(v => {
-            if (d.respuestas[v] !== undefined) {
-              const numVal = Number(d.respuestas[v]);
-              if (!isNaN(numVal)) {
-                sum += numVal;
-                count++;
-              }
-            }
-          });
-          if (count > 0) {
-            const permVal = Number(d.respuestas.permanencia);
-            if (!isNaN(permVal)) {
-              xVals.push(sum / count); // 1-5 scale
-              yVals.push(permVal); // 1-5 scale
-            }
+        if (!d?.respuestas) return;
+        const permVal = sanitizeLikert(d.respuestas.permanencia);
+        if (permVal === null) return;
+
+        let sum = 0;
+        let count = 0;
+        ind.vars.forEach(v => {
+          const numVal = sanitizeLikert(d.respuestas[v]);
+          if (numVal !== null) {
+            sum += numVal;
+            count++;
           }
+        });
+
+        if (count > 0) {
+          xVals.push(sum / count); // 1-5 scale
+          yVals.push(permVal); // 1-5 scale
         }
       });
 

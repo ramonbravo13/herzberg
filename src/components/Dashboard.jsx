@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid, ReferenceLine } from 'recharts';
-import { calculateIndex, getRiskLabel, INDICES_CONFIG, getActionableInsight } from '../utils/metrics';
+import { calculateIndex, getRiskLabel, INDICES_CONFIG, getActionableInsight, calculateEnps } from '../utils/metrics';
 import { categoryColors, getCategoryColor, getGradientColor, globalPalette } from '../utils/themeColors';
 import TopRisks from './dashboard/TopRisks';
 import QuadrantMatrix from './dashboard/QuadrantMatrix';
@@ -59,23 +59,8 @@ export default function Dashboard({ data, globalData }) {
   const rotacionRiesgo = React.useMemo(() => 100 - calculateIndex(['permanencia'], dataArray), [dataArray]);
 
   // eNPS
-  const enpsScore = React.useMemo(() => {
-    let promotores = 0;
-    let detractores = 0;
-    let total = 0;
-    dataArray.forEach(d => {
-      if (d.respuestas && d.respuestas.enps !== undefined) {
-        const val = Number(d.respuestas.enps);
-        if (!isNaN(val)) {
-          total++;
-          if (val >= 9) promotores++;
-          else if (val <= 6) detractores++;
-        }
-      }
-    });
-    const score = total > 0 ? Math.round(((promotores - detractores) / total) * 100) : 0;
-    return Math.max(-100, Math.min(100, score)); // eNPS ranges from -100 to +100
-  }, [dataArray]);
+  const enpsResult = React.useMemo(() => calculateEnps(dataArray), [dataArray]);
+  const enpsScore = enpsResult.score;
 
   const getTopComments = React.useCallback((key) => {
     const counts = {};
@@ -97,12 +82,12 @@ export default function Dashboard({ data, globalData }) {
   // eNPS Distribution Data for PieChart
   const enpsPieData = React.useMemo(() => {
     const data = [
-      { name: 'Promotores', value: dataArray.filter(d => !isNaN(Number(d.respuestas?.enps)) && Number(d.respuestas?.enps) >= 9).length, color: categoryColors['Promotores'] || '#34d399' },
-      { name: 'Pasivos', value: dataArray.filter(d => !isNaN(Number(d.respuestas?.enps)) && Number(d.respuestas?.enps) >= 7 && Number(d.respuestas?.enps) <= 8).length, color: categoryColors['Pasivos'] || '#fbbf24' },
-      { name: 'Detractores', value: dataArray.filter(d => !isNaN(Number(d.respuestas?.enps)) && d.respuestas?.enps !== undefined && Number(d.respuestas?.enps) <= 6).length, color: categoryColors['Detractores'] || '#f87171' }
+      { name: 'Promotores', value: enpsResult.promotores, color: categoryColors['Promotores'] || '#34d399' },
+      { name: 'Pasivos', value: enpsResult.pasivos, color: categoryColors['Pasivos'] || '#fbbf24' },
+      { name: 'Detractores', value: enpsResult.detractores, color: categoryColors['Detractores'] || '#f87171' }
     ];
     return data.filter(d => d.value > 0);
-  }, [dataArray]);
+  }, [enpsResult]);
 
   return (
     <div className="w-full relative">

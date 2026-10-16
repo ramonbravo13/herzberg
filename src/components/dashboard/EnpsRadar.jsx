@@ -9,11 +9,25 @@ import { categoryColors, getGradientColor } from '../../utils/themeColors';
 export default function EnpsRadar({ dataArray }) {
   const [selectedSegment, setSelectedSegment] = useState('all');
 
-  if (!dataArray || dataArray.length < 2) return null;
+  const getEnpsVal = (d) => {
+    const raw = d?.respuestas ? d.respuestas.enps : d?.enps;
+    if (raw === null || raw === undefined || raw === '') return null;
+    const num = Number(raw);
+    return (Number.isFinite(num) && num >= 0 && num <= 10) ? num : null;
+  };
 
-  const promotores = dataArray.filter(d => d.respuestas && d.respuestas.enps >= 9);
-  const pasivos = dataArray.filter(d => d.respuestas && d.respuestas.enps >= 7 && d.respuestas.enps <= 8);
-  const detractores = dataArray.filter(d => d.respuestas && d.respuestas.enps <= 6);
+  const promotores = dataArray.filter(d => {
+    const v = getEnpsVal(d);
+    return v !== null && v >= 9;
+  });
+  const pasivos = dataArray.filter(d => {
+    const v = getEnpsVal(d);
+    return v !== null && v >= 7 && v <= 8;
+  });
+  const detractores = dataArray.filter(d => {
+    const v = getEnpsVal(d);
+    return v !== null && v <= 6;
+  });
 
   if (promotores.length === 0 && detractores.length === 0) return null;
 

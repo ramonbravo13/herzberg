@@ -1,43 +1,46 @@
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
-import { INDICES_CONFIG } from '../../utils/metrics';
+import { INDICES_CONFIG, sanitizeLikert, calculateExactPercentages } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import { chartTheme } from '../charts/theme';
 import { BarChart3 } from 'lucide-react';
 
 export default function DispersionChart({ dataArray }) {
   const chartData = useMemo(() => {
-    if (!dataArray || dataArray.length === 0) return [];
+    if (!Array.isArray(dataArray) || dataArray.length === 0) return [];
 
     return INDICES_CONFIG.slice(2).map((ind) => {
       let neg = 0;
       let neu = 0;
       let pos = 0;
-      let total = 0;
 
       dataArray.forEach(d => {
+        if (!d?.respuestas) return;
         ind.vars.forEach(v => {
-          if (d.respuestas && d.respuestas[v] !== undefined) {
-            const val = Number(d.respuestas[v]);
-            if (!isNaN(val)) {
-              if (val <= 2) neg++;
-              else if (val === 3) neu++;
-              else if (val >= 4) pos++;
-              total++;
-            }
+          const val = sanitizeLikert(d.respuestas[v]);
+          if (val !== null) {
+            if (val <= 2) neg++;
+            else if (val === 3) neu++;
+            else pos++;
           }
         });
       });
 
-      if (total === 0) return { name: ind.name, Negativo: 0, Neutro: 0, Positivo: 0 };
+      const total = neg + neu + pos;
+      if (total === 0) {
+        return { name: ind.name, Negativo: 0, Neutro: 0, Positivo: 0, totalMuestra: 0 };
+      }
+
+      const percentages = calculateExactPercentages({ Negativo: neg, Neutro: neu, Positivo: pos });
 
       return {
         name: ind.name,
-        Negativo: Math.round((neg / total) * 100),
-        Neutro: Math.round((neu / total) * 100),
-        Positivo: Math.round((pos / total) * 100)
+        Negativo: percentages.Negativo,
+        Neutro: percentages.Neutro,
+        Positivo: percentages.Positivo,
+        totalMuestra: total
       };
-    });
+    }).filter(d => d.totalMuestra > 0);
   }, [dataArray]);
 
   if (chartData.length === 0) return null;

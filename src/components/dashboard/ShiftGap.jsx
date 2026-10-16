@@ -1,6 +1,6 @@
 import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, ReferenceLine } from 'recharts';
-import { calculateIndex } from '../../utils/metrics';
+import { calculateIndex, calculateEnps } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import ChartGradients from '../charts/ChartGradients';
@@ -35,25 +35,12 @@ export default function ShiftGap({ dataArray }) {
 
   const chartData = turnos.map(turno => {
     const arr = turnoMap[turno];
-    let promotores = 0;
-    let detractores = 0;
-    let total = 0;
-    arr.forEach(a => {
-      if (a.respuestas && a.respuestas.enps !== undefined) {
-        const val = Number(a.respuestas.enps);
-        total++;
-        if (val >= 9) promotores++;
-        else if (val <= 6) detractores++;
-      }
-    });
-    
-    // Scale eNPS using standard NPS formula (-100 to 100)
-    const enpsScaled = total > 0 ? Math.round(((promotores - detractores) / total) * 100) : 0;
+    const enpsResult = calculateEnps(arr);
 
     return {
       name: turno,
       satisfaccion: calculateIndex(['satisfaccion_global'], arr),
-      enps: enpsScaled,
+      enps: enpsResult.score,
       size: arr.length
     };
   });

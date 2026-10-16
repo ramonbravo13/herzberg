@@ -18,7 +18,7 @@ export default function HierarchyGap({ dataArray }) {
 
   // We only compare a few key indices to not overcrowd the chart
   const compareIndices = INDICES_CONFIG.filter(i => 
-    ['Liderazgo', 'Políticas', 'Condiciones Trabajo', 'Reconocimiento', 'Relaciones Laborales'].includes(i.name)
+    ['Liderazgo', 'Políticas Internas', 'Condiciones Trabajo', 'Reconocimiento', 'Relaciones Laborales'].includes(i.name)
   );
 
   const chartData = compareIndices.map(ind => {

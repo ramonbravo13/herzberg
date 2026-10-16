@@ -6,7 +6,12 @@ export default function RoiSimulator({ dataArray }) {
 
   if (!dataArray || dataArray.length < 2) return null;
 
-  const leaving = dataArray.filter(d => d.respuestas && d.respuestas.permanencia <= 2);
+  const leaving = dataArray.filter(d => {
+    const p = d.respuestas?.permanencia;
+    if (p === null || p === undefined || p === '') return false;
+    const num = Number(p);
+    return Number.isFinite(num) && num >= 1 && num <= 2;
+  });
   if (leaving.length === 0) return null;
 
   const savedPeople = Math.ceil(leaving.length / 2);

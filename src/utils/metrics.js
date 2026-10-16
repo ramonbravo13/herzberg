@@ -14,26 +14,156 @@ export const INDICES_CONFIG = [
   { name: 'Seguridad Laboral', tipo: 'Higiene', vars: ['seguridad_1','seguridad_2','seguridad_3'], explanation: 'Mide la percepción de estabilidad en el empleo, la confianza en el futuro de la organización y la claridad de las decisiones institucionales.' },
 ];
 
+export const sanitizeLikert = (val) => {
+  if (val === null || val === undefined || val === '') return null;
+  const num = Number(val);
+  if (Number.isFinite(num) && num >= 1 && num <= 5) {
+    return num;
+  }
+  return null;
+};
+
 export const calculateIndex = (vars, dataArray) => {
+  if (!Array.isArray(dataArray) || dataArray.length === 0 || !Array.isArray(vars) || vars.length === 0) {
+    return 0;
+  }
+
   let sum = 0;
   let count = 0;
-  dataArray.forEach(data => {
-    vars.forEach(v => {
-      const val = data.respuestas ? data.respuestas[v] : data[v];
-      if (val !== undefined && val !== null) {
-        const numVal = Number(val);
-        if (!isNaN(numVal)) {
-          sum += numVal;
-          count++;
-        }
+
+  for (let i = 0; i < dataArray.length; i++) {
+    const item = dataArray[i];
+    if (!item) continue;
+    const resp = item.respuestas || item;
+
+    for (let j = 0; j < vars.length; j++) {
+      const v = vars[j];
+      const validVal = sanitizeLikert(resp[v]);
+      if (validVal !== null) {
+        sum += validVal;
+        count++;
       }
-    });
-  });
+    }
+  }
+
   if (count === 0) return 0;
   const avg = sum / count;
   const score = Math.round(((avg - 1) / 4) * 100);
   return Math.max(0, Math.min(100, score));
 };
+
+export const calculateExactPercentages = (counts) => {
+  const total = Object.values(counts).reduce((acc, c) => acc + (Number(c) || 0), 0);
+  if (total === 0) {
+    const emptyResult = {};
+    Object.keys(counts).forEach(k => { emptyResult[k] = 0; });
+    return emptyResult;
+  }
+
+  const intParts = {};
+  const remainders = {};
+  let allocatedSum = 0;
+
+  Object.entries(counts).forEach(([key, count]) => {
+    const raw = (count / total) * 100;
+    const floor = Math.floor(raw);
+    intParts[key] = floor;
+    remainders[key] = raw - floor;
+    allocatedSum += floor;
+  });
+
+  const deficit = 100 - allocatedSum;
+  const sortedByRemainder = Object.keys(counts).sort((a, b) => remainders[b] - remainders[a]);
+
+  for (let i = 0; i < deficit; i++) {
+    intParts[sortedByRemainder[i]] += 1;
+  }
+
+  return intParts;
+};
+
+export const calculateEnps = (dataArray) => {
+  if (!Array.isArray(dataArray) || dataArray.length === 0) {
+    return { score: 0, promotores: 0, pasivos: 0, detractores: 0, totalValidos: 0, distribution: { Promotores: 0, Pasivos: 0, Detractores: 0 } };
+  }
+
+  let promotores = 0;
+  let pasivos = 0;
+  let detractores = 0;
+  let totalValidos = 0;
+
+  dataArray.forEach(d => {
+    const raw = d?.respuestas ? d.respuestas.enps : d?.enps;
+    if (raw === null || raw === undefined || raw === '') return;
+    const val = Number(raw);
+    if (!Number.isFinite(val) || val < 0 || val > 10) return;
+
+    totalValidos++;
+    if (val >= 9) promotores++;
+    else if (val >= 7) pasivos++;
+    else detractores++;
+  });
+
+  if (totalValidos === 0) {
+    return { score: 0, promotores: 0, pasivos: 0, detractores: 0, totalValidos: 0, distribution: { Promotores: 0, Pasivos: 0, Detractores: 0 } };
+  }
+
+  const score = Math.round(((promotores - detractores) / totalValidos) * 100);
+  const distribution = calculateExactPercentages({
+    Promotores: promotores,
+    Pasivos: pasivos,
+    Detractores: detractores
+  });
+
+  return {
+    score: Math.max(-100, Math.min(100, score)),
+    promotores,
+    pasivos,
+    detractores,
+    totalValidos,
+    distribution
+  };
+};
+
+export const calculateBurnout = (dataArray) => {
+  if (!Array.isArray(dataArray) || dataArray.length === 0) {
+    return { burnoutCount: 0, atRiskCount: 0, totalValidos: 0, burnoutPct: 0, atRiskPct: 0 };
+  }
+
+  let burnoutCount = 0;
+  let atRiskCount = 0;
+  let totalValidos = 0;
+
+  dataArray.forEach(d => {
+    const resp = d?.respuestas || d;
+    if (!resp) return;
+
+    const carga = sanitizeLikert(resp.condiciones_3);
+    const apoyo = sanitizeLikert(resp.supervision_2);
+
+    if (carga === null || apoyo === null) return;
+
+    totalValidos++;
+    if (carga <= 2 && apoyo <= 2) {
+      burnoutCount++;
+    } else if (carga <= 2 || apoyo <= 2) {
+      atRiskCount++;
+    }
+  });
+
+  if (totalValidos === 0) {
+    return { burnoutCount: 0, atRiskCount: 0, totalValidos: 0, burnoutPct: 0, atRiskPct: 0 };
+  }
+
+  return {
+    burnoutCount,
+    atRiskCount,
+    totalValidos,
+    burnoutPct: Math.round((burnoutCount / totalValidos) * 100),
+    atRiskPct: Math.round((atRiskCount / totalValidos) * 100)
+  };
+};
+
 
 export const getRiskLabel = (score) => {
   if (score >= 80) return 'Fortaleza';

@@ -9,8 +9,18 @@ export default function FlightRiskDrivers({ dataArray }) {
   if (!dataArray || dataArray.length < 2) return null;
 
   // permanencia <= 2 => High flight risk (quiero irme pronto o muy pronto)
-  const leaving = dataArray.filter(d => d.respuestas && d.respuestas.permanencia <= 2);
-  const staying = dataArray.filter(d => d.respuestas && d.respuestas.permanencia > 2);
+  const leaving = dataArray.filter(d => {
+    const p = d.respuestas?.permanencia;
+    if (p === null || p === undefined || p === '') return false;
+    const num = Number(p);
+    return Number.isFinite(num) && num >= 1 && num <= 2;
+  });
+  const staying = dataArray.filter(d => {
+    const p = d.respuestas?.permanencia;
+    if (p === null || p === undefined || p === '') return false;
+    const num = Number(p);
+    return Number.isFinite(num) && num > 2 && num <= 5;
+  });
 
   if (leaving.length === 0 || staying.length === 0) return null;
 

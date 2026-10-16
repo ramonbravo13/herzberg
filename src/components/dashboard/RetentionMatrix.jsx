@@ -8,21 +8,27 @@ import { categoryColors, getGradientColor } from '../../utils/themeColors';
 export default function RetentionMatrix({ dataArray }) {
   if (!dataArray || dataArray.length < 2) return null;
 
-  const data = dataArray.map((d, index) => {
-    return {
-      id: index,
-      x: Number(d.respuestas ? d.respuestas.satisfaccion_global : d.satisfaccion_global) || 0,
-      y: Number(d.respuestas ? d.respuestas.permanencia : d.permanencia) || 0,
-      depto: d.departamento || d.zone || 'General'
-    };
-  }).filter(d => d.x > 0 && d.y > 0);
+  const jitterData = React.useMemo(() => {
+    return dataArray.map((d, index) => {
+      const rawX = Number(d.respuestas ? d.respuestas.satisfaccion_global : d.satisfaccion_global);
+      const rawY = Number(d.respuestas ? d.respuestas.permanencia : d.permanencia);
+      
+      if (!rawX || !rawY || rawX < 1 || rawX > 5 || rawY < 1 || rawY > 5) return null;
 
-  // We add some jitter so dots with exactly the same score don't completely overlap
-  const jitterData = data.map(d => ({
-    ...d,
-    x: d.x + (Math.random() * 0.4 - 0.2),
-    y: d.y + (Math.random() * 0.4 - 0.2)
-  }));
+      // Deterministic pseudo-random offset based on index so it doesn't jump on re-renders
+      const pseudoRandX = (((index * 9301 + 49297) % 233280) / 233280) * 0.3 - 0.15;
+      const pseudoRandY = (((index * 49297 + 9301) % 233280) / 233280) * 0.3 - 0.15;
+
+      return {
+        id: index,
+        rawX,
+        rawY,
+        x: Math.max(1, Math.min(5, rawX + pseudoRandX)),
+        y: Math.max(1, Math.min(5, rawY + pseudoRandY)),
+        depto: d.departamento || d.zone || 'General'
+      };
+    }).filter(Boolean);
+  }, [dataArray]);
 
   const getQuadrantCategory = (x, y) => {
     if (x >= 3.5 && y >= 3.5) return 'Apóstoles';
@@ -58,12 +64,13 @@ export default function RetentionMatrix({ dataArray }) {
               cursor={chartTheme.tooltip.cursor}
               content={(props) => {
                 if (props.active && props.payload && props.payload.length) {
-                  const data = props.payload[0].payload;
+                  const item = props.payload[0].payload;
                   return (
                     <div className="bg-white/95 backdrop-blur-md p-4 border border-slate-100 shadow-xl rounded-xl z-50">
-                      <p className="font-bold text-slate-800 mb-2 pb-2 border-b border-slate-100">{data.depto}</p>
-                      <p className="text-sm text-slate-600 font-medium">Satisfacción: <span className="font-bold text-slate-800">{data.x.toFixed(1)}</span></p>
-                      <p className="text-sm text-slate-600 font-medium mt-1">Permanencia: <span className="font-bold text-slate-800">{data.y.toFixed(1)}</span></p>
+                      <p className="font-bold text-slate-800 mb-2 pb-2 border-b border-slate-100">{item.depto}</p>
+                      <p className="text-sm text-slate-600 font-medium">Satisfacción: <span className="font-bold text-slate-800">{item.rawX} / 5</span></p>
+                      <p className="text-sm text-slate-600 font-medium mt-1">Permanencia: <span className="font-bold text-slate-800">{item.rawY} / 5</span></p>
+                      <p className="text-xs text-indigo-600 font-bold mt-2">Perfil: {getQuadrantCategory(item.rawX, item.rawY)}</p>
                     </div>
                   );
                 }
@@ -72,7 +79,7 @@ export default function RetentionMatrix({ dataArray }) {
             />
             <Scatter name="Colaboradores" data={jitterData} opacity={0.7} animationDuration={800} animationEasing="ease-out">
               {jitterData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={quadColors[getQuadrantCategory(entry.x, entry.y)]} className="hover:opacity-100 transition-opacity duration-300" />
+                <Cell key={`cell-${index}`} fill={quadColors[getQuadrantCategory(entry.rawX, entry.rawY)]} className="hover:opacity-100 transition-opacity duration-300" />
               ))}
             </Scatter>
           </ScatterChart>

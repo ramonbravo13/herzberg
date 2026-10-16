@@ -9,11 +9,19 @@ import { categoryColors, getGradientUrl } from '../../utils/themeColors';
 
 // Order definition for tenure sorting
 const TENURE_ORDER = {
+  "<1 año": 1,
+  "< 1 año": 1,
   "Menos de 1 año": 1,
+  "1-3 años": 2,
   "1–3 años": 2,
+  "3-5 años": 3,
   "4–7 años": 3,
+  "4-7 años": 3,
+  ">5 años": 4,
   "8–15 años": 4,
-  "Más de 15 años": 5
+  "8-15 años": 4,
+  "Más de 15 años": 5,
+  ">15 años": 5
 };
 
 export default function TenureGap({ dataArray }) {
