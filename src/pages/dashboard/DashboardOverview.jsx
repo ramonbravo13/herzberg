@@ -287,7 +287,11 @@ export default function DashboardOverview() {
   const expectedResponses = selectedZone !== 'all' 
     ? (activeOrg?.zone_headcounts?.[selectedZone] || 0)
     : (activeOrg?.expected_headcount || 0);
-  const progressPercent = expectedResponses > 0 ? Math.min(Math.round((totalResponses / expectedResponses) * 100), 100) : 0;
+  
+  const rawPercent = expectedResponses > 0 ? (totalResponses / expectedResponses) * 100 : 0;
+  const progressPercent = expectedResponses > 0
+    ? (totalResponses >= expectedResponses ? 100 : Math.min(Math.floor(rawPercent * 10) / 10, 99.9))
+    : 0;
 
   const handleAddZone = async (e) => {
     e.preventDefault();
@@ -500,7 +504,13 @@ export default function DashboardOverview() {
               <div>
                 <div className="flex justify-between text-sm font-medium mb-2">
                   <span className="text-slate-600">Avance hacia la meta</span>
-                  <span className="text-emerald-600"><AnimatedNumber value={progressPercent} duration={1.5} />%</span>
+                  <span className="text-emerald-600">
+                    <AnimatedNumber 
+                      value={progressPercent} 
+                      duration={1.5} 
+                      format={v => (Number(v) % 1 === 0 ? Number(v).toFixed(0) : Number(v).toFixed(1))}
+                    />%
+                  </span>
                 </div>
                 <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
                   <div 
