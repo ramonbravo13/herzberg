@@ -2,9 +2,19 @@ import React from 'react';
 import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
 import { getCategoryColor, getGradientColor } from '../../utils/themeColors';
 import ChartCard from '../charts/ChartCard';
+import EmptyState from '../ui/EmptyState';
 
 export default function Heatmap({ dataArray }) {
-  if (!dataArray || dataArray.length < 2) return null;
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard 
+        title="Mapa de Calor por Departamento"
+        subtitle="Identifica rápidamente las áreas de oportunidad y fortalezas por departamento."
+      >
+        <EmptyState title="Muestra insuficiente para Mapa de Calor" description="Se requieren al menos 2 evaluaciones para generar la comparativa departamental." />
+      </ChartCard>
+    );
+  }
 
   // Group by department or zone
   const deptoMap = {};

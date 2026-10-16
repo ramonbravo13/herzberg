@@ -4,10 +4,21 @@ import { calculateIndex, INDICES_CONFIG } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import { chartTheme } from '../charts/theme';
-import { categoryColors, getGradientColor } from '../../utils/themeColors';
+import EmptyState from '../ui/EmptyState';
 
 export default function EnpsRadar({ dataArray }) {
   const [selectedSegment, setSelectedSegment] = useState('all');
+
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard 
+        title="ADN del eNPS (Promotores vs Detractores)"
+        subtitle="Compara los niveles de satisfacción entre los Promotores y los Detractores."
+      >
+        <EmptyState title="Muestra insuficiente para Radar eNPS" description="Se requieren al menos 2 respuestas con recomendación para comparar promotores y detractores." />
+      </ChartCard>
+    );
+  }
 
   const getEnpsVal = (d) => {
     const raw = d?.respuestas ? d.respuestas.enps : d?.enps;
@@ -29,7 +40,16 @@ export default function EnpsRadar({ dataArray }) {
     return v !== null && v <= 6;
   });
 
-  if (promotores.length === 0 && detractores.length === 0) return null;
+  if (promotores.length === 0 && detractores.length === 0) {
+    return (
+      <ChartCard 
+        title="ADN del eNPS (Promotores vs Detractores)"
+        subtitle="Compara los niveles de satisfacción entre los Promotores y los Detractores."
+      >
+        <EmptyState title="Segmentos polares no detectados" description="No se registraron promotores (9-10) ni detractores (0-6) en este segmento." />
+      </ChartCard>
+    );
+  }
 
   // Reduce indices down to the main 4 or 5 for a clean radar
   const radarIndices = INDICES_CONFIG.filter(i => 

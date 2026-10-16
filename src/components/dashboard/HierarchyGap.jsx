@@ -6,15 +6,37 @@ import ChartTooltip from '../charts/ChartTooltip';
 import ChartGradients from '../charts/ChartGradients';
 import { chartTheme } from '../charts/theme';
 import { categoryColors, getGradientUrl } from '../../utils/themeColors';
+import EmptyState from '../ui/EmptyState';
 
 export default function HierarchyGap({ dataArray }) {
-  if (!dataArray || dataArray.length < 2) return null;
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard 
+        title='Brecha Jerárquica ("Ceguera de Taller")'
+        subtitle="Compara la percepción de los líderes contra la base operativa."
+      >
+        <EmptyState title="Muestra insuficiente para Brecha Jerárquica" description="Se requieren al menos 2 evaluaciones para contrastar niveles de puesto." />
+      </ChartCard>
+    );
+  }
 
   const lideres = dataArray.filter(d => ['Directivo', 'Coordinación'].includes(d.nivel_puesto));
   const operativos = dataArray.filter(d => ['Operativo', 'Técnico', 'Administrativo'].includes(d.nivel_puesto));
 
-  // If we don't have both groups, skip
-  if (lideres.length === 0 || operativos.length === 0) return null;
+  // If we don't have both groups, show empty state
+  if (lideres.length === 0 || operativos.length === 0) {
+    return (
+      <ChartCard 
+        title='Brecha Jerárquica ("Ceguera de Taller")'
+        subtitle="Compara la percepción de los líderes contra la base operativa."
+      >
+        <EmptyState 
+          title="Falta representatividad de ambos niveles" 
+          description={lideres.length === 0 ? "No hay respuestas de líderes (Directivos/Coordinación) en este filtro." : "No hay respuestas de personal operativo en este filtro."} 
+        />
+      </ChartCard>
+    );
+  }
 
   // We only compare a few key indices to not overcrowd the chart
   const compareIndices = INDICES_CONFIG.filter(i => 

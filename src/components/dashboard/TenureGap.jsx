@@ -24,8 +24,19 @@ const TENURE_ORDER = {
   ">15 años": 5
 };
 
+import EmptyState from '../ui/EmptyState';
+
 export default function TenureGap({ dataArray }) {
-  if (!dataArray || dataArray.length < 2) return null;
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard 
+        title="Brecha por Antigüedad (Tenure Gap)"
+        subtitle="Compara la Satisfacción Global frente al Riesgo de Rotación según la antigüedad."
+      >
+        <EmptyState title="Muestra insuficiente para Brecha de Antigüedad" description="Se requieren al menos 2 evaluaciones para contrastar la satisfacción según los años en la empresa." />
+      </ChartCard>
+    );
+  }
 
   // Group by tenure
   const tenureMap = {};
@@ -36,6 +47,17 @@ export default function TenureGap({ dataArray }) {
   });
 
   const tenures = Object.keys(tenureMap).sort((a, b) => (TENURE_ORDER[a] || 99) - (TENURE_ORDER[b] || 99));
+
+  if (tenures.length === 0) {
+    return (
+      <ChartCard 
+        title="Brecha por Antigüedad (Tenure Gap)"
+        subtitle="Compara la Satisfacción Global frente al Riesgo de Rotación según la antigüedad."
+      >
+        <EmptyState title="Sin datos de antigüedad" description="Ningún colaborador en este filtro tiene registrada su antigüedad laboral." />
+      </ChartCard>
+    );
+  }
 
   const chartData = tenures.map(tenure => {
     const arr = tenureMap[tenure];

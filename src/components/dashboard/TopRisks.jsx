@@ -1,23 +1,37 @@
 import React from 'react';
-import { calculateIndex, QUESTION_MAP } from '../../utils/metrics';
+import { calculateTopRisks } from '../../utils/metrics';
 import { Target, Info } from 'lucide-react';
 import ChartCard from '../charts/ChartCard';
+import EmptyState from '../ui/EmptyState';
 import { getGradientColor } from '../../utils/themeColors';
 
 export default function TopRisks({ dataArray }) {
-  if (!dataArray || dataArray.length === 0) return null;
+  if (!Array.isArray(dataArray) || dataArray.length === 0) {
+    return (
+      <ChartCard 
+        title="Top 3 Áreas de Oportunidad (Prioridades de Mejora)"
+        subtitle="Muestra los 3 reactivos con la calificación más baja para focalizar acciones."
+        icon={Target}
+      >
+        <EmptyState title="Sin reactivos calificados" description="No se han registrado respuestas suficientes para priorizar áreas de mejora." />
+      </ChartCard>
+    );
+  }
 
-  // Calculate score for each question
-  const scores = Object.keys(QUESTION_MAP).map(key => {
-    const score = calculateIndex([key], dataArray);
-    return { key, text: QUESTION_MAP[key], score };
-  });
+  // Calculate top 3 risks safely using pure logic
+  const top3 = calculateTopRisks(dataArray, 3);
 
-  // Sort ascending by score
-  scores.sort((a, b) => a.score - b.score);
-
-  // Take top 3
-  const top3 = scores.slice(0, 3);
+  if (top3.length === 0) {
+    return (
+      <ChartCard 
+        title="Top 3 Áreas de Oportunidad (Prioridades de Mejora)"
+        subtitle="Muestra los 3 reactivos con la calificación más baja para focalizar acciones."
+        icon={Target}
+      >
+        <EmptyState title="Sin respuestas suficientes" description="Ninguno de los colaboradores de este filtro ha respondido a los reactivos evaluados." />
+      </ChartCard>
+    );
+  }
 
   // Determine global card color based on the lowest score (the #1 priority)
   const lowestScore = top3[0]?.score || 0;

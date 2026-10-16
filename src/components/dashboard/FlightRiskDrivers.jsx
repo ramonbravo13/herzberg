@@ -3,10 +3,21 @@ import { calculateIndex, QUESTION_MAP } from '../../utils/metrics';
 import ChartCard from '../charts/ChartCard';
 import { Info, Users, ChevronDown, ChevronUp } from 'lucide-react';
 
+import EmptyState from '../ui/EmptyState';
+
 export default function FlightRiskDrivers({ dataArray }) {
   const [showDemo, setShowDemo] = useState(false);
 
-  if (!dataArray || dataArray.length < 2) return null;
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard 
+        title="Drivers de Fuga de Talento (Análisis Predictivo)"
+        subtitle="Compara a los colaboradores en alto riesgo de renuncia contra los colaboradores leales."
+      >
+        <EmptyState title="Muestra insuficiente para Drivers de Fuga" description="Se requieren al menos 2 respuestas evaluadas para contrastar perfiles de permanencia." />
+      </ChartCard>
+    );
+  }
 
   // permanencia <= 2 => High flight risk (quiero irme pronto o muy pronto)
   const leaving = dataArray.filter(d => {
@@ -22,7 +33,19 @@ export default function FlightRiskDrivers({ dataArray }) {
     return Number.isFinite(num) && num > 2 && num <= 5;
   });
 
-  if (leaving.length === 0 || staying.length === 0) return null;
+  if (leaving.length === 0 || staying.length === 0) {
+    return (
+      <ChartCard 
+        title="Drivers de Fuga de Talento (Análisis Predictivo)"
+        subtitle="Compara a los colaboradores en alto riesgo de renuncia contra los colaboradores leales."
+      >
+        <EmptyState 
+          title="Sin contraste de permanencia" 
+          description={leaving.length === 0 ? "No hay colaboradores con riesgo de fuga detectado en este grupo (todos expresan alta permanencia)." : "Todos los colaboradores evaluados en este grupo expresan intención de retiro."} 
+        />
+      </ChartCard>
+    );
+  }
 
   // Calculate scores for all questions for both groups
   const gaps = Object.keys(QUESTION_MAP).map(key => {

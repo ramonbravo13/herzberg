@@ -5,9 +5,22 @@ import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import { chartTheme } from '../charts/theme';
 import { getCategoryColor } from '../../utils/themeColors';
+import EmptyState from '../ui/EmptyState';
 
 export default function QuadrantMatrix({ dataArray }) {
-  if (!dataArray || dataArray.length < 2) return null; // Needs aggregated data to be useful
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard 
+        title="Matriz de Higiene vs. Motivación"
+        subtitle="Cruza las dos variables clave de la empresa para clasificar a cada departamento en 4 realidades operativas."
+      >
+        <EmptyState 
+          title="Muestra insuficiente para matriz departamental" 
+          description="Se requieren al menos 2 colaboradores evaluados para calcular la dispersión por cuadrantes operativos." 
+        />
+      </ChartCard>
+    );
+  }
 
   // Group by department or zone
   const deptoMap = {};

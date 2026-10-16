@@ -311,3 +311,70 @@ export const QUESTION_MAP = {
   seguridad_2: 'P35. Confía en el futuro de la organización',
   seguridad_3: 'P36. Decisiones laborales con criterios claros',
 };
+
+export const calculateTopRisks = (dataArray, limit = 3) => {
+  if (!Array.isArray(dataArray) || dataArray.length === 0) return [];
+
+  const scores = [];
+
+  Object.keys(QUESTION_MAP).forEach(key => {
+    let sum = 0;
+    let count = 0;
+
+    dataArray.forEach(d => {
+      const resp = d?.respuestas || d;
+      if (!resp) return;
+      const val = sanitizeLikert(resp[key]);
+      if (val !== null) {
+        sum += val;
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      const avg = sum / count;
+      const score = Math.max(0, Math.min(100, Math.round(((avg - 1) / 4) * 100)));
+      scores.push({
+        key,
+        text: QUESTION_MAP[key],
+        score,
+        sampleCount: count
+      });
+    }
+  });
+
+  scores.sort((a, b) => a.score - b.score || b.sampleCount - a.sampleCount);
+  return scores.slice(0, limit);
+};
+
+export const filterEvaluations = (evaluations, filters = {}) => {
+  if (!Array.isArray(evaluations) || evaluations.length === 0) return [];
+  const { organizationId, period, zone } = filters;
+
+  return evaluations.filter(e => {
+    if (!e) return false;
+
+    // Filter by Organization
+    if (organizationId && organizationId !== 'all') {
+      if (e.organization_id !== organizationId) return false;
+    }
+
+    // Filter by Period
+    if (period !== undefined && period !== null && period !== 'all') {
+      const targetPeriod = Number(period);
+      const evalPeriod = e.period !== undefined && e.period !== null ? Number(e.period) : 1;
+      if (evalPeriod !== targetPeriod) return false;
+    }
+
+    // Filter by Zone / Department
+    if (zone && zone !== 'all') {
+      const normSelected = String(zone).trim().toLowerCase();
+      const zoneNorm = String(e.zone || '').trim().toLowerCase();
+      const deptoNorm = String(e.departamento || e.results?.departamento || '').trim().toLowerCase();
+      if (zoneNorm !== normSelected && deptoNorm !== normSelected) return false;
+    }
+
+    return true;
+  });
+};
+

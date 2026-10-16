@@ -8,6 +8,8 @@ import { chartTheme } from '../charts/theme';
 import { categoryColors, getGradientUrl } from '../../utils/themeColors';
 import { Clock } from 'lucide-react';
 
+import EmptyState from '../ui/EmptyState';
+
 const SHIFT_ORDER = {
   "Turno matutino": 1,
   "Turno vespertino": 2,
@@ -16,7 +18,13 @@ const SHIFT_ORDER = {
 };
 
 export default function ShiftGap({ dataArray }) {
-  if (!dataArray || dataArray.length < 2) return null;
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard title="Brecha por Turno de Trabajo" icon={Clock}>
+        <EmptyState title="Muestra insuficiente por turno" description="Se requieren al menos 2 evaluaciones para contrastar la satisfacción entre turnos." />
+      </ChartCard>
+    );
+  }
 
   // Group by turno
   const turnoMap = {};
@@ -29,7 +37,13 @@ export default function ShiftGap({ dataArray }) {
     turnoMap[d.turno].push(d);
   });
 
-  if (!hasTurnoData) return null;
+  if (!hasTurnoData) {
+    return (
+      <ChartCard title="Brecha por Turno de Trabajo" icon={Clock}>
+        <EmptyState title="Sin datos de turno" description="Ningún colaborador evaluado en este filtro tiene registrado su turno de trabajo." />
+      </ChartCard>
+    );
+  }
 
   const turnos = Object.keys(turnoMap).sort((a, b) => (SHIFT_ORDER[a] || 99) - (SHIFT_ORDER[b] || 99));
 

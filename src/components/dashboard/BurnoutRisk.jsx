@@ -2,12 +2,32 @@ import React from 'react';
 import ChartCard from '../charts/ChartCard';
 import { calculateBurnout } from '../../utils/metrics';
 
+import EmptyState from '../ui/EmptyState';
+
 export default function BurnoutRisk({ dataArray }) {
-  if (!Array.isArray(dataArray) || dataArray.length < 2) return null;
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard 
+        title="Índice de Burnout Severo"
+        subtitle="Colaboradores con sobrecarga extrema y nulo apoyo de su líder."
+      >
+        <EmptyState title="Muestra insuficiente para Burnout" description="Se requieren al menos 2 evaluaciones para calcular el índice de riesgo de burnout." />
+      </ChartCard>
+    );
+  }
 
   const { burnoutCount, atRiskCount, totalValidos, burnoutPct, atRiskPct } = calculateBurnout(dataArray);
 
-  if (totalValidos === 0) return null;
+  if (totalValidos === 0) {
+    return (
+      <ChartCard 
+        title="Índice de Burnout Severo"
+        subtitle="Colaboradores con sobrecarga extrema y nulo apoyo de su líder."
+      >
+        <EmptyState title="Sin reactivos de burnout" description="Ningún colaborador evaluado respondió a las preguntas de sobrecarga o apoyo de jefatura." />
+      </ChartCard>
+    );
+  }
 
   let statusClass = "bg-emerald-50 border-emerald-200";
   let textColor = "text-emerald-600";

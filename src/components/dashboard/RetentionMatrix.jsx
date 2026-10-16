@@ -4,9 +4,19 @@ import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import { chartTheme } from '../charts/theme';
 import { categoryColors, getGradientColor } from '../../utils/themeColors';
+import EmptyState from '../ui/EmptyState';
 
 export default function RetentionMatrix({ dataArray }) {
-  if (!dataArray || dataArray.length < 2) return null;
+  if (!Array.isArray(dataArray) || dataArray.length < 2) {
+    return (
+      <ChartCard 
+        title="Matriz de Retención y Cultura"
+        subtitle="Cruza la Satisfacción Global contra la Intención de Permanencia de cada colaborador."
+      >
+        <EmptyState title="Muestra insuficiente para Matriz de Retención" description="Se requieren al menos 2 colaboradores con satisfacción y permanencia evaluadas." />
+      </ChartCard>
+    );
+  }
 
   const jitterData = React.useMemo(() => {
     return dataArray.map((d, index) => {
