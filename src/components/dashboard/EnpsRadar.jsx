@@ -5,6 +5,7 @@ import ChartCard from '../charts/ChartCard';
 import ChartTooltip from '../charts/ChartTooltip';
 import { chartTheme } from '../charts/theme';
 import EmptyState from '../ui/EmptyState';
+import { categoryColors, getGradientColor } from '../../utils/themeColors';
 
 export default function EnpsRadar({ dataArray }) {
   const [selectedSegment, setSelectedSegment] = useState('all');
