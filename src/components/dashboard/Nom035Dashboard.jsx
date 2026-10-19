@@ -19,6 +19,7 @@ import ChartTooltip from '../charts/ChartTooltip';
 import ChartGradients from '../charts/ChartGradients';
 import { chartTheme } from '../charts/theme';
 import { getGradientUrl } from '../../utils/themeColors';
+import SpotlightBlock from './SpotlightBlock';
 
 export default function Nom035Dashboard({ dataArray }) {
   const [showClinicalModal, setShowClinicalModal] = React.useState(false);
@@ -118,161 +119,169 @@ export default function Nom035Dashboard({ dataArray }) {
       
       {/* Resumen Ejecutivo de Guía II / III */}
       {(hasG2 || hasG3) && (
-        <ChartCard 
-          title="Calificación Final del Centro de Trabajo"
-          subtitle={`Muestra evaluada: ${hasG3 ? countG3 : countG2} colaboradores (Guía ${hasG3 ? 'III' : 'II'})`}
-          icon={Activity}
-        >
-          <div className={`p-8 rounded-2xl border ${hasG3 ? infoG3.bg : infoG2.bg} ${(hasG3 ? infoG3.color : infoG2.color).replace('text-', 'border-').replace('500', '200')} shadow-sm transition-all`}>
-            <div className="flex justify-between items-end mb-4">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-1">Nivel de Riesgo Promedio</p>
-                <div className={`text-6xl font-black tracking-tight ${hasG3 ? infoG3.color : infoG2.color}`}>{hasG3 ? riskG3 : riskG2}</div>
+        <SpotlightBlock>
+          <ChartCard 
+            title="Calificación Final del Centro de Trabajo"
+            subtitle={`Muestra evaluada: ${hasG3 ? countG3 : countG2} colaboradores (Guía ${hasG3 ? 'III' : 'II'})`}
+            icon={Activity}
+          >
+            <div className={`p-8 rounded-2xl border ${hasG3 ? infoG3.bg : infoG2.bg} ${(hasG3 ? infoG3.color : infoG2.color).replace('text-', 'border-').replace('500', '200')} shadow-sm transition-all`}>
+              <div className="flex justify-between items-end mb-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-1">Nivel de Riesgo Promedio</p>
+                  <div className={`text-6xl font-black tracking-tight ${hasG3 ? infoG3.color : infoG2.color}`}>{hasG3 ? riskG3 : riskG2}</div>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-1">Puntuación Final</p>
+                  <div className={`text-4xl font-bold ${hasG3 ? infoG3.color : infoG2.color}`}>{hasG3 ? avgG3 : avgG2} <span className="text-xl opacity-70">pts</span></div>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-xs font-bold uppercase tracking-widest opacity-60 mb-1">Puntuación Final</p>
-                <div className={`text-4xl font-bold ${hasG3 ? infoG3.color : infoG2.color}`}>{hasG3 ? avgG3 : avgG2} <span className="text-xl opacity-70">pts</span></div>
+              <div className="mt-8 pt-6 border-t border-black/5 flex flex-col gap-5">
+                <div>
+                  <p className="text-sm font-bold text-slate-800 mb-1.5 flex items-center gap-2">
+                    <Activity size={16} className="text-slate-400" /> Implicaciones del Nivel de Riesgo
+                  </p>
+                  <p className="text-sm text-slate-600 leading-relaxed">{hasG3 ? infoG3.implicaciones : infoG2.implicaciones}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-800 mb-1.5 flex items-center gap-2">
+                    <Briefcase size={16} className="text-slate-400" /> Recomendaciones y Obligaciones
+                  </p>
+                  <p className="text-sm text-slate-600 leading-relaxed">{hasG3 ? infoG3.recomendaciones : infoG2.recomendaciones}</p>
+                </div>
+                <div className="bg-red-50/50 p-4 rounded-xl border border-red-100 mt-2">
+                  <p className="text-sm font-bold text-red-800 mb-1.5 flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-red-600" /> Riesgo de Sanción (STPS)
+                  </p>
+                  <p className="text-sm text-red-700/90 leading-relaxed">{hasG3 ? infoG3.sanciones : infoG2.sanciones}</p>
+                </div>
               </div>
             </div>
-            <div className="mt-8 pt-6 border-t border-black/5 flex flex-col gap-5">
-              <div>
-                <p className="text-sm font-bold text-slate-800 mb-1.5 flex items-center gap-2">
-                  <Activity size={16} className="text-slate-400" /> Implicaciones del Nivel de Riesgo
-                </p>
-                <p className="text-sm text-slate-600 leading-relaxed">{hasG3 ? infoG3.implicaciones : infoG2.implicaciones}</p>
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-800 mb-1.5 flex items-center gap-2">
-                  <Briefcase size={16} className="text-slate-400" /> Recomendaciones y Obligaciones
-                </p>
-                <p className="text-sm text-slate-600 leading-relaxed">{hasG3 ? infoG3.recomendaciones : infoG2.recomendaciones}</p>
-              </div>
-              <div className="bg-red-50/50 p-4 rounded-xl border border-red-100 mt-2">
-                <p className="text-sm font-bold text-red-800 mb-1.5 flex items-center gap-2">
-                  <AlertTriangle size={16} className="text-red-600" /> Riesgo de Sanción (STPS)
-                </p>
-                <p className="text-sm text-red-700/90 leading-relaxed">{hasG3 ? infoG3.sanciones : infoG2.sanciones}</p>
-              </div>
-            </div>
-          </div>
-        </ChartCard>
+          </ChartCard>
+        </SpotlightBlock>
       )}
 
       {/* Análisis por Categorías y Dominios */}
       {(hasG2 || hasG3) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ChartCard title="Riesgo por Categorías" icon={Briefcase} className="lg:col-span-1">
-             <div className="h-[350px]">
-               <ResponsiveContainer width="100%" height="100%">
-                 <BarChart data={catData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
-                   <ChartGradients />
-                   <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
-                   <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
-                   <YAxis dataKey="name" type="category" width={140} {...chartTheme.axis} />
-                   <Tooltip 
-                     cursor={chartTheme.tooltip.cursor}
-                     content={<ChartTooltip 
-                        formatter={(val, name, props) => (
-                          <span style={{ color: props.payload.hex }}>Índice: {val}% - Riesgo {props.payload.risk}</span>
-                        )}
-                        labelFormatter={() => null}
-                     />}
-                   />
-                   <Bar dataKey="score" radius={chartTheme.bar.horizontalRadius} animationDuration={800} animationEasing="ease-out">
-                     {catData.map((entry, index) => {
-                        return <Cell key={`cell-${index}`} fill={getGradientUrl(entry.hex)} className="hover:opacity-80 transition-opacity duration-300" />;
-                     })}
-                   </Bar>
-                 </BarChart>
-               </ResponsiveContainer>
-             </div>
-          </ChartCard>
+          <SpotlightBlock className="lg:col-span-1 h-full">
+            <ChartCard title="Riesgo por Categorías" icon={Briefcase}>
+               <div className="h-[350px]">
+                 <ResponsiveContainer width="100%" height="100%">
+                   <BarChart data={catData} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
+                     <ChartGradients />
+                     <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
+                     <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
+                     <YAxis dataKey="name" type="category" width={140} {...chartTheme.axis} />
+                     <Tooltip 
+                       cursor={chartTheme.tooltip.cursor}
+                       content={<ChartTooltip 
+                          formatter={(val, name, props) => (
+                            <span style={{ color: props.payload.hex }}>Índice: {val}% - Riesgo {props.payload.risk}</span>
+                          )}
+                          labelFormatter={() => null}
+                       />}
+                     />
+                     <Bar dataKey="score" radius={chartTheme.bar.horizontalRadius} animationDuration={800} animationEasing="ease-out">
+                       {catData.map((entry, index) => {
+                          return <Cell key={`cell-${index}`} fill={getGradientUrl(entry.hex)} className="hover:opacity-80 transition-opacity duration-300" />;
+                       })}
+                     </Bar>
+                   </BarChart>
+                 </ResponsiveContainer>
+               </div>
+            </ChartCard>
+          </SpotlightBlock>
 
-          <ChartCard title="Dominios Críticos (Focos Rojos)" icon={AlertTriangle} iconColor="text-red-500" iconBg="bg-red-50" className="lg:col-span-1">
-             <p className="text-sm text-slate-600 mb-4">
-               La norma STPS exige realizar programas de intervención a nivel grupal para los siguientes dominios, ya que superan los umbrales permisibles.
-             </p>
-             
-             {criticalDomains.length === 0 ? (
-               <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 min-h-[250px]">
-                 <ShieldCheck size={48} className="text-emerald-400 mb-3 drop-shadow-sm" />
-                 <h4 className="font-bold text-emerald-800 tracking-tight">No hay Dominios Críticos</h4>
-                 <p className="text-sm text-emerald-600 mt-1">Ningún dominio presenta riesgo Alto o Muy Alto en la evaluación actual.</p>
-               </div>
-             ) : (
-               <div className="flex-1 overflow-y-auto space-y-3 pr-2 min-h-[250px]">
-                 {criticalDomains.map((d, i) => (
-                   <div key={i} className={`p-4 rounded-xl border ${d.bg} border-red-100/50 shadow-sm transition-all hover:shadow-md`}>
-                     <div className="flex justify-between items-center mb-2">
-                       <span className="font-bold text-slate-800 tracking-tight">{d.name}</span>
-                       <span className={`text-xs font-bold px-2.5 py-1 rounded-md text-white shadow-sm`} style={{backgroundColor: d.hex}}>
-                         {d.risk}
-                       </span>
+          <SpotlightBlock className="lg:col-span-1 h-full">
+            <ChartCard title="Dominios Críticos (Focos Rojos)" icon={AlertTriangle} iconColor="text-red-500" iconBg="bg-red-50">
+               <p className="text-sm text-slate-600 mb-4">
+                 La norma STPS exige realizar programas de intervención a nivel grupal para los siguientes dominios, ya que superan los umbrales permisibles.
+               </p>
+               
+               {criticalDomains.length === 0 ? (
+                 <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 min-h-[250px]">
+                   <ShieldCheck size={48} className="text-emerald-400 mb-3 drop-shadow-sm" />
+                   <h4 className="font-bold text-emerald-800 tracking-tight">No hay Dominios Críticos</h4>
+                   <p className="text-sm text-emerald-600 mt-1">Ningún dominio presenta riesgo Alto o Muy Alto en la evaluación actual.</p>
+                 </div>
+               ) : (
+                 <div className="flex-1 overflow-y-auto space-y-3 pr-2 min-h-[250px]">
+                   {criticalDomains.map((d, i) => (
+                     <div key={i} className={`p-4 rounded-xl border ${d.bg} border-red-100/50 shadow-sm transition-all hover:shadow-md`}>
+                       <div className="flex justify-between items-center mb-2">
+                         <span className="font-bold text-slate-800 tracking-tight">{d.name}</span>
+                         <span className={`text-xs font-bold px-2.5 py-1 rounded-md text-white shadow-sm`} style={{backgroundColor: d.hex}}>
+                           {d.risk}
+                         </span>
+                       </div>
+                       <div className="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden shadow-inner">
+                         <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${d.score}%`, backgroundColor: d.hex }}></div>
+                       </div>
                      </div>
-                     <div className="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden shadow-inner">
-                       <div className="h-full rounded-full transition-all duration-1000 ease-out" style={{ width: `${d.score}%`, backgroundColor: d.hex }}></div>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-             )}
-          </ChartCard>
+                   ))}
+                 </div>
+               )}
+            </ChartCard>
+          </SpotlightBlock>
         </div>
       )}
 
       {/* Guía I: Acontecimientos Traumáticos */}
       {hasG1 && (
-        <ChartCard 
-          title="Guía de Referencia I: Acontecimientos Traumáticos Severos (ATS)"
-          subtitle={`Muestra evaluada: ${countG1} colaboradores`}
-          icon={Stethoscope}
-        >
-          <div className="flex flex-col md:flex-row gap-6 items-stretch">
-            {/* Resumen Numerico */}
-            <div className="md:w-1/3 flex flex-col gap-4">
-              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center shadow-sm">
-                <span className="text-5xl font-black text-slate-800 tracking-tight">{countG1 - requireClinical}</span>
-                <span className="text-sm font-medium text-emerald-600 mt-2 flex items-center gap-1"><ShieldCheck size={18}/> Sin riesgo clínico</span>
-                <p className="text-[10px] leading-tight text-slate-400 mt-3 px-2">
-                  *Nota Legal (STPS): La canalización médica aplica únicamente si el colaborador presenció el evento Y además presenta un cuadro de síntomas persistentes.
-                </p>
+        <SpotlightBlock>
+          <ChartCard 
+            title="Guía de Referencia I: Acontecimientos Traumáticos Severos (ATS)"
+            subtitle={`Muestra evaluada: ${countG1} colaboradores`}
+            icon={Stethoscope}
+          >
+            <div className="flex flex-col md:flex-row gap-6 items-stretch">
+              {/* Resumen Numerico */}
+              <div className="md:w-1/3 flex flex-col gap-4">
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 flex flex-col justify-center items-center text-center shadow-sm">
+                  <span className="text-5xl font-black text-slate-800 tracking-tight">{countG1 - requireClinical}</span>
+                  <span className="text-sm font-medium text-emerald-600 mt-2 flex items-center gap-1"><ShieldCheck size={18}/> Sin riesgo clínico</span>
+                  <p className="text-[10px] leading-tight text-slate-400 mt-3 px-2">
+                    *Nota Legal (STPS): La canalización médica aplica únicamente si el colaborador presenció el evento Y además presenta un cuadro de síntomas persistentes.
+                  </p>
+                </div>
+                
+                <button 
+                  onClick={() => requireClinical > 0 && setShowClinicalModal(true)}
+                  disabled={requireClinical === 0}
+                  className={`p-5 rounded-2xl border flex flex-col justify-center items-center text-center w-full transition-all duration-300 shadow-sm ${requireClinical > 0 ? 'bg-red-50 border-red-200 hover:bg-red-100 hover:shadow-md cursor-pointer active:scale-[0.98]' : 'bg-slate-50 border-slate-100 cursor-default opacity-60'}`}
+                >
+                  <span className={`text-5xl font-black tracking-tight ${requireClinical > 0 ? 'text-red-600' : 'text-slate-800'}`}>{requireClinical}</span>
+                  <span className={`text-sm font-medium mt-2 flex items-center gap-1 ${requireClinical > 0 ? 'text-red-600' : 'text-slate-500'}`}>
+                    {requireClinical > 0 && <AlertTriangle size={18}/>} 
+                    Requieren valoración médica
+                  </span>
+                  {requireClinical > 0 && <span className="text-xs text-red-500 mt-3 font-semibold underline underline-offset-2">Ver expedientes</span>}
+                </button>
               </div>
-              
-              <button 
-                onClick={() => requireClinical > 0 && setShowClinicalModal(true)}
-                disabled={requireClinical === 0}
-                className={`p-5 rounded-2xl border flex flex-col justify-center items-center text-center w-full transition-all duration-300 shadow-sm ${requireClinical > 0 ? 'bg-red-50 border-red-200 hover:bg-red-100 hover:shadow-md cursor-pointer active:scale-[0.98]' : 'bg-slate-50 border-slate-100 cursor-default opacity-60'}`}
-              >
-                <span className={`text-5xl font-black tracking-tight ${requireClinical > 0 ? 'text-red-600' : 'text-slate-800'}`}>{requireClinical}</span>
-                <span className={`text-sm font-medium mt-2 flex items-center gap-1 ${requireClinical > 0 ? 'text-red-600' : 'text-slate-500'}`}>
-                  {requireClinical > 0 && <AlertTriangle size={18}/>} 
-                  Requieren valoración médica
-                </span>
-                {requireClinical > 0 && <span className="text-xs text-red-500 mt-3 font-semibold underline underline-offset-2">Ver expedientes</span>}
-              </button>
-            </div>
 
-            {/* Desglose de Traumas */}
-            <div className="md:w-2/3 p-6 border border-slate-100 rounded-2xl bg-white shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] flex flex-col justify-center">
-               <h3 className="font-bold text-slate-400 mb-5 text-xs uppercase tracking-widest">Tipos de Acontecimientos Presenciados</h3>
-               <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                 {Object.entries(atsBreakdown).map(([evento, cantidad]) => (
-                   <div key={evento} className="flex justify-between items-center border-b border-slate-50 pb-3">
-                     <span className="text-sm font-medium text-slate-600">{evento}</span>
-                     <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-sm ${cantidad > 0 ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-400'}`}>
-                       {cantidad}
-                     </span>
-                   </div>
-                 ))}
-               </div>
-               {requireClinical > 0 && (
-                 <div className="mt-6 p-4 bg-red-50/50 text-red-700 text-xs rounded-xl border border-red-100 italic">
-                   <strong>Nota (Numeral 5.5):</strong> Canalizar obligatoriamente a los {requireClinical} trabajadores afectados a la institución de seguridad social (IMSS) o al médico de la empresa.
+              {/* Desglose de Traumas */}
+              <div className="md:w-2/3 p-6 border border-slate-100 rounded-2xl bg-white shadow-[0_2px_10px_-4px_rgba(0,0,0,0.05)] flex flex-col justify-center">
+                 <h3 className="font-bold text-slate-400 mb-5 text-xs uppercase tracking-widest">Tipos de Acontecimientos Presenciados</h3>
+                 <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                   {Object.entries(atsBreakdown).map(([evento, cantidad]) => (
+                     <div key={evento} className="flex justify-between items-center border-b border-slate-50 pb-3">
+                       <span className="text-sm font-medium text-slate-600">{evento}</span>
+                       <span className={`text-xs font-bold px-3 py-1 rounded-full shadow-sm ${cantidad > 0 ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-400'}`}>
+                         {cantidad}
+                       </span>
+                     </div>
+                   ))}
                  </div>
-               )}
+                 {requireClinical > 0 && (
+                   <div className="mt-6 p-4 bg-red-50/50 text-red-700 text-xs rounded-xl border border-red-100 italic">
+                     <strong>Nota (Numeral 5.5):</strong> Canalizar obligatoriamente a los {requireClinical} trabajadores afectados a la institución de seguridad social (IMSS) o al médico de la empresa.
+                   </div>
+                 )}
+              </div>
             </div>
-          </div>
-        </ChartCard>
+          </ChartCard>
+        </SpotlightBlock>
       )}
 
       {/* Slide-over de Casos Clínicos */}

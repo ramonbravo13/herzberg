@@ -25,14 +25,17 @@ import ChartCard from './charts/ChartCard';
 import ChartTooltip from './charts/ChartTooltip';
 import ChartGradients from './charts/ChartGradients';
 import { chartTheme } from './charts/theme';
-import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon, Info, X, Scale, BrainCircuit } from 'lucide-react';
+import { Activity, Smile, Target, Users, TrendingUp, PieChart as PieChartIcon, Info, X, Scale, BrainCircuit, Sparkles } from 'lucide-react';
 import { PieChart, Pie, Cell as PieCell } from 'recharts';
 import AnimatedNumber from './ui/AnimatedNumber';
 import ErrorBoundary from './ui/ErrorBoundary';
+import SpotlightBlock from './dashboard/SpotlightBlock';
+import { SpotlightProvider, useSpotlight } from '../contexts/SpotlightContext';
 
-export default function Dashboard({ data, globalData }) {
+function DashboardContent({ data, globalData }) {
   const [selectedMetric, setSelectedMetric] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const { spotlightEnabled, toggleSpotlight } = useSpotlight();
 
   const dataArray = React.useMemo(() => (Array.isArray(data) ? data : [data]), [data]);
   
@@ -92,7 +95,7 @@ export default function Dashboard({ data, globalData }) {
   return (
     <div className="w-full relative">
       
-      {/* Sticky Header / Tabs */}
+      {/* Sticky Header / Tabs (EXCEPCIÓN: 100% visible y fijo sin atenuación) */}
       <div className="sticky top-0 z-40 bg-white/85 backdrop-blur-md border-b border-slate-200 pb-0 pt-5 px-6 mb-8 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
           <h1 className="text-xl font-bold text-slate-800">
@@ -110,6 +113,26 @@ export default function Dashboard({ data, globalData }) {
                 <div className="bg-slate-100 px-3 py-1.5 rounded-full"><strong>Nivel:</strong> {dataArray[0].nivel_puesto}</div>
               </>
             )}
+
+            {/* Selector de Modo Enfoque (Spotlight) */}
+            <button
+              type="button"
+              onClick={toggleSpotlight}
+              className={`px-3 py-1.5 rounded-full border flex items-center gap-1.5 transition-all duration-300 font-semibold cursor-pointer shadow-sm text-xs ${
+                spotlightEnabled
+                  ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 hover:border-amber-300'
+                  : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
+              }`}
+              title={
+                spotlightEnabled
+                  ? 'Modo Enfoque (Spotlight) activo: Atenúa las gráficas fuera de tu campo visual central para lectura concentrada. Clic para ver todas al 100%.'
+                  : 'Modo Enfoque desactivado: Todas las gráficas al 100%. Clic para activar el enfoque guiado por scroll.'
+              }
+            >
+              <span className={`w-2 h-2 rounded-full ${spotlightEnabled ? 'bg-amber-500 animate-pulse' : 'bg-slate-400'}`} />
+              <Sparkles size={14} className={spotlightEnabled ? 'text-amber-600 fill-amber-400' : 'text-slate-400'} />
+              <span>Modo Enfoque: {spotlightEnabled ? 'Activado' : 'Desactivado'}</span>
+            </button>
           </div>
         </div>
         
@@ -161,105 +184,119 @@ export default function Dashboard({ data, globalData }) {
         </div>
       </div>
 
-      <div className="w-full space-y-10">
+      <div className="w-full space-y-10 pb-20">
         
         {/* TAB 1: RESUMEN EJECUTIVO */}
         {activeTab === 'overview' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <ErrorBoundary><CriticalAlerts dataArray={dataArray} /></ErrorBoundary>
+            <SpotlightBlock>
+              <ErrorBoundary><CriticalAlerts dataArray={dataArray} /></ErrorBoundary>
+            </SpotlightBlock>
 
-            {isAggregated && <ErrorBoundary><TopRisks dataArray={dataArray} /></ErrorBoundary>}
+            {isAggregated && (
+              <SpotlightBlock>
+                <ErrorBoundary><TopRisks dataArray={dataArray} /></ErrorBoundary>
+              </SpotlightBlock>
+            )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <ScoreCard 
-            title="Satisfacción Global" 
-            score={satisfaccionScore} 
-            subtitle="Felicidad general" 
-            icon={Smile} 
-            onClick={() => setSelectedMetric('satisfaccion')} 
-          />
-          <ScoreCard 
-            title="Compromiso" 
-            score={compromisoScore} 
-            subtitle="Sentido de pertenencia" 
-            icon={Target}
-            onClick={() => setSelectedMetric('compromiso')} 
-          />
-          <ScoreCard 
-            title="Riesgo de Rotación" 
-            score={rotacionRiesgo} 
-            subtitle="Probabilidad de salida"
-            icon={TrendingUp}
-            onClick={() => setSelectedMetric('rotacion')} 
-          />
-          <ScoreCard 
-            title="eNPS Promedio" 
-            score={enpsScore} 
-            subtitle="Lealtad del empleado"
-            icon={Users}
-            onClick={() => setSelectedMetric('enps')} 
-          />
+            <SpotlightBlock>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <ScoreCard 
+                  title="Satisfacción Global" 
+                  score={satisfaccionScore} 
+                  subtitle="Felicidad general" 
+                  icon={Smile} 
+                  onClick={() => setSelectedMetric('satisfaccion')} 
+                />
+                <ScoreCard 
+                  title="Compromiso" 
+                  score={compromisoScore} 
+                  subtitle="Sentido de pertenencia" 
+                  icon={Target}
+                  onClick={() => setSelectedMetric('compromiso')} 
+                />
+                <ScoreCard 
+                  title="Riesgo de Rotación" 
+                  score={rotacionRiesgo} 
+                  subtitle="Probabilidad de salida"
+                  icon={TrendingUp}
+                  onClick={() => setSelectedMetric('rotacion')} 
+                />
+                <ScoreCard 
+                  title="eNPS Promedio" 
+                  score={enpsScore} 
+                  subtitle="Lealtad del empleado"
+                  icon={Users}
+                  onClick={() => setSelectedMetric('enps')} 
+                />
+              </div>
+            </SpotlightBlock>
           </div>
-        </div>
         )}
 
         {/* TAB: TEORIA DE HERZBERG */}
         {activeTab === 'teoria' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="mb-6">
-              <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
-                <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                </div>
-                Teoría de Herzberg
-              </h2>
-              <p className="text-slate-500 mt-2 text-lg">
-                Este dashboard basa sus métricas en la Teoría de los Dos Factores de Frederick Herzberg, un estándar global en psicología organizacional. Herzberg postula que la satisfacción y la insatisfacción no son opuestos directos, sino que son generadas por dos grupos distintos de variables que deben gestionarse de forma independiente:
-              </p>
-            </div>
+            <SpotlightBlock>
+              <div className="mb-6">
+                <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+                  <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                  </div>
+                  Teoría de Herzberg
+                </h2>
+                <p className="text-slate-500 mt-2 text-lg">
+                  Este dashboard basa sus métricas en la Teoría de los Dos Factores de Frederick Herzberg, un estándar global en psicología organizacional. Herzberg postula que la satisfacción y la insatisfacción no son opuestos directos, sino que son generadas por dos grupos distintos de variables que deben gestionarse de forma independiente:
+                </p>
+              </div>
+            </SpotlightBlock>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                  <h4 className="text-xl font-bold text-emerald-800">1. Factores Motivacionales</h4>
+            <SpotlightBlock>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                    <h4 className="text-xl font-bold text-emerald-800">1. Factores Motivacionales</h4>
+                  </div>
+                  <p className="text-emerald-700/90 text-justify leading-relaxed">
+                    Son intrínsecos a la naturaleza del trabajo en sí (Logro, Reconocimiento, Responsabilidad, Crecimiento Profesional). Su presencia genera verdadera satisfacción y fomenta el compromiso a largo plazo. Su carencia no genera quejas inmediatas, pero produce empleados estancados y sin iniciativa.
+                  </p>
                 </div>
-                <p className="text-emerald-700/90 text-justify leading-relaxed">
-                  Son intrínsecos a la naturaleza del trabajo en sí (Logro, Reconocimiento, Responsabilidad, Crecimiento Profesional). Su presencia genera verdadera satisfacción y fomenta el compromiso a largo plazo. Su carencia no genera quejas inmediatas, pero produce empleados estancados y sin iniciativa.
-                </p>
-              </div>
-              
-              <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-3 h-3 rounded-full bg-amber-500"></div>
-                  <h4 className="text-xl font-bold text-amber-800">2. Factores de Higiene</h4>
+                
+                <div className="bg-amber-50/50 p-6 rounded-2xl border border-amber-100 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-3 h-3 rounded-full bg-amber-500"></div>
+                    <h4 className="text-xl font-bold text-amber-800">2. Factores de Higiene</h4>
+                  </div>
+                  <p className="text-amber-700/90 text-justify leading-relaxed">
+                    Son externos al empleado (Salario, Políticas, Relaciones, Seguridad Laboral, Supervisión). Su deficiencia causa una profunda insatisfacción y motiva la fuga de talento. Sin embargo, aunque sean excelentes, los empleados rápidamente los dan por sentado, por lo que no generan motivación real por sí solos.
+                  </p>
                 </div>
-                <p className="text-amber-700/90 text-justify leading-relaxed">
-                  Son externos al empleado (Salario, Políticas, Relaciones, Seguridad Laboral, Supervisión). Su deficiencia causa una profunda insatisfacción y motiva la fuga de talento. Sin embargo, aunque sean excelentes, los empleados rápidamente los dan por sentado, por lo que no generan motivación real por sí solos.
-                </p>
               </div>
-            </div>
+            </SpotlightBlock>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm">
-                <h4 className="text-lg font-bold text-slate-800 mb-2">Valor Estratégico para la Organización</h4>
-                <p className="text-slate-600 leading-relaxed text-justify">
-                  Entender esta diferencia previene el error directivo más común: <strong>intentar motivar al talento únicamente con dinero o prestaciones (factores de higiene)</strong>. Si se incrementa el salario sin mejorar la autonomía o el reconocimiento (factores motivacionales), la insatisfacción desaparece temporalmente, pero el desempeño excepcional y la lealtad a largo plazo no aumentan. Las empresas más rentables optimizan sus presupuestos garantizando la "higiene" para frenar la fuga de talento, y maximizando la "motivación" para impulsar la productividad real.
-                </p>
+            <SpotlightBlock>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm">
+                  <h4 className="text-lg font-bold text-slate-800 mb-2">Valor Estratégico para la Organización</h4>
+                  <p className="text-slate-600 leading-relaxed text-justify">
+                    Entender esta diferencia previene el error directivo más común: <strong>intentar motivar al talento únicamente con dinero o prestaciones (factores de higiene)</strong>. Si se incrementa el salario sin mejorar la autonomía o el reconocimiento (factores motivacionales), la insatisfacción desaparece temporalmente, pero el desempeño excepcional y la lealtad a largo plazo no aumentan. Las empresas más rentables optimizan sus presupuestos garantizando la "higiene" para frenar la fuga de talento, y maximizando la "motivación" para impulsar la productividad real.
+                  </p>
+                </div>
+                
+                <div className="bg-indigo-50/40 p-6 rounded-2xl border border-indigo-100 shadow-sm">
+                  <h4 className="text-lg font-bold text-slate-800 mb-2">¿Cómo leer nuestras métricas?</h4>
+                  <p className="text-slate-600 leading-relaxed text-justify">
+                    A través de la IA, evaluamos 36 variables estandarizadas mediante entrevistas conversacionales. Las respuestas se promedian en un índice del 0 al 100:
+                  </p>
+                  <ul className="mt-4 space-y-3 text-sm text-slate-600">
+                    <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></div> <span><strong>80 a 100%:</strong> Fortalezas sólidas. Mantener.</span></li>
+                    <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm"></div> <span><strong>60 a 79%:</strong> Áreas neutrales o estancadas. Observar.</span></li>
+                    <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></div> <span><strong>Menos de 60%:</strong> Riesgo inminente. Intervención directiva urgente requerida.</span></li>
+                  </ul>
+                </div>
               </div>
-              
-              <div className="bg-indigo-50/40 p-6 rounded-2xl border border-indigo-100 shadow-sm">
-                <h4 className="text-lg font-bold text-slate-800 mb-2">¿Cómo leer nuestras métricas?</h4>
-                <p className="text-slate-600 leading-relaxed text-justify">
-                  A través de la IA, evaluamos 36 variables estandarizadas mediante entrevistas conversacionales. Las respuestas se promedian en un índice del 0 al 100:
-                </p>
-                <ul className="mt-4 space-y-3 text-sm text-slate-600">
-                  <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></div> <span><strong>80 a 100%:</strong> Fortalezas sólidas. Mantener.</span></li>
-                  <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm"></div> <span><strong>60 a 79%:</strong> Áreas neutrales o estancadas. Observar.</span></li>
-                  <li className="flex items-center gap-3"><div className="w-2.5 h-2.5 rounded-full bg-orange-500 shadow-sm"></div> <span><strong>Menos de 60%:</strong> Riesgo inminente. Intervención directiva urgente requerida.</span></li>
-                </ul>
-              </div>
-            </div>
+            </SpotlightBlock>
           </div>
         )}
 
@@ -274,157 +311,168 @@ export default function Dashboard({ data, globalData }) {
             </div>
 
             {/* Factores Herzberg + Matriz (50/50) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="lg:col-span-1">
-            <ChartCard 
-              title="Factores Motivacionales" 
-              subtitle={<>Generan satisfacción real y compromiso a largo plazo. Según la teoría de Herzberg, estos factores (logro, reconocimiento, autonomía) son los únicos que verdaderamente impulsan el rendimiento excepcional.<br/><br/><strong>Interpretación:</strong> La línea vertical punteada marca la meta de excelencia (80%). Barras por debajo de esta línea indican áreas donde el talento no se siente suficientemente retado o valorado, estancando la productividad.</>}
-              icon={Target}
-            >
-              <div className="h-[320px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={motivadoresData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <ChartGradients />
-                    <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
-                    <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
-                    <YAxis dataKey="name" type="category" width={130} {...chartTheme.axis} />
-                    <ReferenceLine x={80} stroke="#94a3b8" strokeDasharray="3 3" strokeOpacity={0.7} label={{ value: "Meta (80%)", position: "insideBottomRight", fill: "#94a3b8", fontSize: 11, offset: 5 }} />
-                    <Tooltip 
-                      cursor={chartTheme.tooltip.cursor}
-                      content={<ChartTooltip 
-                        formatter={(val, name, props) => {
-                          const payload = props.payload;
-                          const rules = payload.rulesEngine;
-                          return (
-                            <div className="flex flex-col gap-2 max-w-xs whitespace-normal">
-                              <span style={{ color: props.payload.fill }} className="font-bold">{val}% - {getRiskLabel(val)}</span>
-                              {rules && rules.status !== 'Bueno' && (
-                                <div className="mt-1 pt-2 border-t border-slate-200/60">
-                                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">{rules.status}</p>
-                                  <p className="text-sm font-semibold text-slate-800 leading-tight mb-1">{rules.insight}</p>
-                                  <p className="text-xs text-slate-600 leading-snug"><strong>Acción Sugerida:</strong> {rules.action}</p>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        }}
-                        labelFormatter={() => null}
-                      />}
-                    />
-                    <Bar 
-                      dataKey="score" 
-                      radius={chartTheme.bar.horizontalRadius}
-                      cursor="pointer"
-                      onClick={(data) => setSelectedMetric(data.name)}
-                      animationDuration={800}
-                      animationEasing="ease-out"
-                    >
-                      {motivadoresData.map((entry, index) => {
-                        const globalIdx = globalPalette.indexOf(entry.fill);
-                        const gradient = globalIdx !== -1 ? `url(#gradient-${globalIdx})` : entry.fill;
-                        return <Cell key={`cell-mot-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </ChartCard>
-          </div>
-
-          <div className="lg:col-span-1">
-            <ChartCard 
-              title="Factores de Higiene" 
-              subtitle={<>Su deficiencia causa insatisfacción profunda y es el detonante #1 de las renuncias. Estos factores (salario, liderazgo, equipo) no motivan por sí solos, pero si fallan, destruyen el clima laboral.<br/><br/><strong>Interpretación:</strong> La línea punteada marca la meta de retención (80%). Si hay barras por debajo de la línea, estás ante un riesgo inminente de fuga de talento por inconformidad básica.</>}
-              icon={Activity}
-            >
-              <div className="h-[320px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={higieneData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <ChartGradients />
-                    <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
-                    <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
-                    <YAxis dataKey="name" type="category" width={130} {...chartTheme.axis} />
-                    <ReferenceLine x={80} stroke="#94a3b8" strokeDasharray="3 3" strokeOpacity={0.7} label={{ value: "Meta (80%)", position: "insideBottomRight", fill: "#94a3b8", fontSize: 11, offset: 5 }} />
-                    <Tooltip 
-                      cursor={chartTheme.tooltip.cursor}
-                      content={<ChartTooltip 
-                        formatter={(val, name, props) => {
-                          const payload = props.payload;
-                          const rules = payload.rulesEngine;
-                          return (
-                            <div className="flex flex-col gap-2 max-w-xs whitespace-normal">
-                              <span style={{ color: props.payload.fill }} className="font-bold">{val}% - {getRiskLabel(val)}</span>
-                              {rules && rules.status !== 'Bueno' && (
-                                <div className="mt-1 pt-2 border-t border-slate-200/60">
-                                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">{rules.status}</p>
-                                  <p className="text-sm font-semibold text-slate-800 leading-tight mb-1">{rules.insight}</p>
-                                  <p className="text-xs text-slate-600 leading-snug"><strong>Acción Sugerida:</strong> {rules.action}</p>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        }}
-                        labelFormatter={() => null}
-                      />}
-                    />
-                    <Bar 
-                      dataKey="score" 
-                      radius={chartTheme.bar.horizontalRadius}
-                      cursor="pointer"
-                      onClick={(data) => setSelectedMetric(data.name)}
-                      animationDuration={800}
-                      animationEasing="ease-out"
-                    >
-                      {higieneData.map((entry, index) => {
-                        const globalIdx = globalPalette.indexOf(entry.fill);
-                        const gradient = globalIdx !== -1 ? `url(#gradient-${globalIdx})` : entry.fill;
-                        return <Cell key={`cell-hig-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </ChartCard>
-          </div>
-        </div>
-
-        {isAggregated && (
-          <div className="w-full">
-            <ErrorBoundary><QuadrantMatrix dataArray={dataArray} /></ErrorBoundary>
-          </div>
-        )}
-
-        {isAggregated && (
-          <>
-            {/* Brecha por Turno + Tenure Gap (50/50) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ErrorBoundary><TenureGap dataArray={dataArray} /></ErrorBoundary>
-              <ErrorBoundary><ShiftGap dataArray={dataArray} /></ErrorBoundary>
+              <SpotlightBlock className="lg:col-span-1 h-full">
+                <ChartCard 
+                  title="Factores Motivacionales" 
+                  subtitle={<>Generan satisfacción real y compromiso a largo plazo. Según la teoría de Herzberg, estos factores (logro, reconocimiento, autonomía) son los únicos que verdaderamente impulsan el rendimiento excepcional.<br/><br/><strong>Interpretación:</strong> La línea vertical punteada marca la meta de excelencia (80%). Barras por debajo de esta línea indican áreas donde el talento no se siente suficientemente retado o valorado, estancando la productividad.</>}
+                  icon={Target}
+                >
+                  <div className="h-[320px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={motivadoresData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <ChartGradients />
+                        <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
+                        <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
+                        <YAxis dataKey="name" type="category" width={130} {...chartTheme.axis} />
+                        <ReferenceLine x={80} stroke="#94a3b8" strokeDasharray="3 3" strokeOpacity={0.7} label={{ value: "Meta (80%)", position: "insideBottomRight", fill: "#94a3b8", fontSize: 11, offset: 5 }} />
+                        <Tooltip 
+                          cursor={chartTheme.tooltip.cursor}
+                          content={<ChartTooltip 
+                            formatter={(val, name, props) => {
+                              const payload = props.payload;
+                              const rules = payload.rulesEngine;
+                              return (
+                                <div className="flex flex-col gap-2 max-w-xs whitespace-normal">
+                                  <span style={{ color: props.payload.fill }} className="font-bold">{val}% - {getRiskLabel(val)}</span>
+                                  {rules && rules.status !== 'Bueno' && (
+                                    <div className="mt-1 pt-2 border-t border-slate-200/60">
+                                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">{rules.status}</p>
+                                      <p className="text-sm font-semibold text-slate-800 leading-tight mb-1">{rules.insight}</p>
+                                      <p className="text-xs text-slate-600 leading-snug"><strong>Acción Sugerida:</strong> {rules.action}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            }}
+                            labelFormatter={() => null}
+                          />}
+                        />
+                        <Bar 
+                          dataKey="score" 
+                          radius={chartTheme.bar.horizontalRadius}
+                          cursor="pointer"
+                          onClick={(data) => setSelectedMetric(data.name)}
+                          animationDuration={800}
+                          animationEasing="ease-out"
+                        >
+                          {motivadoresData.map((entry, index) => {
+                            const globalIdx = globalPalette.indexOf(entry.fill);
+                            const gradient = globalIdx !== -1 ? `url(#gradient-${globalIdx})` : entry.fill;
+                            return <Cell key={`cell-mot-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
+                          })}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </ChartCard>
+              </SpotlightBlock>
+
+              <SpotlightBlock className="lg:col-span-1 h-full">
+                <ChartCard 
+                  title="Factores de Higiene" 
+                  subtitle={<>Su deficiencia causa insatisfacción profunda y es el detonante #1 de las renuncias. Estos factores (salario, liderazgo, equipo) no motivan por sí solos, pero si fallan, destruyen el clima laboral.<br/><br/><strong>Interpretación:</strong> La línea punteada marca la meta de retención (80%). Si hay barras por debajo de la línea, estás ante un riesgo inminente de fuga de talento por inconformidad básica.</>}
+                  icon={Activity}
+                >
+                  <div className="h-[320px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={higieneData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <ChartGradients />
+                        <CartesianGrid strokeDasharray={chartTheme.grid.strokeDasharray} stroke={chartTheme.grid.stroke} horizontal={false} strokeOpacity={0.4} />
+                        <XAxis type="number" domain={[0, 100]} {...chartTheme.axis} />
+                        <YAxis dataKey="name" type="category" width={130} {...chartTheme.axis} />
+                        <ReferenceLine x={80} stroke="#94a3b8" strokeDasharray="3 3" strokeOpacity={0.7} label={{ value: "Meta (80%)", position: "insideBottomRight", fill: "#94a3b8", fontSize: 11, offset: 5 }} />
+                        <Tooltip 
+                          cursor={chartTheme.tooltip.cursor}
+                          content={<ChartTooltip 
+                            formatter={(val, name, props) => {
+                              const payload = props.payload;
+                              const rules = payload.rulesEngine;
+                              return (
+                                <div className="flex flex-col gap-2 max-w-xs whitespace-normal">
+                                  <span style={{ color: props.payload.fill }} className="font-bold">{val}% - {getRiskLabel(val)}</span>
+                                  {rules && rules.status !== 'Bueno' && (
+                                    <div className="mt-1 pt-2 border-t border-slate-200/60">
+                                      <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1">{rules.status}</p>
+                                      <p className="text-sm font-semibold text-slate-800 leading-tight mb-1">{rules.insight}</p>
+                                      <p className="text-xs text-slate-600 leading-snug"><strong>Acción Sugerida:</strong> {rules.action}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            }}
+                            labelFormatter={() => null}
+                          />}
+                        />
+                        <Bar 
+                          dataKey="score" 
+                          radius={chartTheme.bar.horizontalRadius}
+                          cursor="pointer"
+                          onClick={(data) => setSelectedMetric(data.name)}
+                          animationDuration={800}
+                          animationEasing="ease-out"
+                        >
+                          {higieneData.map((entry, index) => {
+                            const globalIdx = globalPalette.indexOf(entry.fill);
+                            const gradient = globalIdx !== -1 ? `url(#gradient-${globalIdx})` : entry.fill;
+                            return <Cell key={`cell-hig-${index}`} fill={gradient} className="hover:opacity-80 transition-opacity duration-300" />;
+                          })}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </ChartCard>
+              </SpotlightBlock>
             </div>
 
-            <ErrorBoundary><Heatmap dataArray={dataArray} /></ErrorBoundary>
-            <ErrorBoundary><ThematicAnalysis dataArray={dataArray} /></ErrorBoundary>
+            {isAggregated && (
+              <SpotlightBlock className="w-full">
+                <ErrorBoundary><QuadrantMatrix dataArray={dataArray} /></ErrorBoundary>
+              </SpotlightBlock>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h3 className="font-bold text-slate-800 mb-4">Lo que más valoran (Fortalezas)</h3>
-                <ul className="space-y-3">
-                  {fortalezas.map((f, i) => (
-                    <li key={i} className="text-slate-600 italic border-l-4 border-emerald-400 pl-3 py-1 bg-slate-50 rounded-r-md">"{f}"</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h3 className="font-bold text-slate-800 mb-4">Oportunidades de Mejora</h3>
-                <ul className="space-y-3">
-                  {mejoras.map((m, i) => (
-                    <li key={i} className="text-slate-600 italic border-l-4 border-orange-400 pl-3 py-1 bg-slate-50 rounded-r-md">"{m}"</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </>
-        )}
+            {isAggregated && (
+              <>
+                {/* Brecha por Turno + Tenure Gap (50/50) */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <SpotlightBlock className="lg:col-span-1 h-full">
+                    <ErrorBoundary><TenureGap dataArray={dataArray} /></ErrorBoundary>
+                  </SpotlightBlock>
+                  <SpotlightBlock className="lg:col-span-1 h-full">
+                    <ErrorBoundary><ShiftGap dataArray={dataArray} /></ErrorBoundary>
+                  </SpotlightBlock>
+                </div>
+
+                <SpotlightBlock>
+                  <ErrorBoundary><Heatmap dataArray={dataArray} /></ErrorBoundary>
+                </SpotlightBlock>
+
+                <SpotlightBlock>
+                  <ErrorBoundary><ThematicAnalysis dataArray={dataArray} /></ErrorBoundary>
+                </SpotlightBlock>
+
+                <SpotlightBlock>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                      <h3 className="font-bold text-slate-800 mb-4">Lo que más valoran (Fortalezas)</h3>
+                      <ul className="space-y-3">
+                        {fortalezas.map((f, i) => (
+                          <li key={i} className="text-slate-600 italic border-l-4 border-emerald-400 pl-3 py-1 bg-slate-50 rounded-r-md">"{f}"</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                      <h3 className="font-bold text-slate-800 mb-4">Oportunidades de Mejora</h3>
+                      <ul className="space-y-3">
+                        {mejoras.map((m, i) => (
+                          <li key={i} className="text-slate-600 italic border-l-4 border-orange-400 pl-3 py-1 bg-slate-50 rounded-r-md">"{m}"</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </SpotlightBlock>
+              </>
+            )}
           </div>
         )}
 
@@ -436,30 +484,38 @@ export default function Dashboard({ data, globalData }) {
               <p className="text-slate-500 mt-1">Métricas estratégicas para Business Partners y Consultores de RH.</p>
             </div>
 
-            <ErrorBoundary><RetentionProfiles dataArray={dataArray} /></ErrorBoundary>
+            <SpotlightBlock>
+              <ErrorBoundary><RetentionProfiles dataArray={dataArray} /></ErrorBoundary>
+            </SpotlightBlock>
 
             {/* Matriz 60% | ROI 40% */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-              <div className="lg:col-span-3">
+              <SpotlightBlock className="lg:col-span-3 h-full">
                 <ErrorBoundary><RetentionMatrix dataArray={dataArray} /></ErrorBoundary>
-              </div>
-              <div className="lg:col-span-2">
+              </SpotlightBlock>
+              <SpotlightBlock className="lg:col-span-2 h-full">
                 <ErrorBoundary><RoiSimulator dataArray={dataArray} /></ErrorBoundary>
-              </div>
+              </SpotlightBlock>
             </div>
 
             {/* Drivers Fuga (Ancho completo) */}
-            <ErrorBoundary><FlightRiskDrivers dataArray={dataArray} /></ErrorBoundary>
+            <SpotlightBlock>
+              <ErrorBoundary><FlightRiskDrivers dataArray={dataArray} /></ErrorBoundary>
+            </SpotlightBlock>
 
             {/* Brecha Jerárquica (Ancho completo) */}
-            <ErrorBoundary><HierarchyGap dataArray={dataArray} /></ErrorBoundary>
+            <SpotlightBlock>
+              <ErrorBoundary><HierarchyGap dataArray={dataArray} /></ErrorBoundary>
+            </SpotlightBlock>
 
             {/* Burnout Risk */}
-            <ErrorBoundary><BurnoutRisk dataArray={dataArray} /></ErrorBoundary>
+            <SpotlightBlock>
+              <ErrorBoundary><BurnoutRisk dataArray={dataArray} /></ErrorBoundary>
+            </SpotlightBlock>
 
             {/* Distribución eNPS + EnpsRadar (50/50) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="lg:col-span-1">
+              <SpotlightBlock className="lg:col-span-1 h-full">
                 <ChartCard 
                   title="Distribución eNPS" 
                   subtitle="Promotores, Pasivos y Detractores"
@@ -520,13 +576,16 @@ export default function Dashboard({ data, globalData }) {
                     </div>
                   </div>
                 </ChartCard>
-              </div>
-              <div className="lg:col-span-1">
+              </SpotlightBlock>
+              
+              <SpotlightBlock className="lg:col-span-1 h-full">
                 <ErrorBoundary><EnpsRadar dataArray={dataArray} /></ErrorBoundary>
-              </div>
+              </SpotlightBlock>
             </div>
             
-            <ErrorBoundary><DiagnosticCharts dataArray={dataArray} /></ErrorBoundary>
+            <SpotlightBlock>
+              <ErrorBoundary><DiagnosticCharts dataArray={dataArray} /></ErrorBoundary>
+            </SpotlightBlock>
           </div>
         )}
 
@@ -538,8 +597,13 @@ export default function Dashboard({ data, globalData }) {
               <p className="text-slate-500 mt-1">Modelos estadísticos para predecir retención y entender la distribución de las percepciones.</p>
             </div>
             
-            <ErrorBoundary><PredictiveMatrix dataArray={dataArray} /></ErrorBoundary>
-            <ErrorBoundary><DispersionChart dataArray={dataArray} /></ErrorBoundary>
+            <SpotlightBlock>
+              <ErrorBoundary><PredictiveMatrix dataArray={dataArray} /></ErrorBoundary>
+            </SpotlightBlock>
+
+            <SpotlightBlock>
+              <ErrorBoundary><DispersionChart dataArray={dataArray} /></ErrorBoundary>
+            </SpotlightBlock>
           </div>
         )}
 
@@ -550,11 +614,13 @@ export default function Dashboard({ data, globalData }) {
               <h2 className="text-2xl font-black text-slate-800">Benchmarking y Segmentación</h2>
               <p className="text-slate-500 mt-1">Comparativa directa (Cross-sectional) entre áreas y sucursales de la organización.</p>
             </div>
-            <ErrorBoundary><Benchmarking globalData={globalData} /></ErrorBoundary>
+            <SpotlightBlock>
+              <ErrorBoundary><Benchmarking globalData={globalData} /></ErrorBoundary>
+            </SpotlightBlock>
           </div>
         )}
 
-        {/* TAB 5: NOM-035 */}
+        {/* TAB 6: NOM-035 */}
         {activeTab === 'nom035' && (
           <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-6">
@@ -575,6 +641,14 @@ export default function Dashboard({ data, globalData }) {
         />
       )}
     </div>
+  );
+}
+
+export default function Dashboard(props) {
+  return (
+    <SpotlightProvider>
+      <DashboardContent {...props} />
+    </SpotlightProvider>
   );
 }
 

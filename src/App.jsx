@@ -22,6 +22,7 @@ const DemoRequestsManager = React.lazy(() => import('./pages/admin/DemoRequestsM
 // Dashboard (Lazy - heaviest)
 const DashboardLayout = React.lazy(() => import('./layouts/DashboardLayout'));
 const DashboardOverview = React.lazy(() => import('./pages/dashboard/DashboardOverview'));
+const TestDashboard = React.lazy(() => import('./pages/public/TestDashboard'));
 
 function FallbackLoader() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Routes>
             {/* Rutas Públicas */}
             <Route path="/" element={<LandingPage />} />
+            <Route path="/test-dashboard" element={<TestDashboard />} />
             <Route path="/evaluate/:token" element={<EvaluationPortal />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

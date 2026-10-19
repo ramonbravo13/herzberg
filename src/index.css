@@ -14,3 +14,20 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 }
+
+@media print {
+  .spotlight-block {
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-block {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
