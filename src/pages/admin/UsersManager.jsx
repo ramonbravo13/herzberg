@@ -47,7 +47,9 @@ export default function UsersManager() {
           organization_id: role === 'empresarial' ? organizationId : null,
           allowed_organizations: role === 'corporativo' ? allowedOrganizations : null,
         };
-        if (password.trim()) updates.password = password.trim();
+        if (password.trim()) {
+          updates.password_hash = password.trim();
+        }
         await dbService.updateUser(editingUser.id, updates);
       } else {
         if (!password.trim()) {

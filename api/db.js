@@ -477,7 +477,16 @@ export default async function handler(req, res) {
         if (decodedAdmin.role !== 'admin' && decodedAdmin.id !== id) {
            throw new Error('Acceso denegado. Se requiere rol de administrador o ser el propietario del perfil.');
         }
-        const { data, error } = await supabase.from('profiles').update(updates).eq('id', id).select().single();
+
+        const updatesToApply = { ...updates };
+        if (updatesToApply.password !== undefined) {
+          if (updatesToApply.password && typeof updatesToApply.password === 'string' && updatesToApply.password.trim()) {
+            updatesToApply.password_hash = updatesToApply.password.trim();
+          }
+          delete updatesToApply.password;
+        }
+
+        const { data, error } = await supabase.from('profiles').update(updatesToApply).eq('id', id).select().single();
         if (error) throw error;
         const { password_hash, ...userWithoutPassword } = data;
         return res.status(200).json(userWithoutPassword);
